@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIDD Clean-Room Framework — Architectural Brainstorm Blueprint</title>
+  <style>
+    :root {
+      --bg-base: #070c14;
+      --bg-panel: #0c1420;
+      --bg-card: #101b2b;
+      --bg-card-hover: #152338;
+      --grid-minor: rgba(56, 189, 248, 0.045);
+      --grid-major: rgba(56, 189, 248, 0.10);
+      --border-subtle: rgba(56, 189, 248, 0.16);
+      --border-strong: rgba(34, 211, 238, 0.42);
+      --cyan: #22d3ee;
+      --cyan-dim: rgba(34, 211, 238, 0.14);
+      --sky: #38bdf8;
+      --text-primary: #e6f1ff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --coach: #a78bfa;
+      --coach-bg: rgba(167, 139, 250, 0.12);
+      --coach-border: rgba(167, 139, 250, 0.35);
+      --user: #22d3ee;
+      --user-bg: rgba(34, 211, 238, 0.12);
+      --user-border: rgba(34, 211, 238, 0.38);
+      --decision: #34d399;
+      --decision-bg: rgba(52, 211, 153, 0.12);
+      --decision-border: rgba(52, 211, 153, 0.40);
+      --insight: #fbbf24;
+      --insight-bg: rgba(251, 191, 36, 0.11);
+      --insight-border: rgba(251, 191, 36, 0.38);
+      --danger: #f87171;
+      --danger-bg: rgba(248, 113, 113, 0.10);
+      --danger-border: rgba(248, 113, 113, 0.36);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+      background-color: var(--bg-base);
+      background-image:
+        linear-gradient(to right, var(--grid-minor) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-minor) 1px, transparent 1px),
+        linear-gradient(to right, var(--grid-major) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-major) 1px, transparent 1px);
+      background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 72px;
+    }
+
+    /* Blueprint Title Block */
+    .title-block {
+      position: relative;
+      background: linear-gradient(160deg, rgba(16, 27, 43, 0.96), rgba(9, 15, 25, 0.98));
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      padding: 28px 28px 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(34, 211, 238, 0.08);
+    }
+
+    .corner-tick {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: var(--cyan);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .corner-tick.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .corner-tick.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+    .corner-tick.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+    .corner-tick.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+    .dwg-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .dwg-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dwg-meta .sep { color: var(--text-muted); }
+
+    .title-block h1 {
+      font-size: clamp(1.6rem, 3vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .title-goal {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      max-width: 820px;
+      margin-bottom: 18px;
+    }
+
+    .meta-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .meta-cell {
+      background: rgba(7, 12, 20, 0.65);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+    .meta-cell .k {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .meta-cell .v { color: var(--text-primary); font-weight: 600; }
+    .meta-cell .v.ok { color: var(--decision); }
+
+    /* Control Bar: Tabs + Attribution Filter */
+    .control-bar {
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(10, 17, 28, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 26px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .nav-tabs, .attr-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tab-btn, .filter-btn {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      letter-spacing: 0.03em;
+      padding: 6px 11px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(16, 27, 43, 0.6);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+    .tab-btn:hover, .filter-btn:hover {
+      border-color: var(--cyan);
+      color: var(--text-primary);
+    }
+    .tab-btn.active {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      font-weight: 600;
+    }
+    .filter-btn.active[data-filter="all"] {
+      background: rgba(255,255,255,0.1);
+      border-color: #cbd5e1;
+      color: #fff;
+    }
+    .filter-btn.active[data-filter="coach"] {
+      background: var(--coach-bg);
+      border-color: var(--coach);
+      color: var(--coach);
+    }
+    .filter-btn.active[data-filter="user"] {
+      background: var(--user-bg);
+      border-color: var(--user);
+      color: var(--user);
+    }
+    .filter-btn.active[data-filter="decision"] {
+      background: var(--decision-bg);
+      border-color: var(--decision);
+      color: var(--decision);
+    }
+
+    .filter-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    /* Technique Sections */
+    .tech-section {
+      background: rgba(12, 20, 32, 0.92);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 26px;
+      margin-bottom: 26px;
+      position: relative;
+      transition: opacity 0.2s ease;
+    }
+    .tech-section.hidden { display: none; }
+
+    .sec-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sec-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .sec-title {
+      font-size: 1.38rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .sec-subtitle {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+    .sec-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      color: var(--cyan);
+      background: rgba(34, 211, 238, 0.07);
+      white-space: nowrap;
+    }
+
+    /* Attribution Cards & Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+    }
+    .badge.coach { color: var(--coach); background: var(--coach-bg); border-color: var(--coach-border); }
+    .badge.user { color: var(--user); background: var(--user-bg); border-color: var(--user-border); }
+    .badge.decision { color: var(--decision); background: var(--decision-bg); border-color: var(--decision-border); }
+    .badge.insight { color: var(--insight); background: var(--insight-bg); border-color: var(--insight-border); }
+    .badge.direction { color: #cbd5e1; background: rgba(148, 163, 184, 0.12); border-color: rgba(148, 163, 184, 0.35); }
+
+    .node-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-left-width: 3px;
+      border-radius: 5px;
+      padding: 15px 16px;
+      transition: transform 0.15s ease, border-color 0.15s ease, opacity 0.2s ease;
+    }
+    .node-card:hover { background: var(--bg-card-hover); }
+    .node-card[data-attr="coach"] { border-left-color: var(--coach); }
+    .node-card[data-attr="user"] { border-left-color: var(--user); }
+    .node-card[data-attr="decision"] { border-left-color: var(--decision); }
+    .node-card[data-attr="insight"] { border-left-color: var(--insight); }
+
+    .node-card.dimmed {
+      opacity: 0.22;
+      filter: grayscale(40%);
+    }
+
+    .node-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .node-code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .node-card h3 {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .node-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .code-chip {
+      font-family: var(--font-mono);
+      font-size: 0.82em;
+      color: var(--cyan);
+      background: rgba(34, 211, 238, 0.09);
+      border: 1px solid rgba(34, 211, 238, 0.22);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* Technique 1: First Principles — State Machine & Hybrid Split */
+    .fp-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+    @media (max-width: 880px) { .fp-grid { grid-template-columns: 1fr; } }
+
+    .schematic-box {
+      background: rgba(7, 12, 20, 0.78);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 16px;
+    }
+    .schematic-label {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .flow-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .flow-arrow {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+    }
+
+    .hybrid-layers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (max-width: 600px) { .hybrid-layers { grid-template-columns: 1fr; } }
+    .layer-box {
+      background: rgba(16, 27, 43, 0.75);
+      border: 1px dashed var(--border-strong);
+      border-radius: 5px;
+      padding: 12px;
+    }
+    .layer-box h4 {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    /* Technique 2: Constraint Mapping — Boundary & Pipeline */
+    .cm-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 820px) { .cm-layout { grid-template-columns: 1fr; } }
+
+    .folder-tree {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: rgba(7, 12, 20, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 14px 16px;
+      color: #cbd5e1;
+      line-height: 1.65;
+      margin-top: 10px;
+    }
+    .folder-tree .dir { color: var(--cyan); font-weight: 600; }
+    .folder-tree .note { color: var(--text-muted); }
+
+    .pipeline-bar {
+      background: rgba(7, 12, 20, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 16px;
+    }
+    .pipeline-steps {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pipe-step {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border-radius: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      color: #fff;
+    }
+    .pipe-arrow {
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    /* Technique 3: Morphological Analysis — Handoff + 3-Layer Quality Gate */
+    .ma-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 18px;
+    }
+    @media (max-width: 880px) { .ma-grid { grid-template-columns: 1fr; } }
+
+    .gate-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .gate-layer {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 12px;
+      align-items: center;
+      background: rgba(7, 12, 20, 0.82);
+      border: 1px solid var(--border-subtle);
+      border-left: 3px solid var(--user);
+      border-radius: 4px;
+      padding: 11px 14px;
+    }
+    .gate-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .gate-desc strong {
+      display: block;
+      font-size: 0.92rem;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .gate-desc span {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+    }
+
+    /* Technique 4: SCAMPER Method */
+    .scamper-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 860px) { .scamper-grid { grid-template-columns: 1fr; } }
+
+    .scamper-col {
+      background: rgba(7, 12, 20, 0.65);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .scamper-op {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .roster-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    @media (max-width: 520px) { .roster-grid { grid-template-columns: repeat(2, 1fr); } }
+    .roster-card {
+      background: rgba(16, 27, 43, 0.9);
+      border: 1px solid var(--user-border);
+      border-radius: 4px;
+      padding: 8px 10px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: #fff;
+    }
+    .roster-card small {
+      display: block;
+      font-size: 9.5px;
+      color: var(--cyan);
+      margin-bottom: 2px;
+    }
+
+    .lane-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .lane-box {
+      background: rgba(16, 27, 43, 0.85);
+      border: 1px solid var(--border-strong);
+      border-radius: 4px;
+      padding: 10px 12px;
+    }
+    .lane-box h4 {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .lane-box p {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+    }
+
+    /* Climax: MoSCoW Convergence & Synthesis */
+    .climax-section {
+      background: linear-gradient(170deg, rgba(13, 27, 42, 0.97), rgba(7, 13, 22, 0.99));
+      border: 1.5px solid var(--cyan);
+      border-radius: 6px;
+      padding: 28px;
+      box-shadow: 0 0 40px rgba(34, 211, 238, 0.12), inset 0 0 30px rgba(34, 211, 238, 0.04);
+      position: relative;
+    }
+    .climax-section.hidden { display: none; }
+
+    .moscow-grid {
+      display: grid;
+      grid-template-columns: 1.55fr 0.75fr;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 840px) { .moscow-grid { grid-template-columns: 1fr; } }
+
+    .must-box {
+      background: rgba(10, 22, 34, 0.85);
+      border: 1px solid var(--decision-border);
+      border-radius: 5px;
+      padding: 18px;
+    }
+    .must-header, .wont-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed rgba(255,255,255,0.12);
+    }
+    .must-header h3 {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--decision);
+    }
+    .wont-box {
+      background: rgba(28, 13, 18, 0.72);
+      border: 1px solid var(--danger-border);
+      border-radius: 5px;
+      padding: 18px;
+    }
+    .wont-header h3 {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--danger);
+    }
+
+    .must-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 9px;
+    }
+    .must-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      background: rgba(16, 27, 43, 0.85);
+      border: 1px solid rgba(52, 211, 153, 0.24);
+      border-radius: 4px;
+      padding: 9px 11px;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+    .must-item .chk {
+      font-family: var(--font-mono);
+      color: var(--decision);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .wont-items {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .wont-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      border-radius: 4px;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: #fecaca;
+    }
+    .wont-item .x-mark {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .synthesis-banner {
+      background: rgba(7, 12, 20, 0.9);
+      border: 1px solid var(--cyan);
+      border-left-width: 4px;
+      border-radius: 5px;
+      padding: 18px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .synthesis-text h4 {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--insight);
+      margin-bottom: 6px;
+    }
+    .synthesis-text p {
+      font-size: 0.98rem;
+      color: #ffffff;
+      max-width: 820px;
+    }
+    .copy-btn {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 8px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--cyan);
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--cyan); color: #070c14; font-weight: 600; }
+
+    .direction-note {
+      margin-top: 16px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ARCHITECTURAL TITLE BLOCK -->
+    <header class="title-block">
+      <div class="corner-tick tl"></div>
+      <div class="corner-tick tr"></div>
+      <div class="corner-tick bl"></div>
+      <div class="corner-tick br"></div>
+
+      <div class="dwg-meta">
+        <span>DWG NO: AIDD-CLEANROOM-01</span>
+        <span class="sep">|</span>
+        <span>UPDATED: 2026-11-14 12:48</span>
+        <span class="sep">|</span>
+        <span>MODE: PARTNER</span>
+        <span class="sep">|</span>
+        <span>STATUS: COMPLETE</span>
+      </div>
+
+      <h1>Clean-Room Serverless AI-Driven Development Framework</h1>
+      <p class="title-goal">
+        <strong>Goal:</strong> Create a clean-room AI-driven development framework using only skills, prompts, and personas with no server — engineered for corporate work.
+      </p>
+
+      <div class="meta-strip">
+        <div class="meta-cell">
+          <span class="k">Topic</span>
+          <span class="v">Serverless Skills / Prompts / Personas</span>
+        </div>
+        <div class="meta-cell">
+          <span class="k">Runtime Footprint</span>
+          <span class="v">Pure Markdown (+ optional bash/powershell)</span>
+        </div>
+        <div class="meta-cell">
+          <span class="k">Persona Roster</span>
+          <span class="v">6 Core Roles + Standalone Skills</span>
+        </div>
+        <div class="meta-cell">
+          <span class="k">v1 Scope Status</span>
+          <span class="v ok">LOCKED (MoSCoW)</span>
+        </div>
+      </div>
+
+      <div class="direction-note">
+        <span class="badge direction">Session Protocol</span>
+        <span>Questions asked one by one with multiple choice and a write-in option.</span>
+      </div>
+    </header>
+
+    <!-- INTERACTIVE CONTROL BAR -->
+    <nav class="control-bar" aria-label="Blueprint Navigation and Attribution Filters">
+      <div class="nav-tabs" role="tablist">
+        <button class="tab-btn active" data-target="all">All Blueprints</button>
+        <button class="tab-btn" data-target="sec-fp">01 First Principles</button>
+        <button class="tab-btn" data-target="sec-cm">02 Constraint Mapping</button>
+        <button class="tab-btn" data-target="sec-ma">03 Morphological</button>
+        <button class="tab-btn" data-target="sec-scamper">04 SCAMPER</button>
+        <button class="tab-btn" data-target="sec-moscow">05 MoSCoW Climax</button>
+      </div>
+      <div class="attr-filters">
+        <span class="filter-label">Attribution:</span>
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="user">User</button>
+        <button class="filter-btn" data-filter="coach">Coach</button>
+        <button class="filter-btn" data-filter="decision">Decisions &amp; Insights</button>
+      </div>
+    </nav>
+
+    <!-- 01: FIRST PRINCIPLES THINKING -->
+    <section id="sec-fp" class="tech-section">
+      <div class="sec-header">
+        <div>
+          <div class="sec-tag">Phase 01 // Foundational Architecture</div>
+          <h2 class="sec-title">First Principles Thinking</h2>
+          <p class="sec-subtitle">Deconstructing workflow state, discovery, and role separation without a server or daemon.</p>
+        </div>
+        <span class="sec-badge">STATE MACHINE &amp; ROUTING</span>
+      </div>
+
+      <div class="fp-grid">
+        <!-- Left: State Machine & GPS Routing Schematic -->
+        <div class="schematic-box">
+          <div class="schematic-label">
+            <span>Schematic A // Filesystem State Machine</span>
+            <span>NO SERVER</span>
+          </div>
+
+          <div class="flow-stack">
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">FP-01</span>
+              </div>
+              <h3>Filesystem as State Machine</h3>
+              <p>Shared Markdown state files + persona lenses + checklist skills form the entire execution substrate.</p>
+            </div>
+
+            <div class="flow-arrow">&#8595; exposes core bottleneck</div>
+
+            <div class="node-card" data-attr="insight">
+              <div class="node-top">
+                <span class="badge insight">Insight</span>
+                <span class="node-code">FP-02</span>
+              </div>
+              <h3>The Discovery &amp; Routing Problem</h3>
+              <p>Hardest problem without a server/CLI is <strong>workflow discovery &amp; routing</strong> — knowing what step or skill to run next.</p>
+            </div>
+
+            <div class="flow-arrow">&#8595; solved by frontmatter + navigator</div>
+
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">FP-03</span>
+              </div>
+              <h3>Frontmatter <span class="code-chip">next_step</span> + GPS Skill</h3>
+              <p>Artifact frontmatter declares <span class="code-chip">next_step</span>, paired with a single GPS/Navigator skill that inspects repo state and recommends the exact next skill.</p>
+            </div>
+
+            <div class="node-card" data-attr="user">
+              <div class="node-top">
+                <span class="badge user">Idea by User</span>
+                <span class="node-code">FP-04</span>
+              </div>
+              <h3>Exact Command &amp; Persona Recommendation</h3>
+              <p>Single Navigator/GPS skill inspects repo state and recommends the exact next <strong>command/persona</strong> to invoke.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Skills vs Personas Hybrid Architecture -->
+        <div class="schematic-box">
+          <div class="schematic-label">
+            <span>Schematic B // Composable Layer Split</span>
+            <span>HYBRID MODEL</span>
+          </div>
+
+          <div class="flow-stack">
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">FP-05</span>
+              </div>
+              <h3>Skills as Verbs vs. Personas as Hats</h3>
+              <p>Architectural fork: either bundle persona inside each skill, or keep them as separate composable layers.</p>
+            </div>
+
+            <div class="node-card" data-attr="user">
+              <div class="node-top">
+                <span class="badge user">Idea by User</span>
+                <span class="node-code">FP-06</span>
+              </div>
+              <h3>Hybrid Architecture Selected</h3>
+              <p>Core roles are <strong>personas</strong>; cross-cutting actions are <strong>standalone skills</strong>.</p>
+            </div>
+
+            <div class="hybrid-layers">
+              <div class="layer-box">
+                <h4>Personas (Hats / Roles)</h4>
+                <div class="pill-list">
+                  <span class="pill">PM</span>
+                  <span class="pill">Architect</span>
+                  <span class="pill">Dev</span>
+                  <span class="pill">QA</span>
+                </div>
+              </div>
+              <div class="layer-box">
+                <h4>Standalone Skills (Verbs)</h4>
+                <div class="pill-list">
+                  <span class="pill">review</span>
+                  <span class="pill">retro</span>
+                  <span class="pill">GPS</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02: CONSTRAINT MAPPING -->
+    <section id="sec-cm" class="tech-section">
+      <div class="sec-header">
+        <div>
+          <div class="sec-tag">Phase 02 // Corporate &amp; Runtime Boundaries</div>
+          <h2 class="sec-title">Constraint Mapping</h2>
+          <p class="sec-subtitle">Enforcing zero-install portability, native readability, and a streamlined corporate delivery flow.</p>
+        </div>
+        <span class="sec-badge">ZERO-RUNTIME BOUNDARY</span>
+      </div>
+
+      <div class="cm-layout">
+        <!-- Portability & Runtime -->
+        <div class="schematic-box">
+          <div class="schematic-label">
+            <span>Boundary 01 // Portable Footprint</span>
+            <span>ZERO PYTHON / NODE</span>
+          </div>
+          <div class="flow-stack">
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">CM-01</span>
+              </div>
+              <h3>Zero-Install Portable Folder</h3>
+              <p>Self-contained <span class="code-chip">.ai/</span> or <span class="code-chip">.agent/</span> directory: pure Markdown skills + prompts + personas with zero Python/Node runtime dependencies.</p>
+            </div>
+
+            <div class="node-card" data-attr="user">
+              <div class="node-top">
+                <span class="badge user">Idea by User</span>
+                <span class="node-code">CM-02</span>
+              </div>
+              <h3>Pure Markdown + Optional Native Escape Hatch</h3>
+              <p>Zero-runtime pure Markdown by default, with optional native <span class="code-chip">bash</span> / <span class="code-chip">powershell</span> only if deterministic checks are needed.</p>
+            </div>
+          </div>
+
+          <div class="folder-tree">
+            <div><span class="dir">.ai/</span> <span class="note">or</span> <span class="dir">.agent/</span> <span class="note"># drop-in portable folder</span></div>
+            <div>├── <span class="dir">personas/</span> <span class="note"># pure Markdown role hats</span></div>
+            <div>├── <span class="dir">skills/</span> <span class="note"># pure Markdown verb workflows</span></div>
+            <div>├── <span class="dir">prompts/</span> <span class="note"># reusable templates</span></div>
+            <div>└── <span class="dir">guards/</span> <span class="note"># optional bash/powershell only</span></div>
+          </div>
+        </div>
+
+        <!-- Data Format & Corporate Flow -->
+        <div class="schematic-box">
+          <div class="schematic-label">
+            <span>Boundary 02 // Native Parsing &amp; Flow</span>
+            <span>LLM + SHELL READABLE</span>
+          </div>
+          <div class="flow-stack">
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">CM-03</span>
+              </div>
+              <h3>Plain Markdown Tables or Simple JSON</h3>
+              <p>Use plain Markdown tables (e.g. <span class="code-chip">PROJECT_STATE.md</span>) or simple JSON instead of complex YAML/TOML parsers so both LLM and <span class="code-chip">bash</span>/<span class="code-chip">powershell</span> can read natively.</p>
+            </div>
+
+            <div class="node-card" data-attr="user">
+              <div class="node-top">
+                <span class="badge user">Idea by User</span>
+                <span class="node-code">CM-04</span>
+              </div>
+              <h3>Streamlined Corporate Agile Flow</h3>
+              <p>Keep the agile flow, but rename and streamline stages for corporate work.</p>
+            </div>
+          </div>
+
+          <div class="pipeline-bar" style="margin-top: 12px;">
+            <div class="schematic-label" style="margin-bottom: 4px;">
+              <span>Corporate Delivery Pipeline</span>
+              <span>6 STAGES</span>
+            </div>
+            <div class="pipeline-steps">
+              <span class="pipe-step">Brief</span>
+              <span class="pipe-arrow">&#8594;</span>
+              <span class="pipe-step">Spec</span>
+              <span class="pipe-arrow">&#8594;</span>
+              <span class="pipe-step">Arch</span>
+              <span class="pipe-arrow">&#8594;</span>
+              <span class="pipe-step">Stories</span>
+              <span class="pipe-arrow">&#8594;</span>
+              <span class="pipe-step">Dev</span>
+              <span class="pipe-arrow">&#8594;</span>
+              <span class="pipe-step">Review</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03: MORPHOLOGICAL ANALYSIS -->
+    <section id="sec-ma" class="tech-section">
+      <div class="sec-header">
+        <div>
+          <div class="sec-tag">Phase 03 // Handoff &amp; Verification Mechanics</div>
+          <h2 class="sec-title">Morphological Analysis</h2>
+          <p class="sec-subtitle">Optimizing token-lean stage handoffs and enforcing adversarial quality verification.</p>
+        </div>
+        <span class="sec-badge">STORY PACKETS &amp; 3-LAYER GATE</span>
+      </div>
+
+      <div class="ma-grid">
+        <!-- Left: Token-Lean Handoff -->
+        <div class="schematic-box">
+          <div class="schematic-label">
+            <span>Axis 01 // Context &amp; Handoff</span>
+            <span>TOKEN-LEAN</span>
+          </div>
+          <div class="flow-stack">
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">MA-01</span>
+              </div>
+              <h3>Context Capsules</h3>
+              <p>Each stage writes a compact top-of-file <strong>Handoff Summary</strong> so downstream skills stay lean on tokens.</p>
+            </div>
+
+            <div class="flow-arrow">&#8595; converged into</div>
+
+            <div class="node-card" data-attr="decision">
+              <div class="node-top">
+                <span class="badge decision">Decision</span>
+                <span class="node-code">MA-02</span>
+              </div>
+              <h3>Self-Contained Story Packets + <span class="code-chip">INDEX.md</span></h3>
+              <p>Handoff best practice: <strong>Self-contained Story Packets</strong> (all AC + architectural constraints inline) paired with a lightweight <span class="code-chip">INDEX.md</span> for GPS routing.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: 3-Layer Quality Gate -->
+        <div class="schematic-box">
+          <div class="schematic-label">
+            <span>Axis 02 // Quality Verification</span>
+            <span>ADVERSARIAL GATE</span>
+          </div>
+          <div class="flow-stack">
+            <div class="node-card" data-attr="coach">
+              <div class="node-top">
+                <span class="badge coach">Idea by Coach</span>
+                <span class="node-code">MA-03</span>
+              </div>
+              <h3>Adversarial Two-Hat Gate</h3>
+              <p>Builder cannot mark a story Done; a separate Reviewer/QA skill must run tests and verify AC against <span class="code-chip">git diff</span>.</p>
+            </div>
+
+            <div class="node-card" data-attr="user">
+              <div class="node-top">
+                <span class="badge user">Idea by User</span>
+                <span class="node-code">MA-04</span>
+              </div>
+              <h3>3-Layer Quality Gate Architecture</h3>
+              <p>Combines role separation, recorded terminal proof, and deterministic pre-commit enforcement.</p>
+            </div>
+          </div>
+
+          <div class="gate-stack">
+            <div class="gate-layer">
+              <div class="gate-num">Layer 01</div>
+              <div class="gate-desc">
+                <strong>Two-Hat Builder / Reviewer Split</strong>
+                <span>Builder implements; independent Reviewer/QA skill verifies AC vs <span class="code-chip">git diff</span>.</span>
+              </div>
+            </div>
+            <div class="gate-layer">
+              <div class="gate-num">Layer 02</div>
+              <div class="gate-desc">
+                <strong>Evidence-First Terminal Output</strong>
+                <span>Actual test &amp; command output captured directly inside the story packet.</span>
+              </div>
+            </div>
+            <div class="gate-layer">
+              <div class="gate-num">Layer 03</div>
+              <div class="gate-desc">
+                <strong><span class="code-chip">bash</span> / <span class="code-chip">powershell</span> Pre-Commit Guard</strong>
+                <span>Deterministic local shell check before code is committed.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04: SCAMPER METHOD -->
+    <section id="sec-scamper" class="tech-section">
+      <div class="sec-header">
+        <div>
+          <div class="sec-tag">Phase 04 // Structural Refinement</div>
+          <h2 class="sec-title">SCAMPER Method</h2>
+          <p class="sec-subtitle">Calibrating persona granularity and adapting entry points for brownfield corporate repos &amp; urgent tickets.</p>
+        </div>
+        <span class="sec-badge">ELIMINATE · COMBINE · REVERSE · ADAPT</span>
+      </div>
+
+      <div class="scamper-grid">
+        <!-- Eliminate / Combine -->
+        <div class="scamper-col">
+          <div class="scamper-op">[ E / C ] Eliminate &amp; Combine</div>
+
+          <div class="node-card" data-attr="coach">
+            <div class="node-top">
+              <span class="badge coach">Idea by Coach</span>
+              <span class="node-code">SC-01</span>
+            </div>
+            <h3>Collapse 9+ Agile Roles into 4</h3>
+            <p>Proposed compressing 9+ agile roles into 4 razor-sharp personas: Strategist, Architect, Builder, Verifier.</p>
+          </div>
+
+          <div class="node-card" data-attr="user">
+            <div class="node-top">
+              <span class="badge user">Idea by User</span>
+              <span class="node-code">SC-02</span>
+            </div>
+            <h3>Standard 6-Persona Roster</h3>
+            <p>User calibrated the roster to 6 distinct corporate-ready personas for clear ownership.</p>
+            <div class="roster-grid">
+              <div class="roster-card"><small>ROLE 01</small>Analyst</div>
+              <div class="roster-card"><small>ROLE 02</small>PM</div>
+              <div class="roster-card"><small>ROLE 03</small>Architect</div>
+              <div class="roster-card"><small>ROLE 04</small>UX Designer</div>
+              <div class="roster-card"><small>ROLE 05</small>Developer</div>
+              <div class="roster-card"><small>ROLE 06</small>QA Reviewer</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reverse / Adapt -->
+        <div class="scamper-col">
+          <div class="scamper-op">[ R / A ] Reverse &amp; Adapt</div>
+
+          <div class="node-card" data-attr="coach">
+            <div class="node-top">
+              <span class="badge coach">Idea by Coach</span>
+              <span class="node-code">SC-03</span>
+            </div>
+            <h3>Repo Bootstrap Fingerprinting</h3>
+            <p>Reverse the greenfield assumption: a Bootstrap skill fingerprints an existing corporate repo (stack, CI, style) into <span class="code-chip">PROJECT_CONVENTIONS.md</span> first.</p>
+          </div>
+
+          <div class="node-card" data-attr="user">
+            <div class="node-top">
+              <span class="badge user">Idea by User</span>
+              <span class="node-code">SC-04</span>
+            </div>
+            <h3>Dual Entry: Repo Bootstrap + Quick-Fix Lane</h3>
+            <p>Include both Repo Bootstrap (auto-detect stack/conventions) and a Quick-Fix fast-track lane for small tickets.</p>
+            <div class="lane-split">
+              <div class="lane-box">
+                <h4>Repo Bootstrap</h4>
+                <p>Auto-detects stack, CI, and style into <span class="code-chip">PROJECT_CONVENTIONS.md</span>.</p>
+              </div>
+              <div class="lane-box">
+                <h4>Quick-Fix Lane</h4>
+                <p>Fast-track execution path bypassing heavy ceremony for small tickets.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05: CLIMAX — MOSCOW CONVERGENCE & SYNTHESIS -->
+    <section id="sec-moscow" class="climax-section">
+      <div class="corner-tick tl"></div>
+      <div class="corner-tick tr"></div>
+      <div class="corner-tick bl"></div>
+      <div class="corner-tick br"></div>
+
+      <div class="sec-header">
+        <div>
+          <div class="sec-tag">Phase 05 // Final Specification &amp; Sign-Off</div>
+          <h2 class="sec-title">MoSCoW Convergence &amp; Synthesis</h2>
+          <p class="sec-subtitle">v1 scope locked — balancing zero-server portability with corporate-grade quality gates.</p>
+        </div>
+        <span class="badge decision" style="font-size: 11px; padding: 5px 12px;">v1 SCOPE LOCKED BY USER</span>
+      </div>
+
+      <div class="moscow-grid">
+        <!-- MUST HAVE -->
+        <div class="must-box">
+          <div class="must-header">
+            <h3>MUST — v1 Locked Deliverables</h3>
+            <span class="badge user">Decision by User</span>
+          </div>
+          <div class="must-items">
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>Portable pure-Markdown framework</span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>GPS / Navigator skill</span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>6 core personas (Analyst, PM, Architect, UX Designer, Developer, QA Reviewer)</span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>Repo Bootstrap (<span class="code-chip">PROJECT_CONVENTIONS.md</span>)</span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>Quick-Fix fast-track lane</span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>Self-Contained Story Packets + <span class="code-chip">INDEX.md</span></span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>3-Layer Quality Gate (incl. <span class="code-chip">bash</span>/<span class="code-chip">powershell</span> pre-commit guard)</span></div>
+            <div class="must-item"><span class="chk">[&#10003;]</span><span>Retrospective &amp; Roundtable Panel</span></div>
+          </div>
+        </div>
+
+        <!-- WON'T HAVE -->
+        <div class="wont-box">
+          <div class="wont-header">
+            <h3>WON'T — Out of Scope</h3>
+            <span class="badge" style="color: var(--danger); background: var(--danger-bg); border-color: var(--danger-border);">EXCLUDED</span>
+          </div>
+          <div class="wont-items">
+            <div class="wont-item"><span class="x-mark">&#10005;</span><span>No Server</span></div>
+            <div class="wont-item"><span class="x-mark">&#10005;</span><span>No CLI</span></div>
+            <div class="wont-item"><span class="x-mark">&#10005;</span><span>No Daemons</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINAL SYNTHESIS -->
+      <div class="synthesis-banner">
+        <div class="synthesis-text">
+          <h4>Final Architectural Synthesis</h4>
+          <p id="synthesis-copy-target">
+            Serverless pure-Markdown framework with optional <span class="code-chip">bash</span>/<span class="code-chip">powershell</span> guard, 6 core personas + standalone GPS / Review / Retro / Panel / Bootstrap / Quick-Fix skills, Self-Contained Story Packets + <span class="code-chip">INDEX.md</span>, and 3-layer Quality Gate.
+          </p>
+        </div>
+        <button class="copy-btn" id="copy-spec-btn" type="button">Copy Synthesis</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    (function () {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const sections = document.querySelectorAll('.tech-section, .climax-section');
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const cards = document.querySelectorAll('.node-card');
+      const copyBtn = document.getElementById('copy-spec-btn');
+      const synthesisTarget = document.getElementById('synthesis-copy-target');
+
+      // Section tab switching
+      tabBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const target = btn.dataset.target;
+          sections.forEach((sec) => {
+            if (target === 'all' || sec.id === target) {
+              sec.classList.remove('hidden');
+            } else {
+              sec.classList.add('hidden');
+            }
+          });
+        });
+      });
+
+      // Attribution filtering
+      filterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.dataset.filter;
+
+          cards.forEach((card) => {
+            const attr = card.dataset.attr;
+            if (filter === 'all') {
+              card.classList.remove('dimmed');
+            } else if (filter === 'decision') {
+              card.classList.toggle('dimmed', attr !== 'decision' && attr !== 'insight');
+            } else {
+              card.classList.toggle('dimmed', attr !== filter);
+            }
+          });
+        });
+      });
+
+      // Copy synthesis summary
+      if (copyBtn && synthesisTarget) {
+        copyBtn.addEventListener('click', () => {
+          const text = synthesisTarget.textContent.replace(/\s+/g, ' ').trim();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+              const prev = copyBtn.textContent;
+              copyBtn.textContent = 'Copied!';
+              setTimeout(() => { copyBtn.textContent = prev; }, 1600);
+            });
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

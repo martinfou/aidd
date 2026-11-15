@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clean-Room Copilot Agentic Delivery Framework — Build Pack</title>
+  <style>
+    :root {
+      --bg-base: #0b1120;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --bg-code: #090e1a;
+      --border: #334155;
+      --border-strong: #475569;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-dim: rgba(56, 189, 248, 0.14);
+      --emerald: #10b981;
+      --emerald-dim: rgba(16, 185, 129, 0.15);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.14);
+      --rose: #f43f5e;
+      --rose-dim: rgba(244, 63, 94, 0.14);
+      --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Blueprint Header */
+    .hero {
+      background-color: var(--bg-surface);
+      background-image:
+        linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+      border-bottom: 1px solid var(--border);
+      padding: 28px 24px 24px;
+    }
+
+    .container {
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+
+    .hero-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: rgba(15, 23, 42, 0.85);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge.accent {
+      border-color: rgba(56, 189, 248, 0.45);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .badge.emerald {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: var(--emerald-dim);
+      color: var(--emerald);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 740px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-radius: 7px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.15s, border-color 0.15s, transform 0.05s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      background: #273549;
+      border-color: var(--accent);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #06121e;
+      border-color: var(--accent);
+    }
+
+    button.primary:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
+    }
+
+    button.copied {
+      background: var(--emerald-dim) !important;
+      border-color: var(--emerald) !important;
+      color: var(--emerald) !important;
+    }
+
+    button.sm {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    /* Progress Bar */
+    .progress-wrap {
+      margin-top: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .progress-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .progress-stats {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: var(--bg-code);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--emerald));
+      transition: width 0.25s ease;
+    }
+
+    /* Main Layout */
+    main {
+      padding: 24px;
+    }
+
+    .section-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 960px) {
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+    }
+
+    .tree-pre {
+      margin: 0;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .cap-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .cap-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .cap-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin: 2px 0 4px;
+      color: var(--text-primary);
+    }
+
+    .cap-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .rules-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .rules-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .rule-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .rule-box h4 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      color: var(--amber);
+    }
+
+    .rule-box.nongoal h4 {
+      color: var(--rose);
+    }
+
+    .rule-box ul {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .rule-box li {
+      margin-bottom: 4px;
+    }
+
+    /* Filter Tabs */
+    .tabs-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 17, 32, 0.94);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 0;
+      margin-bottom: 20px;
+    }
+
+    .tabs-inner {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tab-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 7px 12px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tab-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 999px;
+      color: var(--text-muted);
+    }
+
+    .tab-btn.active .tab-count {
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* Story Group Header */
+    .story-group {
+      margin-bottom: 28px;
+    }
+
+    .story-banner {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .story-banner h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .story-banner p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Task Cards */
+    .task-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: border-color 0.15s, opacity 0.15s;
+    }
+
+    .task-card.done {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.04), var(--bg-surface));
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .task-check-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .task-checkbox {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      margin-top: 2px;
+      border-radius: 5px;
+      border: 2px solid var(--border-strong);
+      background: var(--bg-code);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .task-checkbox:checked {
+      background: var(--emerald);
+      border-color: var(--emerald);
+    }
+
+    .task-checkbox:checked::after {
+      content: "✓";
+      color: #03150e;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .task-id {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .task-card.done .task-title {
+      color: var(--emerald);
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+
+    .meta-pill {
+      font-family: var(--font-mono);
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+    }
+
+    .meta-pill strong {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .code-block-wrap {
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-code);
+    }
+
+    .code-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="hero-top">
+        <div>
+          <div class="badge-row">
+            <span class="badge accent">Clean-Room Copilot Framework</span>
+            <span class="badge emerald">Zero-Runtime Pure Markdown</span>
+            <span class="badge">Mixed-OS Guards (sh + ps1)</span>
+          </div>
+          <h1>.github/ + .ai-flow/ Build Pack</h1>
+          <p class="subtitle">
+            Self-contained engineering blueprint and atomic task runner for GitHub Copilot &amp; Gemini 3.8 Flash.
+            Drop <code>.github/</code> and <code>.ai-flow/</code> into any repository for deterministic workflow routing,
+            Two-Hat review separation, and cross-platform pre-commit quality gates.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="copy-full-btn" class="primary" type="button">
+            <span>Copy Full Agent Instructions</span>
+          </button>
+          <button id="reset-progress-btn" type="button">
+            <span>Reset Progress</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span class="progress-label">Build Progress (Persisted in localStorage)</span>
+          <span class="progress-stats" id="progress-stats">0 / 20 tasks completed (0%)</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section aria-label="Architecture Overview">
+      <div class="section-toggle">
+        <h2 class="section-title">Architecture Overview</h2>
+        <button id="toggle-overview-btn" class="sm" type="button">Hide Overview</button>
+      </div>
+
+      <div id="overview-body" class="overview-grid">
+        <div class="panel">
+          <h3>Target Directory Tree</h3>
+          <pre class="tree-pre"><code>.github/
+├── copilot-instructions.md
+├── agents/
+│   ├── analyst.agent.md
+│   ├── pm.agent.md
+│   ├── architect.agent.md
+│   ├── ux-designer.agent.md
+│   ├── developer.agent.md        [Golden 0.1]
+│   └── qa-reviewer.agent.md
+├── prompts/
+│   ├── gps-navigator.prompt.md   [Golden 0.2]
+│   ├── repo-bootstrap.prompt.md
+│   ├── quick-fix.prompt.md
+│   ├── two-hat-review.prompt.md
+│   ├── retrospective.prompt.md
+│   └── roundtable-panel.prompt.md
+└── skills/
+    └── gps-navigator/
+        └── SKILL.md
+
+.ai-flow/
+├── README.md
+├── INDEX.md
+├── PROJECT_STATE.md
+├── PROJECT_CONVENTIONS.md        [Golden 0.3]
+├── templates/
+│   ├── brief.md
+│   ├── spec.md
+│   ├── architecture.md
+│   └── story-packet.md
+├── guards/
+│   ├── pre-commit.sh             [POSIX bash]
+│   └── pre-commit.ps1            [Windows PS]
+└── work/
+    ├── briefs/
+    ├── specs/
+    ├── architecture/
+    └── stories/</code></pre>
+        </div>
+
+        <div class="panel">
+          <h3>7 Core Capabilities (CAP-1 .. CAP-7)</h3>
+          <div class="cap-grid">
+            <div class="cap-item">
+              <div class="cap-id">CAP-1</div>
+              <div class="cap-name">Portable Copilot-Native Install</div>
+              <p class="cap-desc">Drop <code>.github/</code> and <code>.ai-flow/</code> into any repo with zero servers, CLIs, or runtimes.</p>
+            </div>
+            <div class="cap-item">
+              <div class="cap-id">CAP-2</div>
+              <div class="cap-name">GPS / Navigator Routing</div>
+              <p class="cap-desc">Deterministic state inspection (<code>IN_REVIEW &gt; IN_PROGRESS &gt; BLOCKED &gt; READY</code>) outputs 1 next action.</p>
+            </div>
+            <div class="cap-item">
+              <div class="cap-id">CAP-3</div>
+              <div class="cap-name">6-Persona Agents &amp; 6 Prompts</div>
+              <p class="cap-desc">Role-bounded <code>.agent.md</code> files and slash <code>.prompt.md</code> workflows cloned from Golden References.</p>
+            </div>
+            <div class="cap-item">
+              <div class="cap-id">CAP-4</div>
+              <div class="cap-name">Brownfield Repo Bootstrap</div>
+              <p class="cap-desc">Scans manifests &amp; CI to populate <code>PROJECT_CONVENTIONS.md</code> with machine-parseable test commands.</p>
+            </div>
+            <div class="cap-item">
+              <div class="cap-id">CAP-5</div>
+              <div class="cap-name">SDLC &amp; Quick-Fix Fast-Track</div>
+              <p class="cap-desc">Brief &rarr; Spec &rarr; Arch &rarr; Story Packet &rarr; Dev &rarr; QA Review, plus <code>lane: quick-fix</code> for small fixes.</p>
+            </div>
+            <div class="cap-item">
+              <div class="cap-id">CAP-6</div>
+              <div class="cap-name">3-Layer Mixed-OS Quality Gate</div>
+              <p class="cap-desc">Two-Hat separation, pasted Execution Evidence, and <code>pre-commit.sh</code> / <code>pre-commit.ps1</code> guards.</p>
+            </div>
+            <div class="cap-item">
+              <div class="cap-id">CAP-7</div>
+              <div class="cap-name">Retrospective &amp; Roundtable</div>
+              <p class="cap-desc">Post-milestone convention updates and structured multi-persona trade-off debates.</p>
+            </div>
+          </div>
+
+          <div class="rules-split">
+            <div class="rule-box">
+              <h4>Constraints</h4>
+              <ul>
+                <li><strong>100% Clean-Room IP:</strong> Original corporate-friendly naming; zero external framework references.</li>
+                <li><strong>Copilot-Native:</strong> Conforms to <code>copilot-instructions.md</code>, <code>*.agent.md</code>, <code>*.prompt.md</code>, <code>SKILL.md</code>.</li>
+                <li><strong>Zero-Runtime:</strong> Pure Markdown + optional POSIX <code>bash</code> / Windows <code>PowerShell</code> guards.</li>
+                <li><strong>Native-Readable State:</strong> Plain Markdown tables &amp; key-value lines (no YAML/TOML parsers).</li>
+                <li><strong>Golden Reference Cloning:</strong> Lock Task 0 schemas before cloning remaining files.</li>
+              </ul>
+            </div>
+            <div class="rule-box nongoal">
+              <h4>Non-Goals</h4>
+              <ul>
+                <li>No background server, daemon, or persistent orchestrator loop.</li>
+                <li>No Python, Node.js, or custom CLI binary dependencies.</li>
+                <li>No complex YAML/TOML state-parsing libraries.</li>
+                <li>No collapsed 4-persona model (the 6-persona roster is mandatory).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="tabs-bar" role="tablist" aria-label="Filter by Story">
+      <div class="tabs-inner" id="tabs-container"></div>
+    </div>
+
+    <section id="runner-container" aria-label="Story and Task Runner"></section>
+  </main>
+
+  <footer>
+    Clean-Room Copilot Agentic Delivery Framework &bull; 100% Self-Contained Build Pack &bull; Zero External Dependencies
+  </footer>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "clean_room_copilot_build_pack_v1";
+
+      const STORIES = [
+        {
+          id: "task0",
+          tabLabel: "Task 0: Golden Refs",
+          title: "Task 0 — Canonical Golden References",
+          description: "Create these three canonical reference files first. Every downstream agent, prompt, and guard clones these exact schemas.",
+          verifyCmd: "ls -1 .github/agents/developer.agent.md .github/prompts/gps-navigator.prompt.md .ai-flow/PROJECT_CONVENTIONS.md && grep -qF -- '- **Test Command:** `' .ai-flow/PROJECT_CONVENTIONS.md && echo \"TASK_0_OK\"",
+          items: [
+            {
+              id: "0.1",
+              kind: "golden",
+              title: "Golden Agent: .github/agents/developer.agent.md",
+              targets: [".github/agents/developer.agent.md"],
+              reference: "Canonical Agent Schema (YAML name/description + 5 H2 headings)",
+              content: `---
+name: developer
+description: Implements self-contained Story Packets, writes unit/integration tests, and records unedited terminal Execution Evidence. Cannot mark a story DONE.
+---
+
+## Role & Ownership
+You are the **Developer** persona. You own turning a \`READY\` or \`IN_PROGRESS\` Story Packet in \`.ai-flow/work/stories/\` into working, tested code that satisfies every inline Acceptance Criterion and Architectural Constraint.
+
+## Inputs
+- \`.ai-flow/PROJECT_CONVENTIONS.md\` (tech stack, lint, typecheck, and test commands)
+- \`.ai-flow/PROJECT_STATE.md\` (to confirm the target story is \`READY\` or \`IN_PROGRESS\`)
+- Target Story Packet: \`.ai-flow/work/stories/STORY-XXX-*.md\`
+
+## Outputs
+- Code and test changes scoped strictly to the Story Packet's inline boundaries
+- Updated \`## Execution Evidence\` section in the Story Packet containing actual, unedited terminal output
+- Updated Story Packet frontmatter: \`status: IN_REVIEW\`, \`next_step: skill:two-hat-review\`
+- Updated \`.ai-flow/PROJECT_STATE.md\` row: \`Status = IN_REVIEW\`, \`Evidence Logged = YES\`
+- Updated \`.ai-flow/INDEX.md\` row: \`Next Step = skill:two-hat-review\`
+
+## Forbidden Actions
+- **NEVER** set \`status: DONE\` in the Story Packet or \`DONE\` in \`.ai-flow/PROJECT_STATE.md\`.
+- **NEVER** fill in \`## Review Verdict\` or write \`APPROVED\`.
+- **NEVER** fabricate, summarize, or edit terminal output under \`## Execution Evidence\`.
+- **NEVER** modify code outside the Story Packet's \`## Architectural & UX Constraints (Inline)\` boundary without escalating to \`architect\`.
+
+## Execution Checklist
+1. Read \`.ai-flow/PROJECT_CONVENTIONS.md\` and the target Story Packet completely.
+2. Set the Story Packet frontmatter \`status: IN_PROGRESS\` and update \`.ai-flow/PROJECT_STATE.md\` to \`IN_PROGRESS\`.
+3. Implement the smallest clean change that satisfies all \`AC-*\` items and respects all inline constraints.
+4. Write or update unit/integration tests covering each \`AC-*\` and boundary condition.
+5. Run the exact test, lint, and typecheck commands from \`.ai-flow/PROJECT_CONVENTIONS.md\`.
+6. Paste the raw, unedited command invocations and terminal output into \`## Execution Evidence\` in the Story Packet.
+7. Set Story Packet frontmatter \`status: IN_REVIEW\` and \`next_step: skill:two-hat-review\`.
+8. Update \`.ai-flow/PROJECT_STATE.md\` (\`Status = IN_REVIEW\`, \`Evidence Logged = YES\`) and \`.ai-flow/INDEX.md\` (\`Next Step = skill:two-hat-review\`).
+9. Stop and instruct the user to run \`/two-hat-review\`.`
+            },
+            {
+              id: "0.2",
+              kind: "golden",
+              title: "Golden Prompt: .github/prompts/gps-navigator.prompt.md",
+              targets: [".github/prompts/gps-navigator.prompt.md"],
+              reference: "Canonical Prompt Schema (mode: agent, description, Step-by-Step Instructions, Strict Output)",
+              content: `---
+mode: agent
+description: Inspects .ai-flow/ state, conventions, and git status to recommend the single exact next persona or prompt to run.
+---
+
+# GPS / Navigator
+
+Inspect the repository's \`.ai-flow/\` state machine and output **one unambiguous next action**. Do not modify any files.
+
+## Step-by-Step Instructions
+
+1. **Check Conventions:**
+   - Check if \`.ai-flow/PROJECT_CONVENTIONS.md\` exists and has a populated \`- **Test Command:**\` line.
+   - If missing or unpopulated, STOP and output the recommendation below pointing to \`/repo-bootstrap\`.
+2. **Check Active Work State:**
+   - Read \`.ai-flow/PROJECT_STATE.md\`.
+   - Prioritize active items in this exact order:
+     1. \`IN_REVIEW\` -> recommend \`/two-hat-review\` with \`qa-reviewer\` on the target story file.
+     2. \`IN_PROGRESS\` -> recommend continuing with the listed \`Owner Persona\` on the target story file.
+     3. \`BLOCKED\` -> surface the blocker and recommend \`/roundtable-panel\` or the blocking persona.
+     4. \`READY\` -> recommend invoking \`developer\` on the first \`READY\` story packet.
+3. **Check Upstream Routing Index (if no active story in Step 2):**
+   - Read \`.ai-flow/INDEX.md\`.
+   - Find the most recent artifact row whose \`Next Step\` is not \`DONE\` or \`-\`.
+   - Read that artifact's YAML frontmatter (\`next_step\`) to confirm the target persona or prompt.
+4. **Check Working Tree:**
+   - Run \`git status --short\` (read-only) to note any uncommitted changes that affect the recommendation.
+5. **Output Format (Strict):**
+   Output only the following structured block:
+   - **Current State:** \`<1-line summary of PROJECT_STATE.md / INDEX.md / git status>\`
+   - **Recommended Next Step:** \`<exact /prompt-name or @persona>\`
+   - **Target File:** \`<exact relative path or NONE>\`
+   - **Why:** \`<1-sentence justification based on observed state>\``
+            },
+            {
+              id: "0.3",
+              kind: "golden",
+              title: "Golden Conventions: .ai-flow/PROJECT_CONVENTIONS.md",
+              targets: [".ai-flow/PROJECT_CONVENTIONS.md"],
+              reference: "Canonical Conventions Schema (Machine-parseable Commands section)",
+              content: `# Project Conventions
+
+> Generated or updated by \`/repo-bootstrap\`. Read by all personas and parsed by \`.ai-flow/guards/pre-commit.*\`.
+
+## Tech Stack & Runtime
+- **Primary Language(s):** \`<e.g., TypeScript 5.x / Python 3.12 / NONE>\`
+- **Framework(s):** \`<e.g., Next.js / FastAPI / NONE>\`
+- **Package Manager:** \`<e.g., npm / pnpm / uv / NONE>\`
+
+## Commands (Parsed by Quality Gates)
+- **Build Command:** \`<command or NONE>\`
+- **Lint Command:** \`<command or NONE>\`
+- **Typecheck Command:** \`<command or NONE>\`
+- **Test Command:** \`<command or NONE>\`
+
+## Repository & Git Conventions
+- **Default Branch:** \`main\`
+- **Branch Naming:** \`<e.g., feat/STORY-XXX-slug, fix/STORY-XXX-slug>\`
+- **Commit Format:** \`<e.g., Conventional Commits (feat:, fix:, chore:)>\`
+
+## Architecture & Security Guardrails
+- **Module Boundaries:** \`<key folder boundaries or NONE>\`
+- **Auth / Secrets Rule:** Never commit secrets, \`.env\` files, tokens, or credentials.
+- **UI / Design System:** \`<component library / accessibility baseline or NONE>\``
+            }
+          ]
+        },
+        {
+          id: "story1",
+          tabLabel: "Story 1",
+          title: "Story 1 — Scaffold State Contracts, Instructions & Templates",
+          description: "Create the .ai-flow/ state files, .github/copilot-instructions.md, and the four artifact templates per CAP-1, CAP-4, and CAP-5.",
+          items: [
+            {
+              id: "1.1",
+              kind: "task",
+              title: "Directory Scaffold & Initial State Tables",
+              targets: [
+                ".ai-flow/INDEX.md",
+                ".ai-flow/PROJECT_STATE.md",
+                ".ai-flow/work/briefs/.gitkeep",
+                ".ai-flow/work/specs/.gitkeep",
+                ".ai-flow/work/architecture/.gitkeep",
+                ".ai-flow/work/stories/.gitkeep"
+              ],
+              reference: "Task 0.3 (plain Markdown style; no YAML/TOML parsers)",
+              prompt: `Create the \`.ai-flow/\` workspace directories and initial state tables without modifying any other files:
+1. Create empty \`.gitkeep\` files in \`.ai-flow/work/briefs/.gitkeep\`, \`.ai-flow/work/specs/.gitkeep\`, \`.ai-flow/work/architecture/.gitkeep\`, and \`.ai-flow/work/stories/.gitkeep\`.
+2. Create \`.ai-flow/INDEX.md\` with exact content:
+\`\`\`markdown
+# .ai-flow/ Artifact Index
+
+| ID | Stage | Title | Path | Next Step |
+| :--- | :--- | :--- | :--- | :--- |
+\`\`\`
+3. Create \`.ai-flow/PROJECT_STATE.md\` with exact content:
+\`\`\`markdown
+# Project Delivery State
+
+> Allowed Status values: \`BACKLOG\` | \`READY\` | \`IN_PROGRESS\` | \`IN_REVIEW\` | \`DONE\` | \`BLOCKED\`
+
+| Story ID | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+\`\`\``,
+              verifyCmd: `ls -1 .ai-flow/INDEX.md .ai-flow/PROJECT_STATE.md .ai-flow/work/briefs/.gitkeep .ai-flow/work/specs/.gitkeep .ai-flow/work/architecture/.gitkeep .ai-flow/work/stories/.gitkeep && grep -q "| ID | Stage | Title | Path | Next Step |" .ai-flow/INDEX.md && grep -q "| Story ID | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged |" .ai-flow/PROJECT_STATE.md && echo "TASK_1_1_OK"`
+            },
+            {
+              id: "1.2",
+              kind: "task",
+              title: "Global Copilot Instructions",
+              targets: [".github/copilot-instructions.md"],
+              reference: "Task 0.2 & Task 0.3 (references .ai-flow/ state files and 3-layer gate)",
+              prompt: `Create \`.github/copilot-instructions.md\` as the always-on repository instruction file for GitHub Copilot. Include these exact sections and rules:
+1. \`# Repository AI Delivery Instructions\`
+2. \`## State & Conventions\`: Direct the agent to read \`.ai-flow/PROJECT_CONVENTIONS.md\`, \`.ai-flow/INDEX.md\`, and \`.ai-flow/PROJECT_STATE.md\` before planning or editing code.
+3. \`## Delivery Workflow\`: Document the standard flow (\`Brief -> Spec -> Architecture -> Story Packet -> Implementation -> Two-Hat Review\`) and the \`/quick-fix\` lane for low-risk fixes. Point to \`/gps-navigator\` whenever the next step is unclear.
+4. \`## Non-Negotiable Quality Gates\`:
+   - **Two-Hat Gate:** \`developer\` cannot mark a story \`DONE\`; only \`qa-reviewer\` via \`/two-hat-review\` may set \`DONE\`.
+   - **Evidence-First Gate:** Paste raw, unedited terminal output under \`## Execution Evidence\` before setting \`IN_REVIEW\`.
+   - **Zero-Runtime Rule:** Do not introduce external servers, daemons, or CLI wrappers for workflow state; keep all state in \`.ai-flow/\` plain Markdown tables and artifact frontmatter.
+Keep the file concise (under 60 lines).`,
+              verifyCmd: `test -f .github/copilot-instructions.md && grep -q "PROJECT_CONVENTIONS.md" .github/copilot-instructions.md && grep -q "Two-Hat" .github/copilot-instructions.md && test "$(wc -l < .github/copilot-instructions.md)" -le 80 && echo "TASK_1_2_OK"`
+            },
+            {
+              id: "1.3",
+              kind: "task",
+              title: "Four Standardized Artifact Templates",
+              targets: [
+                ".ai-flow/templates/brief.md",
+                ".ai-flow/templates/spec.md",
+                ".ai-flow/templates/architecture.md",
+                ".ai-flow/templates/story-packet.md"
+              ],
+              reference: "Task 0.3 (clean Markdown + frontmatter next_step)",
+              prompt: `Create four Markdown templates in \`.ai-flow/templates/\`:
+1. \`.ai-flow/templates/brief.md\`:
+   - YAML frontmatter: \`id: BRIEF-XX\`, \`title: <Title>\`, \`status: DRAFT\`, \`owner: analyst\`, \`next_step: pm:spec\`
+   - Sections: \`## Context Capsule (Handoff Summary)\`, \`## Problem Statement\`, \`## Stakeholders & Goals\`, \`## Scope Boundaries (In / Out)\`, \`## Open Questions\`
+2. \`.ai-flow/templates/spec.md\`:
+   - YAML frontmatter: \`id: SPEC-XX\`, \`title: <Title>\`, \`upstream: BRIEF-XX\`, \`status: DRAFT\`, \`owner: pm\`, \`next_step: architect:design\`
+   - Sections: \`## Context Capsule (Handoff Summary)\`, \`## Functional Requirements\`, \`## Edge Cases & Error States\`, \`## UX & Accessibility States\`, \`## Acceptance Criteria\`
+3. \`.ai-flow/templates/architecture.md\`:
+   - YAML frontmatter: \`id: ARCH-XX\`, \`title: <Title>\`, \`upstream: SPEC-XX\`, \`status: DRAFT\`, \`owner: architect\`, \`next_step: pm:story-packet\`
+   - Sections: \`## Context Capsule (Handoff Summary)\`, \`## System Boundaries & Interfaces\`, \`## Data Contracts & Security\`, \`## Key Decisions (ADR Summary)\`, \`## Constraints for Story Packets\`
+4. \`.ai-flow/templates/story-packet.md\`:
+   - YAML frontmatter: \`id: STORY-XXX\`, \`title: <Title>\`, \`lane: standard\`, \`status: READY\`, \`owner: developer\`, \`reviewer: qa-reviewer\`, \`next_step: developer:implement\`
+   - Sections: \`## Context Capsule (Handoff Summary)\`, \`## Acceptance Criteria\` (checkboxes \`- [ ] **AC-1:**\`), \`## Architectural & UX Constraints (Inline)\`, \`## Execution Evidence (Required Before IN_REVIEW)\` (with fenced \`text\` block), \`## Review Verdict (QA Reviewer Only)\` (with \`- **Reviewer:** \\\`qa-reviewer\\\`\`, \`- **Decision:** \\\`PENDING\\\` <!-- APPROVED | CHANGES_REQUESTED -->\`, \`- **Diff & Test Notes:**\`).`,
+              verifyCmd: `ls -1 .ai-flow/templates/brief.md .ai-flow/templates/spec.md .ai-flow/templates/architecture.md .ai-flow/templates/story-packet.md && grep -q "next_step:" .ai-flow/templates/brief.md && grep -q "## Execution Evidence" .ai-flow/templates/story-packet.md && grep -q "## Review Verdict" .ai-flow/templates/story-packet.md && echo "TASK_1_3_OK"`
+            }
+          ]
+        },
+        {
+          id: "story2",
+          tabLabel: "Story 2",
+          title: "Story 2 — Clone Remaining 5 Copilot Custom Agents",
+          description: "Clone the developer.agent.md Golden Reference into analyst, pm, architect, ux-designer, and qa-reviewer under .github/agents/ per CAP-3 and CAP-6.",
+          items: [
+            {
+              id: "2.1",
+              kind: "task",
+              title: "Analyst Agent",
+              targets: [".github/agents/analyst.agent.md"],
+              reference: "Task 0.1 (.github/agents/developer.agent.md)",
+              prompt: `Read \`.github/agents/developer.agent.md\` and clone its exact YAML frontmatter (\`name\`, \`description\`) and 5-heading structure (\`## Role & Ownership\`, \`## Inputs\`, \`## Outputs\`, \`## Forbidden Actions\`, \`## Execution Checklist\`) to create \`.github/agents/analyst.agent.md\`.
+Configure it for the **Analyst** persona:
+- \`name: analyst\`
+- **Role & Ownership:** Problem framing, stakeholder needs, and existing system discovery.
+- **Inputs:** User problem statement, \`.ai-flow/PROJECT_CONVENTIONS.md\`, \`.ai-flow/templates/brief.md\`, existing codebase/docs.
+- **Outputs:** \`.ai-flow/work/briefs/BRIEF-XX-<slug>.md\` with \`next_step: pm:spec\`, plus updated \`.ai-flow/INDEX.md\`.
+- **Forbidden Actions:** Must NOT prescribe technical architecture or implementation details; must NOT edit application source code.
+- **Execution Checklist:** Read conventions and template -> inspect existing system -> draft Brief with Context Capsule -> update \`INDEX.md\` -> stop and recommend \`pm\`.`,
+              verifyCmd: `test -f .github/agents/analyst.agent.md && grep -q "^name: analyst$" .github/agents/analyst.agent.md && for h in "## Role & Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/analyst.agent.md || exit 1; done && echo "TASK_2_1_OK"`
+            },
+            {
+              id: "2.2",
+              kind: "task",
+              title: "PM Agent",
+              targets: [".github/agents/pm.agent.md"],
+              reference: "Task 0.1 (.github/agents/developer.agent.md)",
+              prompt: `Read \`.github/agents/developer.agent.md\` and clone its exact YAML frontmatter and 5-heading structure to create \`.github/agents/pm.agent.md\`.
+Configure it for the **PM** persona:
+- \`name: pm\`
+- **Role & Ownership:** Functional scope, prioritization, edge cases, testable Acceptance Criteria, and slicing Specs/Architecture into self-contained Story Packets.
+- **Inputs:** \`.ai-flow/work/briefs/*.md\`, \`.ai-flow/work/architecture/*.md\` (when slicing stories), \`.ai-flow/templates/spec.md\`, \`.ai-flow/templates/story-packet.md\`.
+- **Outputs:** \`.ai-flow/work/specs/SPEC-XX-<slug>.md\` (\`next_step: architect:design\`) OR \`.ai-flow/work/stories/STORY-XXX-<slug>.md\` (\`status: READY\`, \`next_step: developer:implement\`), plus updated \`.ai-flow/INDEX.md\` and \`.ai-flow/PROJECT_STATE.md\`.
+- **Forbidden Actions:** Must NOT alter architectural boundaries set by \`architect\`; must NOT write feature code; must NOT mark stories \`DONE\`.
+- **Execution Checklist:** Read upstream Brief/Arch -> author Spec or self-contained Story Packets with inline AC and constraints -> update \`INDEX.md\` and \`PROJECT_STATE.md\` -> stop and recommend next persona (\`architect\` or \`developer\`).`,
+              verifyCmd: `test -f .github/agents/pm.agent.md && grep -q "^name: pm$" .github/agents/pm.agent.md && for h in "## Role & Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/pm.agent.md || exit 1; done && echo "TASK_2_2_OK"`
+            },
+            {
+              id: "2.3",
+              kind: "task",
+              title: "Architect Agent",
+              targets: [".github/agents/architect.agent.md"],
+              reference: "Task 0.1 (.github/agents/developer.agent.md)",
+              prompt: `Read \`.github/agents/developer.agent.md\` and clone its exact YAML frontmatter and 5-heading structure to create \`.github/agents/architect.agent.md\`.
+Configure it for the **Architect** persona:
+- \`name: architect\`
+- **Role & Ownership:** System boundaries, data contracts, security posture, ADR decisions, and inline technical constraints for Story Packets.
+- **Inputs:** \`.ai-flow/PROJECT_CONVENTIONS.md\`, \`.ai-flow/work/specs/SPEC-XX-*.md\`, \`.ai-flow/templates/architecture.md\`.
+- **Outputs:** \`.ai-flow/work/architecture/ARCH-XX-<slug>.md\` with \`next_step: pm:story-packet\` and explicit \`## Constraints for Story Packets\`, plus updated \`.ai-flow/INDEX.md\`.
+- **Forbidden Actions:** Must NOT write feature code during design; must NOT bypass \`PROJECT_CONVENTIONS.md\` security guardrails.
+- **Execution Checklist:** Read Conventions and Spec -> inspect existing code boundaries -> author Architecture doc with Context Capsule and inline constraints -> update \`INDEX.md\` -> stop and recommend \`pm\`.`,
+              verifyCmd: `test -f .github/agents/architect.agent.md && grep -q "^name: architect$" .github/agents/architect.agent.md && for h in "## Role & Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/architect.agent.md || exit 1; done && echo "TASK_2_3_OK"`
+            },
+            {
+              id: "2.4",
+              kind: "task",
+              title: "UX Designer Agent",
+              targets: [".github/agents/ux-designer.agent.md"],
+              reference: "Task 0.1 (.github/agents/developer.agent.md)",
+              prompt: `Read \`.github/agents/developer.agent.md\` and clone its exact YAML frontmatter and 5-heading structure to create \`.github/agents/ux-designer.agent.md\`.
+Configure it for the **UX Designer** persona:
+- \`name: ux-designer\`
+- **Role & Ownership:** User journeys, interaction flows, empty/loading/error states, and accessibility requirements.
+- **Inputs:** \`.ai-flow/PROJECT_CONVENTIONS.md\` (existing design system), \`.ai-flow/work/specs/SPEC-XX-*.md\`, \`.ai-flow/work/stories/STORY-XXX-*.md\`.
+- **Outputs:** Populated \`## UX & Accessibility States\` in Specs and \`## Architectural & UX Constraints (Inline)\` UX bullets in Story Packets.
+- **Forbidden Actions:** Must NOT invent a conflicting design system outside \`PROJECT_CONVENTIONS.md\`; must NOT write backend business logic.
+- **Execution Checklist:** Read \`PROJECT_CONVENTIONS.md\` UI rules and target Spec/Story -> specify user flow and empty/loading/error/a11y states -> update target artifact -> hand back to \`pm\` or \`developer\`.`,
+              verifyCmd: `test -f .github/agents/ux-designer.agent.md && grep -q "^name: ux-designer$" .github/agents/ux-designer.agent.md && for h in "## Role & Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/ux-designer.agent.md || exit 1; done && echo "TASK_2_4_OK"`
+            },
+            {
+              id: "2.5",
+              kind: "task",
+              title: "QA Reviewer Agent",
+              targets: [".github/agents/qa-reviewer.agent.md"],
+              reference: "Task 0.1 (.github/agents/developer.agent.md)",
+              prompt: `Read \`.github/agents/developer.agent.md\` and clone its exact YAML frontmatter and 5-heading structure to create \`.github/agents/qa-reviewer.agent.md\`.
+Configure it for the **QA Reviewer** persona:
+- \`name: qa-reviewer\`
+- **Role & Ownership:** Independent adversarial verification of \`IN_REVIEW\` Story Packets against \`git diff\`, inline Acceptance Criteria, Architectural Constraints, and live test re-execution.
+- **Inputs:** \`.ai-flow/PROJECT_CONVENTIONS.md\`, \`.ai-flow/PROJECT_STATE.md\`, target \`IN_REVIEW\` Story Packet, \`git diff\`.
+- **Outputs:** Populated \`## Review Verdict\` (\`APPROVED\` or \`CHANGES_REQUESTED\`) in the Story Packet; if \`APPROVED\`, sets Story Packet \`status: DONE\`, \`next_step: DONE\`, and \`.ai-flow/PROJECT_STATE.md\` \`Status = DONE\`; if \`CHANGES_REQUESTED\`, sets \`status: IN_PROGRESS\` and \`next_step: developer:fix\`.
+- **Forbidden Actions:** **NEVER** edit application source code or test files; **NEVER** approve a story whose \`## Execution Evidence\` is empty or missing; **NEVER** mark \`DONE\` if any test/lint command fails.
+- **Execution Checklist:** Verify story is \`IN_REVIEW\` with \`Execution Evidence\` -> inspect \`git diff\` against every \`AC-*\` and inline constraint -> independently re-run test/lint/typecheck commands from \`PROJECT_CONVENTIONS.md\` -> write \`## Review Verdict\` -> update \`PROJECT_STATE.md\` and \`INDEX.md\`.`,
+              verifyCmd: `test -f .github/agents/qa-reviewer.agent.md && grep -q "^name: qa-reviewer$" .github/agents/qa-reviewer.agent.md && for h in "## Role & Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/qa-reviewer.agent.md || exit 1; done && echo "TASK_2_5_OK"`
+            }
+          ]
+        },
+        {
+          id: "story3",
+          tabLabel: "Story 3",
+          title: "Story 3 — Add GPS/Navigator Skill & Clone Remaining 5 Slash Prompts",
+          description: "Mirror .github/skills/gps-navigator/SKILL.md and clone gps-navigator.prompt.md into repo-bootstrap, quick-fix, two-hat-review, retrospective, and roundtable-panel under .github/prompts/.",
+          items: [
+            {
+              id: "3.1",
+              kind: "task",
+              title: "Repo Bootstrap Prompt",
+              targets: [".github/prompts/repo-bootstrap.prompt.md"],
+              reference: "Task 0.2 (.github/prompts/gps-navigator.prompt.md) & Task 0.3 (.ai-flow/PROJECT_CONVENTIONS.md)",
+              prompt: `Read \`.github/prompts/gps-navigator.prompt.md\` and \`.ai-flow/PROJECT_CONVENTIONS.md\`. Clone the prompt schema (\`mode: agent\`, \`description\`, \`## Step-by-Step Instructions\`) to create \`.github/prompts/repo-bootstrap.prompt.md\`.
+Instruct the agent to:
+1. Scan repository manifests (\`package.json\`, \`pyproject.toml\`, \`go.mod\`, \`Cargo.toml\`, \`pom.xml\`, CI workflows in \`.github/workflows/\`, linter/formatter configs).
+2. Write or update \`.ai-flow/PROJECT_CONVENTIONS.md\` preserving the exact \`- **Test Command:** \\\`<command or NONE>\\\`\` format (and Build/Lint/Typecheck lines). Use \`NONE\` for any command that does not exist in the repo.
+3. Initialize \`.ai-flow/INDEX.md\` and \`.ai-flow/PROJECT_STATE.md\` if missing.
+4. Output a concise summary of detected stack and commands, and recommend \`/gps-navigator\` next.`,
+              verifyCmd: `test -f .github/prompts/repo-bootstrap.prompt.md && grep -q "^mode: agent$" .github/prompts/repo-bootstrap.prompt.md && grep -q "PROJECT_CONVENTIONS.md" .github/prompts/repo-bootstrap.prompt.md && echo "TASK_3_1_OK"`
+            },
+            {
+              id: "3.2",
+              kind: "task",
+              title: "Quick-Fix Prompt",
+              targets: [".github/prompts/quick-fix.prompt.md"],
+              reference: "Task 0.2 (.github/prompts/gps-navigator.prompt.md)",
+              prompt: `Read \`.github/prompts/gps-navigator.prompt.md\` and clone its prompt schema (\`mode: agent\`, \`description\`, \`## Step-by-Step Instructions\`) to create \`.github/prompts/quick-fix.prompt.md\`.
+Instruct the agent to execute the fast-track lane for small, low-risk tickets:
+1. Confirm the change is small/isolated (blast radius <= 3 files, no schema/API breaking changes); if larger, stop and recommend full \`analyst\` -> \`pm\` flow.
+2. Create \`.ai-flow/work/stories/STORY-XXX-<slug>.md\` from \`.ai-flow/templates/story-packet.md\` with \`lane: quick-fix\`, concise \`AC-*\`, and blast-radius note.
+3. Implement the fix as \`developer\`, run tests/lint from \`.ai-flow/PROJECT_CONVENTIONS.md\`, and paste raw output under \`## Execution Evidence\`.
+4. Set \`status: IN_REVIEW\`, \`next_step: skill:two-hat-review\`, update \`.ai-flow/PROJECT_STATE.md\` (\`Evidence Logged = YES\`), and stop for \`/two-hat-review\` (never self-approve \`DONE\`).`,
+              verifyCmd: `test -f .github/prompts/quick-fix.prompt.md && grep -q "^mode: agent$" .github/prompts/quick-fix.prompt.md && grep -q "quick-fix" .github/prompts/quick-fix.prompt.md && grep -q "two-hat-review" .github/prompts/quick-fix.prompt.md && echo "TASK_3_2_OK"`
+            },
+            {
+              id: "3.3",
+              kind: "task",
+              title: "Two-Hat Review Prompt",
+              targets: [".github/prompts/two-hat-review.prompt.md"],
+              reference: "Task 0.2 (.github/prompts/gps-navigator.prompt.md)",
+              prompt: `Read \`.github/prompts/gps-navigator.prompt.md\` and clone its prompt schema (\`mode: agent\`, \`description\`, \`## Step-by-Step Instructions\`) to create \`.github/prompts/two-hat-review.prompt.md\`.
+Instruct the agent to enforce the Two-Hat Gate:
+1. Adopt the \`qa-reviewer\` persona strictly (do not edit feature code).
+2. Locate the target \`IN_REVIEW\` Story Packet from \`.ai-flow/PROJECT_STATE.md\`.
+3. Verify \`## Execution Evidence\` is present and non-empty.
+4. Inspect \`git diff\` against every \`AC-*\` and \`## Architectural & UX Constraints (Inline)\`.
+5. Re-run the test/lint/typecheck commands from \`.ai-flow/PROJECT_CONVENTIONS.md\` independently.
+6. Write \`## Review Verdict\` (\`APPROVED\` or \`CHANGES_REQUESTED\`) with diff/test notes.
+7. Only if \`APPROVED\`: set Story Packet \`status: DONE\`, \`next_step: DONE\`, and update \`.ai-flow/PROJECT_STATE.md\` \`Status = DONE\`. Otherwise set \`IN_PROGRESS\` and list required fixes.`,
+              verifyCmd: `test -f .github/prompts/two-hat-review.prompt.md && grep -q "^mode: agent$" .github/prompts/two-hat-review.prompt.md && grep -q "APPROVED" .github/prompts/two-hat-review.prompt.md && grep -q "CHANGES_REQUESTED" .github/prompts/two-hat-review.prompt.md && echo "TASK_3_3_OK"`
+            },
+            {
+              id: "3.4",
+              kind: "task",
+              title: "Retrospective Prompt",
+              targets: [".github/prompts/retrospective.prompt.md"],
+              reference: "Task 0.2 (.github/prompts/gps-navigator.prompt.md)",
+              prompt: `Read \`.github/prompts/gps-navigator.prompt.md\` and clone its prompt schema (\`mode: agent\`, \`description\`, \`## Step-by-Step Instructions\`) to create \`.github/prompts/retrospective.prompt.md\`.
+Instruct the agent to:
+1. Inspect \`DONE\` Story Packets in \`.ai-flow/work/stories/\`, \`## Review Verdict\` notes (especially any prior \`CHANGES_REQUESTED\`), and recent \`git log -n 20 --oneline\`.
+2. Identify concrete friction points, recurring defects, or missing guardrails.
+3. Propose specific, minimal edits to \`.ai-flow/PROJECT_CONVENTIONS.md\` or \`.github/agents/*.agent.md\` checklists.
+4. Apply updates only after user confirmation.`,
+              verifyCmd: `test -f .github/prompts/retrospective.prompt.md && grep -q "^mode: agent$" .github/prompts/retrospective.prompt.md && grep -q "PROJECT_CONVENTIONS.md" .github/prompts/retrospective.prompt.md && echo "TASK_3_4_OK"`
+            },
+            {
+              id: "3.5",
+              kind: "task",
+              title: "Roundtable Panel Prompt",
+              targets: [".github/prompts/roundtable-panel.prompt.md"],
+              reference: "Task 0.2 (.github/prompts/gps-navigator.prompt.md)",
+              prompt: `Read \`.github/prompts/gps-navigator.prompt.md\` and clone its prompt schema (\`mode: agent\`, \`description\`, \`## Step-by-Step Instructions\`) to create \`.github/prompts/roundtable-panel.prompt.md\`.
+Instruct the agent to run a structured multi-persona critique for ambiguous or high-risk decisions:
+1. Read the user's decision topic and \`.ai-flow/PROJECT_CONVENTIONS.md\`.
+2. Evaluate the proposal sequentially through 3–4 relevant lenses from (\`analyst\`, \`pm\`, \`architect\`, \`ux-designer\`, \`qa-reviewer\`), keeping each lens strictly to its own risks, trade-offs, and constraints.
+3. Synthesize a single **Decision Summary**, **Chosen Option**, **Risks & Mitigations**, and **Recommended Next Step** (\`next_step\` value).`,
+              verifyCmd: `test -f .github/prompts/roundtable-panel.prompt.md && grep -q "^mode: agent$" .github/prompts/roundtable-panel.prompt.md && grep -q "Decision Summary" .github/prompts/roundtable-panel.prompt.md && echo "TASK_3_5_OK"`
+            },
+            {
+              id: "3.6",
+              kind: "task",
+              title: "GPS/Navigator Copilot Skill Mirror",
+              targets: [".github/skills/gps-navigator/SKILL.md"],
+              reference: "Task 0.2 (.github/prompts/gps-navigator.prompt.md)",
+              prompt: `Read \`.github/prompts/gps-navigator.prompt.md\` and create \`.github/skills/gps-navigator/SKILL.md\` as a Copilot Agent Skill with YAML frontmatter (\`name: gps-navigator\`, \`description: ...\`) and the exact same 5-step routing logic and strict output format as \`.github/prompts/gps-navigator.prompt.md\`.`,
+              verifyCmd: `test -f .github/skills/gps-navigator/SKILL.md && grep -q "^name: gps-navigator$" .github/skills/gps-navigator/SKILL.md && grep -q "PROJECT_STATE.md" .github/skills/gps-navigator/SKILL.md && echo "TASK_3_6_OK"`
+            }
+          ]
+        },
+        {
+          id: "story4",
+          tabLabel: "Story 4",
+          title: "Story 4 — Mixed-OS Pre-Commit Guards, Smoke Tests & Setup Docs",
+          description: "Create .ai-flow/guards/pre-commit.sh and pre-commit.ps1 enforcing Two-Hat evidence and the PROJECT_CONVENTIONS.md test command, verify with smoke tests, and document hook setup in .ai-flow/README.md.",
+          items: [
+            {
+              id: "4.1",
+              kind: "task",
+              title: "POSIX Bash Pre-Commit Guard (macOS/Linux)",
+              targets: [".ai-flow/guards/pre-commit.sh"],
+              reference: "Task 0.3 (parses - **Test Command:** `...`) & .ai-flow/PROJECT_STATE.md table columns",
+              prompt: `Create executable POSIX bash script \`.ai-flow/guards/pre-commit.sh\` (\`#!/usr/bin/env bash\`, \`set -euo pipefail\`):
+1. If \`.ai-flow/PROJECT_STATE.md\` exists:
+   - Fail with exit 1 if \`grep -E '\\|\\s*DONE\\s*\\|\\s*NO\\s*\\|' .ai-flow/PROJECT_STATE.md\` matches.
+   - Loop over data rows (\`grep -E '^\\|' .ai-flow/PROJECT_STATE.md | tail -n +3\`), extract \`story_id\` (col 1) and \`status\` (col 6) trimmed with \`xargs\`.
+   - When \`status == "DONE"\`, verify a matching \`.ai-flow/work/stories/\${story_id}*.md\` file exists and contains both \`## Execution Evidence\` and \`APPROVED\`. Otherwise print \`[ai-flow gate] ERROR: ...\` and exit 1.
+2. If \`.ai-flow/PROJECT_CONVENTIONS.md\` exists:
+   - Extract the backtick-wrapped value on the \`- **Test Command:**\` line using \`sed\`.
+   - If the extracted command is non-empty, not \`NONE\`, and not \`<command or NONE>\`, run it via \`bash -c "$test_cmd"\`. Exit 1 on failure.
+3. Print \`[ai-flow gate] Passed.\` and exit 0.
+Run \`chmod +x .ai-flow/guards/pre-commit.sh\`.`,
+              verifyCmd: `test -x .ai-flow/guards/pre-commit.sh && bash -n .ai-flow/guards/pre-commit.sh && bash .ai-flow/guards/pre-commit.sh && echo "TASK_4_1_OK"`
+            },
+            {
+              id: "4.2",
+              kind: "task",
+              title: "PowerShell Pre-Commit Guard (Windows Mixed-OS)",
+              targets: [".ai-flow/guards/pre-commit.ps1"],
+              reference: "Task 4.1 (.ai-flow/guards/pre-commit.sh) & Task 0.3 (.ai-flow/PROJECT_CONVENTIONS.md)",
+              prompt: `Create \`.ai-flow/guards/pre-commit.ps1\` (\`$ErrorActionPreference = "Stop"\`) with exact parity to \`.ai-flow/guards/pre-commit.sh\`:
+1. If \`.ai-flow/PROJECT_STATE.md\` exists:
+   - Read table rows matching \`^\\|\` skipping the 2 header lines; split on \`|\` and trim each cell.
+   - For any row where \`$cols[6] -eq "DONE"\`:
+     - Fail (\`Write-Error\` + \`exit 1\`) if \`$cols[7] -ne "YES"\`.
+     - Locate \`.ai-flow/work/stories/$($cols[1])*.md\`; fail if missing or if content does not match both \`## Execution Evidence\` and \`APPROVED\`.
+2. If \`.ai-flow/PROJECT_CONVENTIONS.md\` exists:
+   - Match \`- \\*\\*Test Command:\\*\\*\\s*\\\`([^\\\`]+)\\\`\`; if \`$testCmd\` is non-empty, not \`NONE\`, and not \`<command or NONE>\`, run it via \`Invoke-Expression $testCmd\` and fail if \`$LASTEXITCODE -ne 0\`.
+3. Print \`Write-Host "[ai-flow gate] Passed."\` and \`exit 0\`.`,
+              verifyCmd: `test -f .ai-flow/guards/pre-commit.ps1 && grep -q 'Test Command:' .ai-flow/guards/pre-commit.ps1 && grep -q '## Execution Evidence' .ai-flow/guards/pre-commit.ps1 && (command -v pwsh >/dev/null 2>&1 && pwsh -NoProfile -File .ai-flow/guards/pre-commit.ps1 || echo "pwsh_not_installed_syntax_checked") && echo "TASK_4_2_OK"`
+            },
+            {
+              id: "4.3",
+              kind: "task",
+              title: "Hook Setup Guide & End-to-End Smoke Test",
+              targets: [".ai-flow/README.md"],
+              reference: "Task 0.1–0.3 & Task 4.1–4.2",
+              prompt: `Create \`.ai-flow/README.md\` containing:
+1. **Quick Start:** Run \`/repo-bootstrap\` first, then \`/gps-navigator\` at any time.
+2. **Cheat Sheet Tables:** List the 6 Custom Agents (\`analyst\`, \`pm\`, \`architect\`, \`ux-designer\`, \`developer\`, \`qa-reviewer\`) and 6 Prompts (\`/gps-navigator\`, \`/repo-bootstrap\`, \`/quick-fix\`, \`/two-hat-review\`, \`/retrospective\`, \`/roundtable-panel\`).
+3. **Pre-Commit Guard Installation (Mixed OS):**
+   - **macOS / Linux (\`.git/hooks/pre-commit\`):**
+     \`\`\`sh
+     #!/bin/sh
+     exec bash .ai-flow/guards/pre-commit.sh
+     \`\`\`
+   - **Windows Git Bash / PowerShell (\`.git/hooks/pre-commit\`):**
+     \`\`\`sh
+     #!/bin/sh
+     if command -v pwsh >/dev/null 2>&1; then
+       exec pwsh -NoProfile -ExecutionPolicy Bypass -File .ai-flow/guards/pre-commit.ps1
+     else
+       exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File .ai-flow/guards/pre-commit.ps1
+     fi
+     \`\`\`
+Do not mention any external frameworks or non-\`.ai-flow\` tools.`,
+              verifyCmd: `test -f .ai-flow/README.md && grep -q "pre-commit.sh" .ai-flow/README.md && grep -q "pre-commit.ps1" .ai-flow/README.md && \\
+TMP_STATE=$(mktemp) && cp .ai-flow/PROJECT_STATE.md "$TMP_STATE" && \\
+echo "| STORY-999 | quick-fix | Smoke Test | developer | qa-reviewer | DONE | NO |" >> .ai-flow/PROJECT_STATE.md && \\
+(! bash .ai-flow/guards/pre-commit.sh >/dev/null 2>&1) && \\
+mv "$TMP_STATE" .ai-flow/PROJECT_STATE.md && \\
+bash .ai-flow/guards/pre-commit.sh && echo "TASK_4_3_OK"`
+            }
+          ]
+        }
+      ];
+
+      let activeTab = "all";
+      let completedMap = loadProgress();
+
+      function loadProgress() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (_) {
+          return {};
+        }
+      }
+
+      function saveProgress() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(completedMap));
+        } catch (_) {
+          // Ignore storage quota / private mode errors
+        }
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function copyText(text, btn) {
+        const done = () => {
+          if (!btn) return;
+          const orig = btn.innerHTML;
+          btn.classList.add("copied");
+          btn.textContent = "Copied!";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.innerHTML = orig;
+          }, 1500);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+        } else {
+          fallbackCopy(text, done);
+        }
+      }
+
+      function fallbackCopy(text, cb) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          cb();
+        } finally {
+          document.body.removeChild(ta);
+        }
+      }
+
+      function getAllItems() {
+        const list = [];
+        STORIES.forEach((s) => s.items.forEach((it) => list.push(it)));
+        return list;
+      }
+
+      function updateProgressUI() {
+        const all = getAllItems();
+        const doneCount = all.filter((it) => !!completedMap[it.id]).length;
+        const pct = all.length ? Math.round((doneCount / all.length) * 100) : 0;
+        document.getElementById("progress-stats").textContent =
+          `${doneCount} / ${all.length} tasks completed (${pct}%)`;
+        document.getElementById("progress-fill").style.width = `${pct}%`;
+      }
+
+      function renderTabs() {
+        const container = document.getElementById("tabs-container");
+        container.innerHTML = "";
+
+        const all = getAllItems();
+        const allDone = all.filter((it) => !!completedMap[it.id]).length;
+
+        const tabs = [{ id: "all", label: "All", done: allDone, total: all.length }];
+        STORIES.forEach((s) => {
+          const d = s.items.filter((it) => !!completedMap[it.id]).length;
+          tabs.push({ id: s.id, label: s.tabLabel, done: d, total: s.items.length });
+        });
+
+        tabs.forEach((t) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "tab-btn" + (activeTab === t.id ? " active" : "");
+          btn.innerHTML = `<span>${escapeHtml(t.label)}</span> <span class="tab-count">${t.done}/${t.total}</span>`;
+          btn.addEventListener("click", () => {
+            activeTab = t.id;
+            renderTabs();
+            renderRunner();
+          });
+          container.appendChild(btn);
+        });
+      }
+
+      function makeCodeBlock(label, text, btnText) {
+        const wrap = document.createElement("div");
+        wrap.className = "code-block-wrap";
+
+        const toolbar = document.createElement("div");
+        toolbar.className = "code-toolbar";
+        const span = document.createElement("span");
+        span.textContent = label;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "sm";
+        btn.textContent = btnText;
+        btn.addEventListener("click", () => copyText(text, btn));
+
+        toolbar.appendChild(span);
+        toolbar.appendChild(btn);
+
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = text;
+        pre.appendChild(code);
+
+        wrap.appendChild(toolbar);
+        wrap.appendChild(pre);
+        return wrap;
+      }
+
+      function renderRunner() {
+        const container = document.getElementById("runner-container");
+        container.innerHTML = "";
+
+        const visibleStories = activeTab === "all"
+          ? STORIES
+          : STORIES.filter((s) => s.id === activeTab);
+
+        visibleStories.forEach((story) => {
+          const group = document.createElement("div");
+          group.className = "story-group";
+
+          const banner = document.createElement("div");
+          banner.className = "story-banner";
+          banner.innerHTML = `
+            <div>
+              <h2>${escapeHtml(story.title)}</h2>
+              <p>${escapeHtml(story.description)}</p>
+            </div>
+          `;
+          group.appendChild(banner);
+
+          story.items.forEach((item) => {
+            const card = document.createElement("article");
+            const isDone = !!completedMap[item.id];
+            card.className = "task-card" + (isDone ? " done" : "");
+
+            const header = document.createElement("div");
+            header.className = "task-header";
+
+            const checkWrap = document.createElement("label");
+            checkWrap.className = "task-check-wrap";
+            checkWrap.style.cursor = "pointer";
+
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.className = "task-checkbox";
+            cb.checked = isDone;
+            cb.addEventListener("change", () => {
+              if (cb.checked) {
+                completedMap[item.id] = true;
+              } else {
+                delete completedMap[item.id];
+              }
+              saveProgress();
+              updateProgressUI();
+              renderTabs();
+              card.classList.toggle("done", cb.checked);
+            });
+
+            const titleWrap = document.createElement("div");
+            titleWrap.innerHTML = `<span class="task-id">Task ${escapeHtml(item.id)}</span><span class="task-title">${escapeHtml(item.title)}</span>`;
+
+            checkWrap.appendChild(cb);
+            checkWrap.appendChild(titleWrap);
+            header.appendChild(checkWrap);
+            card.appendChild(header);
+
+            const metaRow = document.createElement("div");
+            metaRow.className = "meta-row";
+            item.targets.forEach((t) => {
+              const pill = document.createElement("span");
+              pill.className = "meta-pill";
+              pill.innerHTML = `<strong>Target:</strong> ${escapeHtml(t)}`;
+              metaRow.appendChild(pill);
+            });
+            const refPill = document.createElement("span");
+            refPill.className = "meta-pill";
+            refPill.innerHTML = `<strong>Reference:</strong> ${escapeHtml(item.reference)}`;
+            metaRow.appendChild(refPill);
+            card.appendChild(metaRow);
+
+            if (item.kind === "golden") {
+              card.appendChild(makeCodeBlock("Golden Reference File Content", item.content, "Copy"));
+            } else {
+              card.appendChild(makeCodeBlock("Copy-Paste Prompt for Gemini 3.8", item.prompt, "Copy Prompt"));
+              card.appendChild(makeCodeBlock("Verification Command", item.verifyCmd, "Copy Verify Cmd"));
+            }
+
+            group.appendChild(card);
+          });
+
+          if (story.verifyCmd) {
+            group.appendChild(makeCodeBlock("Task 0 Verification Command", story.verifyCmd, "Copy Verify Cmd"));
+          }
+
+          container.appendChild(group);
+        });
+      }
+
+      function buildFullAgentInstructions() {
+        const lines = [];
+        lines.push("# Clean-Room Copilot Agentic Delivery Framework (`.github/` + `.ai-flow/`) — Full Build Instructions");
+        lines.push("");
+        lines.push("## Execution Rules");
+        lines.push("1. Implement Task 0 Golden References first, then execute Tasks 1.1 through 4.3 in order.");
+        lines.push("2. Clone Golden Reference schemas verbatim, changing only role/skill-specific content.");
+        lines.push("3. Do NOT install packages, servers, CLIs, or Node/Python runtimes.");
+        lines.push("4. Zero external framework names or terminology — 100% clean-room corporate naming.");
+        lines.push("5. Run each task's Verification Command and confirm exit code 0.");
+        lines.push("");
+        lines.push("## Architecture & Constraints");
+        lines.push("- **CAP-1:** Portable `.github/` + `.ai-flow/` drop-in with zero runtime dependencies.");
+        lines.push("- **CAP-2:** GPS/Navigator deterministic routing (`IN_REVIEW > IN_PROGRESS > BLOCKED > READY`).");
+        lines.push("- **CAP-3:** 6 custom agents (`.github/agents/*.agent.md`) + 6 slash prompts (`.github/prompts/*.prompt.md`) + `.github/skills/gps-navigator/SKILL.md`.");
+        lines.push("- **CAP-4:** Brownfield Repo Bootstrap populating `.ai-flow/PROJECT_CONVENTIONS.md` with `- **Test Command:** \\`<cmd or NONE>\\``.");
+        lines.push("- **CAP-5:** Streamlined SDLC (`Brief -> Spec -> Architecture -> Story Packet -> Implementation -> Two-Hat Review`) + `lane: quick-fix`.");
+        lines.push("- **CAP-6:** 3-Layer Quality Gate (Two-Hat separation, pasted Execution Evidence, `pre-commit.sh` + `pre-commit.ps1`).");
+        lines.push("- **CAP-7:** Retrospective & Roundtable Panel prompts.");
+        lines.push("");
+
+        STORIES.forEach((story) => {
+          lines.push(`---`);
+          lines.push(`## ${story.title}`);
+          lines.push(story.description);
+          lines.push("");
+          story.items.forEach((item) => {
+            lines.push(`### Task ${item.id}: ${item.title}`);
+            lines.push(`- **Target File(s):** ${item.targets.map((t) => `\`${t}\``).join(", ")}`);
+            lines.push(`- **Reference to Clone:** ${item.reference}`);
+            if (item.kind === "golden") {
+              lines.push("```markdown");
+              lines.push(item.content);
+              lines.push("```");
+            } else {
+              lines.push("- **Prompt:**");
+              lines.push(item.prompt);
+              lines.push("- **Verification Command:**");
+              lines.push("```bash");
+              lines.push(item.verifyCmd);
+              lines.push("```");
+            }
+            lines.push("");
+          });
+          if (story.verifyCmd) {
+            lines.push("### Task 0 Verification Command");
+            lines.push("```bash");
+            lines.push(story.verifyCmd);
+            lines.push("```");
+            lines.push("");
+          }
+        });
+
+        return lines.join("\n");
+      }
+
+      document.getElementById("copy-full-btn").addEventListener("click", function () {
+        copyText(buildFullAgentInstructions(), this);
+      });
+
+      document.getElementById("reset-progress-btn").addEventListener("click", function () {
+        if (Object.keys(completedMap).length === 0) return;
+        completedMap = {};
+        saveProgress();
+        updateProgressUI();
+        renderTabs();
+        renderRunner();
+      });
+
+      const overviewBody = document.getElementById("overview-body");
+      const toggleBtn = document.getElementById("toggle-overview-btn");
+      toggleBtn.addEventListener("click", () => {
+        const hidden = overviewBody.classList.toggle("hidden");
+        toggleBtn.textContent = hidden ? "Show Overview" : "Hide Overview";
+      });
+
+      updateProgressUI();
+      renderTabs();
+      renderRunner();
+    })();
+  </script>
+</body>
+</html>

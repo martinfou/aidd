@@ -1,0 +1,35 @@
+- id: "1"
+  title: Scaffold state contracts, templates, and Task 0 Golden References
+  description: >-
+    Create the .ai-flow/ state files, .github/copilot-instructions.md, the four
+    artifact templates, and the canonical Golden Reference files
+    (developer.agent.md, gps-navigator.prompt.md, PROJECT_CONVENTIONS.md) per
+    CAP-1, CAP-4, and CAP-5.
+  spec_checkpoint: true
+  done_checkpoint: true
+- id: "2"
+  title: Clone remaining 5 Copilot custom agents
+  description: >-
+    Clone the developer.agent.md Golden Reference into analyst, pm, architect,
+    ux-designer, and qa-reviewer custom agents under .github/agents/ per CAP-3
+    and CAP-6, preserving each role's hard boundaries.
+  spec_checkpoint: false
+  done_checkpoint: false
+- id: "3"
+  title: Add GPS/Navigator skill and clone remaining 5 slash prompts
+  description: >-
+    Mirror .github/skills/gps-navigator/SKILL.md and clone
+    gps-navigator.prompt.md into repo-bootstrap, quick-fix, two-hat-review,
+    retrospective, and roundtable-panel under .github/prompts/ per CAP-2,
+    CAP-3, CAP-4, CAP-5, and CAP-7.
+  spec_checkpoint: false
+  done_checkpoint: false
+- id: "4"
+  title: Implement mixed-OS pre-commit guards, smoke tests, and setup docs
+  description: >-
+    Create .ai-flow/guards/pre-commit.sh and pre-commit.ps1 enforcing Two-Hat
+    evidence and the PROJECT_CONVENTIONS.md test command, verify both with the
+    3-case smoke test, and document hook setup in .ai-flow/README.md per CAP-1
+    and CAP-6.
+  spec_checkpoint: false
+  done_checkpoint: false

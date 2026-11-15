@@ -1,0 +1,2370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AiDD (AI Driven Development) — Spécification LLM Complète en Chambre Blanche (.github/ + .aidd/)</title>
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-surface: #0f172a;
+      --bg-elevated: #172036;
+      --bg-code: #060911;
+      --border: #26334d;
+      --border-strong: #3b4f75;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.13);
+      --emerald: #10b981;
+      --emerald-soft: rgba(16, 185, 129, 0.14);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --rose: #f43f5e;
+      --rose-soft: rgba(244, 63, 94, 0.14);
+      --violet: #a78bfa;
+      --violet-soft: rgba(167, 139, 250, 0.14);
+      --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      font-size: 14.5px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+
+    pre code {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      font-size: 12.5px;
+      color: #e2e8f0;
+    }
+
+    /* Header */
+    .hero {
+      background:
+        radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.10), transparent 40%),
+        radial-gradient(circle at 15% 85%, rgba(16, 185, 129, 0.08), transparent 40%),
+        var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 24px 22px;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .hero-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-base);
+      color: var(--text-secondary);
+    }
+
+    .badge.accent { border-color: rgba(56, 189, 248, 0.5); background: var(--accent-soft); color: var(--accent); }
+    .badge.emerald { border-color: rgba(16, 185, 129, 0.5); background: var(--emerald-soft); color: var(--emerald); }
+    .badge.violet { border-color: rgba(167, 139, 250, 0.5); background: var(--violet-soft); color: var(--violet); }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 780px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .action-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 7px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    button:hover {
+      background: #22304f;
+      border-color: var(--accent);
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #04101d;
+    }
+
+    button.primary:hover {
+      background: #7dd3fc;
+      border-color: #7dd3fc;
+    }
+
+    button.copied {
+      background: var(--emerald-soft) !important;
+      border-color: var(--emerald) !important;
+      color: var(--emerald) !important;
+    }
+
+    button.sm {
+      padding: 3px 9px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+    }
+
+    .progress-bar-box {
+      margin-top: 18px;
+      background: rgba(9, 13, 22, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 14px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+      color: var(--text-secondary);
+    }
+
+    .progress-meta strong {
+      font-family: var(--font-mono);
+      color: var(--accent);
+    }
+
+    .progress-track {
+      height: 7px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--emerald));
+      transition: width 0.2s ease;
+    }
+
+    /* Two-column Workspace */
+    .workspace {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 24px;
+      padding: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .workspace { grid-template-columns: 1fr; }
+      .toc { position: static !important; }
+    }
+
+    .toc {
+      position: sticky;
+      top: 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .toc h2 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    .toc ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+    }
+
+    .toc a:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      text-decoration: none;
+      border-color: var(--border);
+    }
+
+    .toc .filter-box {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .toc input[type="search"] {
+      width: 100%;
+      background: var(--bg-code);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 12.5px;
+      font-family: var(--font-sans);
+    }
+
+    /* Content Sections */
+    .spec-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+
+    .spec-section > h2 {
+      margin: 0 0 6px;
+      font-size: 19px;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sec-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 5px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .sec-lead {
+      margin: 0 0 16px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 15.5px;
+      color: var(--text-primary);
+    }
+
+    h4 {
+      margin: 14px 0 6px;
+      font-size: 13.5px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+
+    p { margin: 0 0 10px; }
+    ul, ol { margin: 0 0 12px; padding-left: 20px; }
+    li { margin-bottom: 4px; }
+
+    /* Callouts */
+    .callout {
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 12px 0;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      font-size: 13.5px;
+    }
+
+    .callout.directive {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.10), rgba(15, 23, 42, 0.9));
+    }
+
+    .callout.warn {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: var(--amber-soft);
+    }
+
+    .callout.danger {
+      border-color: rgba(244, 63, 94, 0.5);
+      background: var(--rose-soft);
+    }
+
+    .callout-title {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+
+    .callout.warn .callout-title { color: var(--amber); }
+    .callout.danger .callout-title { color: var(--rose); }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 10px 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--bg-code);
+    }
+
+    th, td {
+      text-align: left;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    /* Code Panels */
+    .code-panel {
+      margin: 10px 0 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-code);
+    }
+
+    .code-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* Task Cards */
+    .task-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 16px;
+      margin: 14px 0;
+    }
+
+    .task-card.done {
+      border-color: var(--emerald);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.06), var(--bg-elevated));
+    }
+
+    .task-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .task-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .task-check {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--emerald);
+      cursor: pointer;
+    }
+
+    .task-id-pill {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .target-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .target-pill {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 5px;
+      color: var(--text-secondary);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 820px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <div class="badge-row">
+            <span class="badge accent">AiDD &bull; AI Driven Development</span>
+            <span class="badge emerald">Spécification Autonome en Chambre Blanche</span>
+            <span class="badge violet">Natif GitHub Copilot (.github/ + .aidd/)</span>
+          </div>
+          <h1>AiDD (AI Driven Development) — Spécification Maîtresse pour LLM</h1>
+          <p class="subtitle">
+            Spécification complète et sans ambiguïté permettant à tout LLM de code d'implémenter <strong>AiDD (AI Driven Development)</strong> — un framework de livraison portable sans serveur
+            <code>.github/</code> + <code>.aidd/</code> — de zéro en chambre blanche.
+            Tous les schémas, Références d'Or, gabarits, 6 agents personnalisés, 6 invites slash, miroir de compétence,
+            garde-fous pré-commit multi-OS (<code>bash</code> + <code>PowerShell</code>) et tests de fumée sont rendus directement en HTML sémantique.
+          </p>
+        </div>
+        <div class="action-cluster">
+          <button id="copy-master-md" class="primary" type="button">Copier la Spec en Markdown</button>
+          <button id="download-master-md" type="button">Télécharger le .md</button>
+          <button id="reset-checks" type="button">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div class="progress-bar-box">
+        <div class="progress-meta">
+          <span>Progression de l'implémentation (sauvegardée dans localStorage)</span>
+          <strong id="progress-text">0 / 18 tâches terminées (0%)</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container workspace">
+    <nav class="toc" aria-label="Navigation de la spécification">
+      <h2>Table des matières</h2>
+      <ul>
+        <li><a href="#sec-00">00. Directive Chambre Blanche</a></li>
+        <li><a href="#sec-01">01. Manifeste des 35 Fichiers</a></li>
+        <li><a href="#sec-02">02. État, Routage &amp; Contrats</a></li>
+        <li><a href="#sec-03">03. Tâche 0 : Références d'Or</a></li>
+        <li><a href="#sec-04">04. Phase 1 : Structure &amp; Gabarits</a></li>
+        <li><a href="#sec-05">05. Phase 2 : 6 Agents Personnalisés</a></li>
+        <li><a href="#sec-06">06. Phase 3 : 6 Invites &amp; Compétence</a></li>
+        <li><a href="#sec-07">07. Phase 4 : Garde-fous OS &amp; README</a></li>
+        <li><a href="#sec-08">08. Suite de Tests de Fumée</a></li>
+      </ul>
+      <div class="filter-box">
+        <input id="task-filter" type="search" placeholder="Filtrer les tâches ou fichiers..." aria-label="Filtrer les tâches" />
+      </div>
+    </nav>
+
+    <main id="spec-root">
+      <!-- SECTION 00 -->
+      <section class="spec-section" id="sec-00">
+        <h2><span class="sec-num">00</span> Directive d'Exécution en Chambre Blanche &amp; Contraintes</h2>
+        <p class="sec-lead">Lisez cette section en premier avant de créer tout fichier. Ce document est la source de vérité unique.</p>
+
+        <div class="callout directive">
+          <div class="callout-title">Instruction Système pour le LLM Implémenteur</div>
+          <p>
+            Vous réalisez une <strong>implémentation en chambre blanche</strong> de <strong>AiDD (AI Driven Development)</strong>, un framework de livraison logicielle piloté par IA, portable et sans serveur,
+            ciblant GitHub Copilot (<code>.github/</code> + <code>.aidd/</code>). Créez chaque fichier listé à la Section 01 dans l'ordre séquentiel
+            (Tâche 0 &rarr; Phase 1 &rarr; Phase 2 &rarr; Phase 3 &rarr; Phase 4), puis exécutez la suite de vérification de la Section 08 jusqu'à obtenir le code de sortie <code>0</code> sur chaque contrôle.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h3>Contraintes Non Négociables</h3>
+            <ul>
+              <li><strong>IP 100 % Chambre Blanche :</strong> Utilisez exclusivement le nom <strong>AiDD (AI Driven Development)</strong> et une terminologie originale adaptée à l'entreprise (<code>.aidd/</code>, <code>GPS/Navigator</code>, <code>Two-Hat Review</code>, <code>Story Packet</code>). N'incluez <strong>aucune</strong> référence à des frameworks externes, méthodologies tierces ou droits d'auteur externes.</li>
+              <li><strong>Zéro Runtime / Zéro Serveur :</strong> Ne créez et ne requérez <strong>aucun</strong> environnement Python, Node.js, paquet npm, démon en arrière-plan, base de données ou binaire CLI personnalisé.</li>
+              <li><strong>État Lisible Nativement :</strong> Les fichiers d'état utilisent des tableaux Markdown simples et des lignes clé-valeur exactes afin que les LLM, <code>bash</code> POSIX et <code>PowerShell</code> Windows les lisent nativement sans parseur YAML/TOML.</li>
+              <li><strong>Clonage des Références d'Or :</strong> Créez d'abord les trois fichiers de Référence d'Or de la Tâche 0 mot pour mot, puis clonez exactement leurs clés de frontmatter et leurs titres de section dans tous les autres agents et invites.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Problème Résolu &amp; Capacités Clés</h3>
+            <ul>
+              <li><strong>CAP-1 Installation Portable :</strong> Copiez <code>.github/</code> et <code>.aidd/</code> dans n'importe quel dépôt pour activer immédiatement la livraison structurée.</li>
+              <li><strong>CAP-2 Routeur GPS/Navigator :</strong> Une commande en lecture seule inspecte l'état du dépôt et recommande exactement une prochaine étape sans ambiguïté.</li>
+              <li><strong>CAP-3 Hybride 6 Agents + 6 Invites :</strong> Sépare les rôles métier (personas) des actions transverses (invites/compétences).</li>
+              <li><strong>CAP-4 Bootstrap de Dépôt Existant :</strong> Détecte automatiquement la pile, les commandes de lint, typecheck et test dans <code>.aidd/PROJECT_CONVENTIONS.md</code>.</li>
+              <li><strong>CAP-5 SDLC Double Voie :</strong> Voie complète (<code>Brief &rarr; Spec &rarr; Architecture &rarr; Story Packets &rarr; Dev &rarr; Two-Hat Review</code>) plus voie rapide <code>/quick-fix</code>.</li>
+              <li><strong>CAP-6 Porte Qualité à 3 Couches :</strong> Séparation Two-Hat + <code>Execution Evidence</code> terminal brute + garde-fous déterministes <code>pre-commit.sh</code> &amp; <code>pre-commit.ps1</code>.</li>
+              <li><strong>CAP-7 Alignement Continu :</strong> <code>/retrospective</code> post-jalon et débat multi-personas <code>/roundtable-panel</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 01 -->
+      <section class="spec-section" id="sec-01">
+        <h2><span class="sec-num">01</span> Manifeste des Fichiers Cibles (35 Fichiers Livrables)</h2>
+        <p class="sec-lead">Une implémentation complète produit exactement cette arborescence de 35 fichiers à la racine du dépôt.</p>
+
+        <div class="code-panel">
+          <div class="code-head"><span>Arborescence des Fichiers du Dépôt</span></div>
+          <pre><code>.github/
+├── copilot-instructions.md                  # Règles globales toujours actives (&lt;= 40 lignes)
+├── agents/                                  # 6 Agents Personnalisés à Périmètre Strict
+│   ├── analyst.agent.md                     # Étape 1 : Découverte &amp; Briefs
+│   ├── pm.agent.md                          # Étapes 2 &amp; 4 : Specs + Découpage en Story Packets
+│   ├── architect.agent.md                   # Étape 3 : Frontières Système, ADR &amp; Contraintes
+│   ├── ux-designer.agent.md                 # Transverse : Parcours Utilisateur, États UI &amp; A11y
+│   ├── developer.agent.md                   # Étape 5 [Or 0.1] : Code, Tests &amp; Preuves (Ne peut pas marquer DONE)
+│   └── qa-reviewer.agent.md                 # Étape 6 : Audit Diff/Tests Indépendant &amp; Validation DONE
+├── prompts/                                 # 15 Invites Slash Autonomes
+│   ├── gps-navigator.prompt.md              # [Or 0.2] Routeur d'état en lecture seule
+│   ├── repo-bootstrap.prompt.md             # Détecteur de pile et commandes pour dépôts existants
+│   ├── doc-project.prompt.md                # Génère .aidd/PROJECT_CONTEXT.md (LLM) + docs/DEVELOPER_GUIDE.md (Dev)
+│   ├── brainstorm.prompt.md                 # Idéation divergente (3 modes + techniques créatives -> IDEA-XX)
+│   ├── forge-idea.prompt.md                 # Mise à l'épreuve d'une idée brute &amp; cadrage PR/FAQ
+│   ├── creative-studio.prompt.md            # Suite créative (Design Thinking, Stratégie Innovation, Storytelling, Pitch)
+│   ├── deep-critique.prompt.md              # Critique approfondie d'un artefact (Pre-Mortem, Red Team, Socratique)
+│   ├── correct-course.prompt.md             # Analyse d'impact &amp; réalignement en cours de sprint
+│   ├── walkthrough.prompt.md                # Guide pas-à-pas de revue humaine (diff, zones à risque, tests manuels)
+│   ├── test-audit.prompt.md                 # Audit NFR (perf/sécu/fiabilité) &amp; matrice de traçabilité AC &lt;-&gt; Tests
+│   ├── quick-fix.prompt.md                  # Voie rapide (&lt;= 3 fichiers, sans rupture)
+│   ├── two-hat-review.prompt.md             # Exécute la liste de contrôle QA Reviewer
+│   ├── retrospective.prompt.md              # Leçons post-jalon -&gt; PROJECT_CONVENTIONS.md
+│   ├── roundtable-panel.prompt.md           # Synthèse structurée de compromis à 3-4 personas
+│   └── board-sync.prompt.md                 # Synchronise PROJECT_STATE.md dans .aidd/board.html
+└── skills/
+    └── gps-navigator/
+        └── SKILL.md                         # Miroir Copilot Agent Skill de GPS/Navigator
+
+.aidd/
+├── README.md                                # Démarrage rapide, antisèche &amp; installation non destructive des hooks Git
+├── board.html                               # Tableau Kanban visuel autonome (Backlog, Sprints, Epics, Stories, Quick-Fix)
+├── brainstorm-selector.html                 # Sélecteur visuel de techniques de brainstorming (composeur de prompt /brainstorm)
+├── INDEX.md                                 # Tableau de routage Markdown des artefacts
+├── PROJECT_STATE.md                         # Tableau Markdown 9 colonnes (Epic, Sprint, Lane, Status, Evidence)
+├── PROJECT_CONVENTIONS.md                   # [Or 0.3] Pile, règles &amp; Test Command analysée par machine
+├── templates/
+│   ├── brief.md                             # Gabarit Étape 1
+│   ├── spec.md                              # Gabarit Étape 2
+│   ├── architecture.md                      # Gabarit Étape 3
+│   └── story-packet.md                      # Gabarit Étape 4 (paquet d'exécution autonome)
+├── guards/
+│   ├── pre-commit.sh                        # Garde-fou qualité déterministe POSIX bash (macOS/Linux)
+│   └── pre-commit.ps1                       # Garde-fou qualité déterministe PowerShell (Windows)
+└── work/
+    ├── briefs/.gitkeep
+    ├── specs/.gitkeep
+    ├── architecture/.gitkeep
+    └── stories/.gitkeep</code></pre>
+        </div>
+      </section>
+
+      <!-- SECTION 02 -->
+      <section class="spec-section" id="sec-02">
+        <h2><span class="sec-num">02</span> Machine à États, Schémas de Tableaux &amp; Contrats Exacts</h2>
+        <p class="sec-lead">Chaque agent, invite, gabarit et garde-fou shell/PowerShell DOIT respecter exactement ces positions de colonnes et jetons textuels.</p>
+
+        <h3>2.1 Flux de Livraison Bout-en-Bout &amp; Pont de Découpage des Stories</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Étape</th>
+                <th>Propriétaire / Invocation</th>
+                <th>Artefact(s) en Entrée</th>
+                <th>Artefact(s) en Sortie</th>
+                <th>Définit <code>next_step:</code> à</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>0. Bootstrap</strong></td>
+                <td><code>/repo-bootstrap</code></td>
+                <td>Manifestes du dépôt, CI, linters</td>
+                <td><code>.aidd/PROJECT_CONVENTIONS.md</code>, initialise <code>INDEX.md</code> &amp; <code>PROJECT_STATE.md</code></td>
+                <td><code>/doc-project</code> (ou <code>analyst:brief</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>0b. Documentation</strong></td>
+                <td><code>/doc-project</code></td>
+                <td>Base de code + <code>PROJECT_CONVENTIONS.md</code></td>
+                <td><code>.aidd/PROJECT_CONTEXT.md</code> (LLM) + <code>docs/DEVELOPER_GUIDE.md</code> (Dev)</td>
+                <td><code>analyst:brief</code> (ou <code>/brainstorm</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>0c. Brainstorming &amp; Forge</strong></td>
+                <td><code>/brainstorm</code>, <code>/forge-idea</code>, <code>/creative-studio</code></td>
+                <td>Sujet ouvert, idée brute ou besoin créatif</td>
+                <td>Idées priorisées, PR/FAQ ou concept durci (<code>.aidd/work/briefs/IDEA-XX-&lt;slug&gt;.md</code>)</td>
+                <td><code>analyst:brief</code></td>
+              </tr>
+              <tr>
+                <td><strong>1. Brief</strong></td>
+                <td><code>@analyst</code></td>
+                <td>Énoncé du problème + base de code</td>
+                <td><code>.aidd/work/briefs/BRIEF-XX-&lt;slug&gt;.md</code></td>
+                <td><code>pm:spec</code></td>
+              </tr>
+              <tr>
+                <td><strong>2. Spec</strong></td>
+                <td><code>@pm</code> (Mode A : Spec)</td>
+                <td><code>BRIEF-XX</code> (+ optionnel <code>@ux-designer</code>)</td>
+                <td><code>.aidd/work/specs/SPEC-XX-&lt;slug&gt;.md</code></td>
+                <td><code>architect:design</code></td>
+              </tr>
+              <tr>
+                <td><strong>3. Architecture</strong></td>
+                <td><code>@architect</code></td>
+                <td><code>SPEC-XX</code> + <code>PROJECT_CONVENTIONS.md</code></td>
+                <td><code>.aidd/work/architecture/ARCH-XX-&lt;slug&gt;.md</code></td>
+                <td><code>pm:story-packet</code></td>
+              </tr>
+              <tr>
+                <td><strong>4. Découpage Stories</strong></td>
+                <td><code>@pm</code> (Mode B : Découpage)</td>
+                <td><code>SPEC-XX</code> + <code>ARCH-XX</code> (+ états UX)</td>
+                <td><code>.aidd/work/stories/STORY-XXX-&lt;slug&gt;.md</code> + lignes dans <code>PROJECT_STATE.md</code> (<code>READY</code>)</td>
+                <td><code>developer:implement</code></td>
+              </tr>
+              <tr>
+                <td><strong>4b. Quick-Fix</strong></td>
+                <td><code>/quick-fix</code></td>
+                <td>Petite demande (&le; 3 fichiers, isolée)</td>
+                <td><code>STORY-XXX</code> (<code>lane: quick-fix</code>) + code + tests + <code>Execution Evidence</code> (<code>IN_REVIEW</code>)</td>
+                <td><code>skill:two-hat-review</code></td>
+              </tr>
+              <tr>
+                <td><strong>5. Implémentation</strong></td>
+                <td><code>@developer</code></td>
+                <td>Story Packet <code>READY</code> / <code>IN_PROGRESS</code></td>
+                <td>Code + tests + sortie terminal brute dans <code>## Execution Evidence</code> (passe à <code>IN_REVIEW</code>)</td>
+                <td><code>skill:two-hat-review</code></td>
+              </tr>
+              <tr>
+                <td><strong>6. Porte de Revue</strong></td>
+                <td><code>@qa-reviewer</code> / <code>/two-hat-review</code> (+ <code>/walkthrough</code>, <code>/test-audit</code>)</td>
+                <td>Story <code>IN_REVIEW</code> + <code>git diff</code></td>
+                <td><code>- **Verdict:** APPROVED</code> &rarr; passe à <code>DONE</code> (ou <code>CHANGES_REQUESTED</code> &rarr; <code>IN_PROGRESS</code>)</td>
+                <td><code>DONE</code> (ou <code>developer:fix</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>Transverse (Critique &amp; Pivot)</strong></td>
+                <td><code>/deep-critique</code>, <code>/correct-course</code>, <code>/roundtable-panel</code></td>
+                <td>Artefact existant ou changement de périmètre en sprint</td>
+                <td>Artefact durci, proposition de changement de sprint ou décision tracée</td>
+                <td>Selon décision</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>2.2 Schémas Exacts des Tableaux d'État Markdown</h3>
+        <div class="grid-2">
+          <div>
+            <h4>.aidd/INDEX.md (5 Colonnes)</h4>
+            <p>Suit les artefacts de planification amont et les pointeurs de stories actives pour <code>GPS/Navigator</code>.</p>
+            <div class="code-panel">
+              <div class="code-head"><span>En-tête Exact &amp; Ligne Exemple</span></div>
+              <pre><code># .aidd/ Artifact Index
+
+| ID | Stage | Title | Path | Next Step |
+| :--- | :--- | :--- | :--- | :--- |
+| BRIEF-01 | Brief | Expiration Session Inactive | .aidd/work/briefs/BRIEF-01-timeout.md | pm:spec |</code></pre>
+            </div>
+          </div>
+          <div>
+            <h4>.aidd/PROJECT_STATE.md (9 Colonnes)</h4>
+            <p>Analysé par <code>GPS/Navigator</code>, <code>board.html</code>, <code>pre-commit.sh</code> et <code>pre-commit.ps1</code>. L'ordre des colonnes est verrouillé :</p>
+            <div class="code-panel">
+              <div class="code-head"><span>En-tête Exact &amp; Ligne Exemple</span></div>
+              <pre><code># Project Delivery State
+
+&gt; Allowed Status values: `BACKLOG` | `READY` | `IN_PROGRESS` | `BLOCKED` | `IN_REVIEW` | `DONE`
+
+| Story ID | Epic | Sprint | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| STORY-101 | EPIC-01 | SPRINT-01 | standard | Expiration Session | developer | qa-reviewer | IN_REVIEW | YES |</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout warn">
+          <div class="callout-title">Contrats Textuels &amp; de Parsing Critiques (Aucune Dérive Autorisée)</div>
+          <ul>
+            <li><strong>Ligne Test Command dans <code>.aidd/PROJECT_CONVENTIONS.md</code> :</strong> Doit conserver le préfixe exact <code>- **Test Command:** `...`</code>. Avant le bootstrap, son espace réservé est <code>&lt;command or NONE&gt;</code>. Les garde-fous ignorent l'exécution si la valeur est vide, <code>NONE</code> ou commence par <code>&lt;</code>.</li>
+            <li><strong>Section Execution Evidence dans les Story Packets :</strong> Titre H2 exact <code>## Execution Evidence</code>. Le gabarit s'initialise avec le jeton <code>PENDING_EVIDENCE</code>. Les garde-fous rejettent toute story <code>DONE</code> si <code>## Execution Evidence</code> est absent, contient encore <code>PENDING_EVIDENCE</code> ou n'a aucune ligne de sortie non vide avant <code>## Review Verdict</code>.</li>
+            <li><strong>Ligne Review Verdict dans les Story Packets :</strong> Titre H2 exact <code>## Review Verdict</code> contenant la puce <code>- **Verdict:** PENDING</code>. Seul <code>qa-reviewer</code> / <code>/two-hat-review</code> peut la modifier en <code>- **Verdict:** APPROVED</code> ou <code>- **Verdict:** CHANGES_REQUESTED</code>. N'écrivez <strong>jamais</strong> le mot <code>APPROVED</code> dans un commentaire HTML du gabarit pour éviter tout faux positif des regex.</li>
+            <li><strong>Schémas Frontmatter GitHub Copilot :</strong>
+              <ul>
+                <li><code>.github/agents/*.agent.md</code> &rarr; frontmatter YAML avec <code>name: &lt;id&gt;</code> et <code>description: &lt;résumé 1 ligne&gt;</code>.</li>
+                <li><code>.github/prompts/*.prompt.md</code> &rarr; frontmatter YAML avec <code>agent: 'agent'</code>, <code>mode: agent</code> (double clé pour compatibilité entre versions VS Code Copilot) et <code>description: &lt;résumé 1 ligne&gt;</code>.</li>
+                <li><code>.github/skills/gps-navigator/SKILL.md</code> &rarr; frontmatter YAML avec <code>name: gps-navigator</code> et <code>description: &lt;résumé 1 ligne&gt;</code>.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- SECTION 03: GOLDEN REFERENCES -->
+      <section class="spec-section" id="sec-03">
+        <h2><span class="sec-num">03</span> Tâche 0 — Fichiers de Référence d'Or Canoniques</h2>
+        <p class="sec-lead">Écrivez ces trois fichiers mot pour mot en premier. Ils verrouillent la structure exacte clonée dans les Phases 1 à 4.</p>
+
+        <article class="task-card" data-task-id="0.1">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="0.1" />
+              <span class="task-id-pill">Tâche 0.1</span>
+              <span>Créer l'Agent d'Or : <code>.github/agents/developer.agent.md</code></span>
+            </label>
+          </div>
+          <div class="target-list">
+            <span class="target-pill">Cible : .github/agents/developer.agent.md</span>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Contenu Exact — .github/agents/developer.agent.md</span></div>
+            <pre><code>---
+name: developer
+description: Implémente les Story Packets READY ou IN_PROGRESS, écrit les tests unitaires/intégration et consigne les preuves d'exécution brutes. Ne peut pas marquer une story DONE.
+---
+
+## Role &amp; Ownership
+Vous êtes le persona **Developer**. Vous transformez un Story Packet `READY` ou `IN_PROGRESS` dans `.aidd/work/stories/` en code fonctionnel et testé satisfaisant chaque Critère d'Acceptation (`AC-*`) et chaque Contrainte Architecturale/UX en ligne.
+
+## Inputs
+- `.aidd/PROJECT_CONVENTIONS.md` (pile technique, commandes build, lint, typecheck et test)
+- `.aidd/PROJECT_STATE.md` (confirmer que la story cible est `READY` ou `IN_PROGRESS`)
+- Story Packet cible : `.aidd/work/stories/STORY-XXX-*.md`
+
+## Outputs
+- Modifications de code et de tests strictement limitées aux frontières en ligne du Story Packet
+- Sortie de commande brute et non éditée collée sous `## Execution Evidence` (remplaçant `PENDING_EVIDENCE`)
+- Frontmatter du Story Packet mis à jour : `status: IN_REVIEW`, `next_step: skill:two-hat-review`
+- Ligne `.aidd/PROJECT_STATE.md` mise à jour : `Status = IN_REVIEW`, `Evidence Logged = YES`
+- Ligne `.aidd/INDEX.md` mise à jour : `Next Step = skill:two-hat-review`
+
+## Forbidden Actions
+- **NE JAMAIS** définir `status: DONE` dans un Story Packet ni `DONE` dans `.aidd/PROJECT_STATE.md`.
+- **NE JAMAIS** modifier `- **Verdict:**` sous `## Review Verdict` ni écrire `APPROVED`.
+- **NE JAMAIS** fabriquer, tronquer ou paraphraser la sortie terminal dans `## Execution Evidence`.
+- **NE JAMAIS** modifier des fichiers hors de `## Architectural &amp; UX Constraints (Inline)` sans escalader à `architect`.
+
+## Execution Checklist
+1. Lire entièrement `.aidd/PROJECT_CONVENTIONS.md` et le Story Packet cible.
+2. Définir `status: IN_PROGRESS` dans le frontmatter du Story Packet et mettre à jour `.aidd/PROJECT_STATE.md` (`Status = IN_PROGRESS`).
+3. Implémenter les modifications minimales et propres satisfaisant chaque `AC-*` et contrainte en ligne.
+4. Ajouter ou mettre à jour les tests automatisés couvrant cas nominaux, cas limites et frontières.
+5. Exécuter les commandes exactes de test, lint et typecheck de `.aidd/PROJECT_CONVENTIONS.md`.
+6. Coller les commandes exactes et la sortie terminal brute dans `## Execution Evidence` (en retirant `PENDING_EVIDENCE`).
+7. Mettre à jour le frontmatter du Story Packet : `status: IN_REVIEW` et `next_step: skill:two-hat-review`.
+8. Mettre à jour `.aidd/PROJECT_STATE.md` (`Status = IN_REVIEW`, `Evidence Logged = YES`), `.aidd/INDEX.md` (`Next Step = skill:two-hat-review`) et synchroniser le bloc `&lt;script id="aidd-state-snapshot"&gt;` dans `.aidd/board.html`.
+9. S'arrêter et inviter l'utilisateur à exécuter `/two-hat-review` (ou invoquer `qa-reviewer`).</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="0.2">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="0.2" />
+              <span class="task-id-pill">Tâche 0.2</span>
+              <span>Créer l'Invite Slash d'Or : <code>.github/prompts/gps-navigator.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list">
+            <span class="target-pill">Cible : .github/prompts/gps-navigator.prompt.md</span>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Contenu Exact — .github/prompts/gps-navigator.prompt.md</span></div>
+            <pre><code>---
+agent: 'agent'
+mode: agent
+description: Routeur de flux en lecture seule inspectant .aidd/, le frontmatter des artefacts et git status pour recommander une unique prochaine étape.
+---
+
+## Purpose
+Inspecter la machine à états `.aidd/` du dépôt et recommander **exactement une prochaine action**. Ne jamais modifier de fichiers durant la navigation.
+
+## Inputs
+- `.aidd/PROJECT_CONVENTIONS.md`
+- `.aidd/PROJECT_STATE.md`
+- `.aidd/INDEX.md`
+- Artefacts actifs sous `.aidd/work/` (frontmatter `next_step:`)
+- `git status --short` en lecture seule
+
+## Deterministic Steps
+1. **Vérifier le Bootstrap des Conventions :**
+   - Vérifier que `.aidd/PROJECT_CONVENTIONS.md` existe et que sa ligne `- **Test Command:**` est renseignée (pas `&lt;command or NONE&gt;`).
+   - Si absent ou non renseigné, recommander immédiatement `/repo-bootstrap` et s'arrêter.
+2. **Vérifier la File des Stories Actives (`PROJECT_STATE.md`) :**
+   - Inspecter les lignes de `.aidd/PROJECT_STATE.md` selon cet ordre de priorité strict :
+     1. `IN_REVIEW` &rarr; recommander `/two-hat-review` (avec `@qa-reviewer`) sur ce Story Packet.
+     2. `IN_PROGRESS` &rarr; recommander de poursuivre avec l'`Owner Persona` listé (typiquement `@developer`) sur ce Story Packet.
+     3. `BLOCKED` &rarr; exposer le blocage et recommander `/roundtable-panel` ou le persona amont responsable.
+     4. `READY` &rarr; recommander `@developer` sur le premier Story Packet `READY`.
+3. **Vérifier l'Index de Planification Amont (`INDEX.md`) :**
+   - Si aucune story active ne correspond à l'Étape 2, trouver la dernière ligne de `.aidd/INDEX.md` dont `Next Step` n'est ni `DONE` ni `-`.
+   - Lire le frontmatter YAML `next_step:` de cet artefact (`pm:spec`, `architect:design`, `pm:story-packet`, etc.) et le mapper vers l'`@agent` ou `/prompt` correspondant.
+   - Si `INDEX.md` est vide, recommander `@analyst` pour créer un Brief initial (ou `/quick-fix` pour une petite correction isolée).
+4. **Vérifier l'État de l'Arbre de Travail :**
+   - Exécuter `git status --short` (lecture seule) et mentionner toute modification non validée dans le résumé.
+
+## Output Format
+Afficher **uniquement** ces quatre lignes à puces :
+- **Current State:** `&lt;résumé en 1 ligne de conventions, PROJECT_STATE.md, INDEX.md et git status&gt;`
+- **Next Action:** `&lt;/nom-invite ou @nom-agent exact&gt;`
+- **Target File:** `&lt;chemin relatif exact ou NONE&gt;`
+- **Why:** `&lt;justification déterministe en 1 phrase&gt;`</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="0.3">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="0.3" />
+              <span class="task-id-pill">Tâche 0.3</span>
+              <span>Créer le Fichier Conventions d'Or : <code>.aidd/PROJECT_CONVENTIONS.md</code></span>
+            </label>
+          </div>
+          <div class="target-list">
+            <span class="target-pill">Cible : .aidd/PROJECT_CONVENTIONS.md</span>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Contenu Exact — .aidd/PROJECT_CONVENTIONS.md</span></div>
+            <pre><code># Project Conventions
+
+&gt; Renseigné par `/repo-bootstrap` et affiné par `/retrospective`. Lu par tous les personas et analysé par `.aidd/guards/pre-commit.*`.
+
+## Tech Stack &amp; Runtime
+- **Primary Language(s):** `&lt;ex. TypeScript 5.x / Python 3.12 / Go 1.23 / NONE&gt;`
+- **Framework(s):** `&lt;ex. React, FastAPI, Spring Boot / NONE&gt;`
+- **Package Manager:** `&lt;ex. npm, pnpm, uv, cargo, maven / NONE&gt;`
+
+## Commands (Machine-Parsed by Quality Gates)
+- **Build Command:** `&lt;command or NONE&gt;`
+- **Lint Command:** `&lt;command or NONE&gt;`
+- **Typecheck Command:** `&lt;command or NONE&gt;`
+- **Test Command:** `&lt;command or NONE&gt;`
+
+## Repository &amp; Git Rules
+- **Default Branch:** `main`
+- **Branch Naming:** `feat/STORY-XXX-slug` ou `fix/STORY-XXX-slug`
+- **Commit Style:** Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `test:`)
+
+## Architecture, UX &amp; Security Guardrails
+- **Module Boundaries:** `&lt;frontières documentées ou NONE&gt;`
+- **UI &amp; Accessibility Baseline:** `&lt;design system / règles WCAG AA ou NONE&gt;`
+- **Security &amp; Secrets Rule:** Ne jamais coder en dur de secrets, jetons, clés, ni commiter de fichiers `.env`.</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification Tâche 0</span></div>
+            <pre><code>ls -1 .github/agents/developer.agent.md .github/prompts/gps-navigator.prompt.md .aidd/PROJECT_CONVENTIONS.md &amp;&amp; grep -qF -- '- **Test Command:** `' .aidd/PROJECT_CONVENTIONS.md &amp;&amp; echo "TASK_0_OK"</code></pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- SECTION 04: PHASE 1 -->
+      <section class="spec-section" id="sec-04">
+        <h2><span class="sec-num">04</span> Phase 1 — Structure de Base, Instructions Globales &amp; 4 Gabarits</h2>
+        <p class="sec-lead">Initialiser les tableaux d'état `.aidd/`, `.github/copilot-instructions.md` et les 4 gabarits d'étapes.</p>
+
+        <article class="task-card" data-task-id="1.1">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="1.1" />
+              <span class="task-id-pill">Tâche 1.1</span>
+              <span>Créer les Dossiers <code>.aidd/</code>, <code>INDEX.md</code> &amp; <code>PROJECT_STATE.md</code></span>
+            </label>
+          </div>
+          <div class="target-list">
+            <span class="target-pill">.aidd/INDEX.md</span>
+            <span class="target-pill">.aidd/PROJECT_STATE.md</span>
+            <span class="target-pill">.aidd/work/{briefs,specs,architecture,stories}/.gitkeep</span>
+          </div>
+          <p>Créer des fichiers <code>.gitkeep</code> vides dans <code>.aidd/work/briefs/</code>, <code>.aidd/work/specs/</code>, <code>.aidd/work/architecture/</code> et <code>.aidd/work/stories/</code>, puis écrire les deux tableaux d'état avec ces en-têtes exacts :</p>
+          <div class="grid-2">
+            <div class="code-panel">
+              <div class="code-head"><span>.aidd/INDEX.md</span></div>
+              <pre><code># .aidd/ Artifact Index
+
+| ID | Stage | Title | Path | Next Step |
+| :--- | :--- | :--- | :--- | :--- |</code></pre>
+            </div>
+            <div class="code-panel">
+              <div class="code-head"><span>.aidd/PROJECT_STATE.md</span></div>
+              <pre><code># Project Delivery State
+
+&gt; Allowed Status values: `BACKLOG` | `READY` | `IN_PROGRESS` | `BLOCKED` | `IN_REVIEW` | `DONE`
+
+| Story ID | Epic | Sprint | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |</code></pre>
+            </div>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>ls -1 .aidd/INDEX.md .aidd/PROJECT_STATE.md .aidd/work/briefs/.gitkeep .aidd/work/specs/.gitkeep .aidd/work/architecture/.gitkeep .aidd/work/stories/.gitkeep &amp;&amp; grep -q "| ID | Stage | Title | Path | Next Step |" .aidd/INDEX.md &amp;&amp; grep -q "| Story ID | Epic | Sprint | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged |" .aidd/PROJECT_STATE.md &amp;&amp; echo "TASK_1_1_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="1.2">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="1.2" />
+              <span class="task-id-pill">Tâche 1.2</span>
+              <span>Créer les Instructions Globales : <code>.github/copilot-instructions.md</code> (&le; 40 Lignes)</span>
+            </label>
+          </div>
+          <div class="target-list">
+            <span class="target-pill">.github/copilot-instructions.md</span>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Contenu Exact — .github/copilot-instructions.md</span></div>
+            <pre><code># AiDD (AI Driven Development) — Repository Instructions
+
+## 1. Toujours Lire l'État &amp; les Conventions d'Abord
+Avant de planifier ou d'éditer du code, lire :
+- `.aidd/PROJECT_CONVENTIONS.md` (pile, frontières, commandes build/lint/typecheck/test)
+- `.aidd/PROJECT_CONTEXT.md` (si présent : carte condensée du dépôt et pièges pour les LLM)
+- `.aidd/INDEX.md` et `.aidd/PROJECT_STATE.md` (étape active et statut des stories)
+En cas de doute sur la suite, invoquer `/gps-navigator`. Si les conventions sont vides, exécuter `/repo-bootstrap` puis `/doc-project`.
+
+## 2. Voies de Livraison
+- **Voie Standard :** `/brainstorm` (idéation optionnelle) &rarr; `@analyst` (Brief) &rarr; `@pm` (Spec) &rarr; `@architect` (Architecture) &rarr; `@pm` (Story Packets) &rarr; `@developer` (Implémentation) &rarr; `/two-hat-review` (`@qa-reviewer`). Solliciter `@ux-designer` pour les états UI/parcours.
+- **Voie Rapide :** Utiliser `/quick-fix` pour les corrections isolées sans rupture touchant &lt;= 3 fichiers (Two-Hat Review toujours requise).
+
+## 3. Portes Qualité Non Négociables
+- **Séparation Two-Hat :** `@developer` NE DOIT JAMAIS définir `status: DONE` ni écrire `- **Verdict:** APPROVED`. Seul `@qa-reviewer` (ou `/two-hat-review`) peut marquer `DONE` après audit de `git diff` et ré-exécution des tests.
+- **Clôture par Preuves :** Toute story passant à `IN_REVIEW` doit contenir la sortie terminal brute sous `## Execution Evidence`.
+- **État Zéro-Runtime :** Conserver tout l'état dans `.aidd/` en Markdown simple ; ne jamais ajouter de serveurs, démons ou CLI externes.</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/copilot-instructions.md &amp;&amp; test "$(wc -l &lt; .github/copilot-instructions.md)" -le 40 &amp;&amp; grep -q "PROJECT_CONVENTIONS.md" .github/copilot-instructions.md &amp;&amp; grep -q "Two-Hat" .github/copilot-instructions.md &amp;&amp; echo "TASK_1_2_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="1.3">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="1.3" />
+              <span class="task-id-pill">Tâche 1.3</span>
+              <span>Créer les 4 Gabarits Standardisés dans <code>.aidd/templates/</code></span>
+            </label>
+          </div>
+          <div class="target-list">
+            <span class="target-pill">.aidd/templates/brief.md</span>
+            <span class="target-pill">.aidd/templates/spec.md</span>
+            <span class="target-pill">.aidd/templates/architecture.md</span>
+            <span class="target-pill">.aidd/templates/story-packet.md</span>
+          </div>
+
+          <div class="grid-2">
+            <div class="code-panel">
+              <div class="code-head"><span>1. .aidd/templates/brief.md</span></div>
+              <pre><code>---
+id: BRIEF-XX
+title: &lt;Titre Concis du Problème&gt;
+status: DRAFT
+owner: analyst
+next_step: pm:spec
+---
+
+# BRIEF-XX: &lt;Titre Concis du Problème&gt;
+
+## Context Capsule (Handoff Summary)
+- **Problème :** &lt;1-2 phrases&gt;
+- **Résultat Cible :** &lt;résultat métier/utilisateur mesurable&gt;
+- **Contraintes Découvertes :** &lt;contraintes existantes du dépôt&gt;
+
+## Problem Statement
+
+## Stakeholders &amp; User Needs
+
+## Scope Boundaries (In / Out)
+- **Dans le périmètre :**
+- **Hors périmètre :**
+
+## Open Questions &amp; Risks</code></pre>
+            </div>
+
+            <div class="code-panel">
+              <div class="code-head"><span>2. .aidd/templates/spec.md</span></div>
+              <pre><code>---
+id: SPEC-XX
+title: &lt;Titre de la Spécification Fonctionnelle&gt;
+upstream: BRIEF-XX
+status: DRAFT
+owner: pm
+next_step: architect:design
+---
+
+# SPEC-XX: &lt;Titre de la Spécification Fonctionnelle&gt;
+
+## Context Capsule (Handoff Summary)
+- **Pourquoi :** &lt;résumé issu de BRIEF-XX&gt;
+- **Capacités Clés :** &lt;résumé à puces&gt;
+- **Non-Objectifs :** &lt;exclusions explicites&gt;
+
+## Functional Requirements
+
+## UX &amp; Accessibility States
+- **États Vide / Chargement / Erreur :**
+- **Notes Clavier &amp; Lecteur d'écran :**
+
+## Edge Cases &amp; Failure Modes
+
+## Acceptance Criteria
+- [ ] **AC-1:** &lt;critère testable&gt;</code></pre>
+            </div>
+
+            <div class="code-panel">
+              <div class="code-head"><span>3. .aidd/templates/architecture.md</span></div>
+              <pre><code>---
+id: ARCH-XX
+title: &lt;Titre de l'Architecture Technique&gt;
+upstream: SPEC-XX
+status: DRAFT
+owner: architect
+next_step: pm:story-packet
+---
+
+# ARCH-XX: &lt;Titre de l'Architecture Technique&gt;
+
+## Context Capsule (Handoff Summary)
+- **Approche :** &lt;approche technique en 1 paragraphe&gt;
+- **Modules Modifiables :** &lt;chemins autorisés&gt;
+- **Modules Interdits :** &lt;chemins hors limites&gt;
+
+## System Boundaries &amp; Interfaces
+
+## Data Contracts &amp; Security Posture
+
+## Key Decisions (ADR Summary)
+
+## Constraints for Story Packets
+- **Chemins Autorisés :**
+- **Changements Interdits :**
+- **Couverture de Tests Requise :**</code></pre>
+            </div>
+
+            <div class="code-panel">
+              <div class="code-head"><span>4. .aidd/templates/story-packet.md</span></div>
+              <pre><code>---
+id: STORY-XXX
+title: &lt;Titre du Story Packet Autonome&gt;
+upstream: SPEC-XX, ARCH-XX
+epic: EPIC-XX
+sprint: SPRINT-XX
+lane: standard
+status: READY
+owner: developer
+reviewer: qa-reviewer
+next_step: developer:implement
+---
+
+# STORY-XXX: &lt;Titre du Story Packet Autonome&gt;
+
+## Context Capsule (Handoff Summary)
+- **Objectif :** &lt;ce que livre cette tranche&gt;
+- **Règle Technique Clé :** &lt;repris en ligne depuis ARCH-XX&gt;
+
+## Acceptance Criteria
+- [ ] **AC-1:** &lt;comportement précis et vérifiable&gt;
+- [ ] **AC-2:** &lt;cas limite / test négatif&gt;
+
+## Architectural &amp; UX Constraints (Inline)
+- **Fichiers / Modules Autorisés :** &lt;chemins explicites&gt;
+- **Hors Périmètre :** &lt;ne pas modifier&gt;
+- **États UX &amp; A11y :** &lt;règles vide/chargement/erreur/a11y ou N/A&gt;
+
+## Execution Evidence
+```text
+PENDING_EVIDENCE
+```
+
+## Review Verdict
+- **Reviewer:** `qa-reviewer`
+- **Verdict:** PENDING
+- **Diff &amp; Verification Notes:** _En attente de la revue indépendante Two-Hat._</code></pre>
+            </div>
+          </div>
+
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>ls -1 .aidd/templates/brief.md .aidd/templates/spec.md .aidd/templates/architecture.md .aidd/templates/story-packet.md &amp;&amp; grep -q "^## Execution Evidence$" .aidd/templates/story-packet.md &amp;&amp; grep -q "^- \*\*Verdict:\*\* PENDING$" .aidd/templates/story-packet.md &amp;&amp; (! grep -q "APPROVED" .aidd/templates/story-packet.md) &amp;&amp; echo "TASK_1_3_OK"</code></pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- SECTION 05: PHASE 2 -->
+      <section class="spec-section" id="sec-05">
+        <h2><span class="sec-num">05</span> Phase 2 — Cloner les 5 Autres Agents Personnalisés (<code>.github/agents/*.agent.md</code>)</h2>
+        <p class="sec-lead">
+          Chaque fichier agent DOIT cloner la Tâche 0.1 (<code>developer.agent.md</code>) : frontmatter YAML avec <code>name</code> et <code>description</code>,
+          plus exactement les 5 titres H2 : <code>## Role &amp; Ownership</code>, <code>## Inputs</code>, <code>## Outputs</code>, <code>## Forbidden Actions</code>, <code>## Execution Checklist</code>.
+        </p>
+
+        <article class="task-card" data-task-id="2.1">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="2.1" />
+              <span class="task-id-pill">Tâche 2.1</span>
+              <span>Créer l'Agent Analyst : <code>.github/agents/analyst.agent.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/agents/analyst.agent.md</span></div>
+          <ul>
+            <li><strong><code>name: analyst</code></strong> — Découverte, cadrage du problème, résultats parties prenantes et contraintes du dépôt existant.</li>
+            <li><strong>Inputs :</strong> Demande utilisateur, <code>.aidd/PROJECT_CONVENTIONS.md</code>, <code>.aidd/templates/brief.md</code>, code/docs existants.</li>
+            <li><strong>Outputs :</strong> <code>.aidd/work/briefs/BRIEF-XX-&lt;slug&gt;.md</code> avec <code>next_step: pm:spec</code> + ligne ajoutée dans <code>.aidd/INDEX.md</code>.</li>
+            <li><strong>Forbidden Actions :</strong> Ne jamais prescrire d'architecture technique ou d'implémentation ; ne jamais éditer de code source ou de test ; ne jamais marquer de story <code>DONE</code>.</li>
+            <li><strong>Execution Checklist :</strong> Lire conventions &amp; gabarit &rarr; inspecter le contexte du dépôt &rarr; lever les ambiguïtés &rarr; rédiger le Brief avec Context Capsule &rarr; enregistrer dans <code>INDEX.md</code> &rarr; recommander <code>@pm</code>.</li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/agents/analyst.agent.md &amp;&amp; grep -q "^name: analyst$" .github/agents/analyst.agent.md &amp;&amp; for h in "## Role &amp; Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/analyst.agent.md || exit 1; done &amp;&amp; echo "TASK_2_1_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="2.2">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="2.2" />
+              <span class="task-id-pill">Tâche 2.2</span>
+              <span>Créer l'Agent PM (Spec + Découpage Stories) : <code>.github/agents/pm.agent.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/agents/pm.agent.md</span></div>
+          <ul>
+            <li><strong><code>name: pm</code></strong> — Possède deux étapes explicites du pipeline :
+              <ol>
+                <li><strong>Mode A (Spécification) :</strong> Lit <code>BRIEF-XX</code> et rédige <code>.aidd/work/specs/SPEC-XX-&lt;slug&gt;.md</code> (<code>next_step: architect:design</code>) avec des <code>AC-*</code> testables et les cas limites, en mettant à jour <code>INDEX.md</code>.</li>
+                <li><strong>Mode B (Découpage en Story Packets) :</strong> Quand <code>ARCH-XX</code> a <code>next_step: pm:story-packet</code>, découpe <code>SPEC-XX</code> + <code>ARCH-XX</code> en petits paquets autonomes <code>.aidd/work/stories/STORY-XXX-&lt;slug&gt;.md</code> via <code>story-packet.md</code> (avec <code>epic:</code> et <code>sprint:</code>). Intègre en ligne tous les <code>AC-*</code>, frontières architecturales et états UX pour que <code>developer</code> n'ait besoin d'aucun document amont. Enregistre chaque story dans <code>PROJECT_STATE.md</code> (<code>Status = READY</code> ou <code>BACKLOG</code>, <code>Evidence Logged = NO</code>), <code>INDEX.md</code> (<code>Next Step = developer:implement</code>), synchronise <code>.aidd/board.html</code>, et passe la ligne <code>ARCH-XX</code> à <code>Next Step = DONE</code> dans <code>INDEX.md</code>.</li>
+              </ol>
+            </li>
+            <li><strong>Forbidden Actions :</strong> Ne jamais contourner les frontières architecturales de <code>ARCH-XX</code> ; ne jamais écrire de code applicatif ; ne jamais marquer de story <code>DONE</code>.</li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/agents/pm.agent.md &amp;&amp; grep -q "^name: pm$" .github/agents/pm.agent.md &amp;&amp; grep -q "PROJECT_STATE.md" .github/agents/pm.agent.md &amp;&amp; for h in "## Role &amp; Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/pm.agent.md || exit 1; done &amp;&amp; echo "TASK_2_2_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="2.3">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="2.3" />
+              <span class="task-id-pill">Tâche 2.3</span>
+              <span>Créer l'Agent Architect : <code>.github/agents/architect.agent.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/agents/architect.agent.md</span></div>
+          <ul>
+            <li><strong><code>name: architect</code></strong> — Frontières système, interfaces de modules, contrats de données/API, posture de sécurité, compromis ADR et contraintes des Story Packets.</li>
+            <li><strong>Inputs :</strong> <code>.aidd/PROJECT_CONVENTIONS.md</code>, <code>.aidd/work/specs/SPEC-XX-*.md</code>, <code>.aidd/templates/architecture.md</code>, structure du code existant.</li>
+            <li><strong>Outputs :</strong> <code>.aidd/work/architecture/ARCH-XX-&lt;slug&gt;.md</code> avec <code>## Constraints for Story Packets</code> renseigné et <code>next_step: pm:story-packet</code>, plus mise à jour de <code>.aidd/INDEX.md</code> (passage de <code>SPEC-XX</code> à <code>Next Step = DONE</code> et ajout de <code>ARCH-XX</code>).</li>
+            <li><strong>Forbidden Actions :</strong> Ne jamais écrire de code d'implémentation métier durant la conception ; ne jamais affaiblir les règles de sécurité de <code>PROJECT_CONVENTIONS.md</code>.</li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/agents/architect.agent.md &amp;&amp; grep -q "^name: architect$" .github/agents/architect.agent.md &amp;&amp; for h in "## Role &amp; Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/architect.agent.md || exit 1; done &amp;&amp; echo "TASK_2_3_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="2.4">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="2.4" />
+              <span class="task-id-pill">Tâche 2.4</span>
+              <span>Créer l'Agent UX Designer : <code>.github/agents/ux-designer.agent.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/agents/ux-designer.agent.md</span></div>
+          <ul>
+            <li><strong><code>name: ux-designer</code></strong> — Parcours utilisateur, détails d'interaction, états UI vide/chargement/erreur/limite, navigation clavier et accessibilité (WCAG AA).</li>
+            <li><strong>Inputs :</strong> <code>.aidd/PROJECT_CONVENTIONS.md</code> (référentiel UI/Design System), fichiers <code>SPEC-XX</code> ou <code>STORY-XXX</code> cibles.</li>
+            <li><strong>Outputs :</strong> Section <code>## UX &amp; Accessibility States</code> concrète dans <code>SPEC-XX</code> et puces <code>UX &amp; A11y States</code> en ligne dans les paquets <code>STORY-XXX</code>.</li>
+            <li><strong>Forbidden Actions :</strong> Ne jamais inventer une bibliothèque de composants concurrente violant <code>PROJECT_CONVENTIONS.md</code> ; ne jamais écrire de logique backend ni marquer de story <code>DONE</code>.</li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/agents/ux-designer.agent.md &amp;&amp; grep -q "^name: ux-designer$" .github/agents/ux-designer.agent.md &amp;&amp; for h in "## Role &amp; Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/ux-designer.agent.md || exit 1; done &amp;&amp; echo "TASK_2_4_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="2.5">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="2.5" />
+              <span class="task-id-pill">Tâche 2.5</span>
+              <span>Créer l'Agent QA Reviewer : <code>.github/agents/qa-reviewer.agent.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/agents/qa-reviewer.agent.md</span></div>
+          <ul>
+            <li><strong><code>name: qa-reviewer</code></strong> — Vérificateur contradictoire indépendant appliquant la Porte Two-Hat.</li>
+            <li><strong>Inputs :</strong> <code>.aidd/PROJECT_CONVENTIONS.md</code>, <code>.aidd/PROJECT_STATE.md</code>, Story Packet <code>IN_REVIEW</code> cible, <code>git diff</code>.</li>
+            <li><strong>Outputs :</strong>
+              <ul>
+                <li>Met à jour <code>## Review Verdict</code> dans le Story Packet : définit la ligne exacte <code>- **Verdict:** APPROVED</code> ou <code>- **Verdict:** CHANGES_REQUESTED</code> avec les notes d'audit du diff et des tests.</li>
+                <li>Si <code>APPROVED</code> : coche les <code>[x] AC-*</code> vérifiés, passe le frontmatter du Story Packet à <code>status: DONE</code> et <code>next_step: DONE</code>, met à jour <code>PROJECT_STATE.md</code> (<code>Status = DONE</code>), <code>INDEX.md</code> (<code>Next Step = DONE</code>) et synchronise <code>.aidd/board.html</code>.</li>
+                <li>Si <code>CHANGES_REQUESTED</code> : passe le Story Packet à <code>status: IN_PROGRESS</code> et <code>next_step: developer:fix</code>, met à jour <code>PROJECT_STATE.md</code> (<code>Status = IN_PROGRESS</code>), <code>INDEX.md</code> (<code>Next Step = developer:fix</code>) et synchronise <code>.aidd/board.html</code>.</li>
+              </ul>
+            </li>
+            <li><strong>Forbidden Actions :</strong> <strong>NE JAMAIS</strong> éditer le code source applicatif ou les fichiers de test ; <strong>NE JAMAIS</strong> approuver une story dont <code>## Execution Evidence</code> est absent, vide ou contient <code>PENDING_EVIDENCE</code> ; <strong>NE JAMAIS</strong> approuver si la ré-exécution des tests/lint échoue ou si un <code>AC-*</code> n'est pas satisfait dans <code>git diff</code>.</li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/agents/qa-reviewer.agent.md &amp;&amp; grep -q "^name: qa-reviewer$" .github/agents/qa-reviewer.agent.md &amp;&amp; grep -q "APPROVED" .github/agents/qa-reviewer.agent.md &amp;&amp; for h in "## Role &amp; Ownership" "## Inputs" "## Outputs" "## Forbidden Actions" "## Execution Checklist"; do grep -q "^$h$" .github/agents/qa-reviewer.agent.md || exit 1; done &amp;&amp; echo "TASK_2_5_OK"</code></pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- SECTION 06: PHASE 3 -->
+      <section class="spec-section" id="sec-06">
+        <h2><span class="sec-num">06</span> Phase 3 — Cloner les 5 Autres Invites Slash &amp; Miroir de Compétence</h2>
+        <p class="sec-lead">
+          Chaque fichier <code>.prompt.md</code> DOIT cloner la Tâche 0.2 (<code>gps-navigator.prompt.md</code>) : frontmatter YAML (<code>agent: 'agent'</code>, <code>mode: agent</code>, <code>description</code>)
+          et exactement les 4 titres H2 : <code>## Purpose</code>, <code>## Inputs</code>, <code>## Deterministic Steps</code>, <code>## Output Format</code>.
+        </p>
+
+        <article class="task-card" data-task-id="3.1">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.1" />
+              <span class="task-id-pill">Tâche 3.1</span>
+              <span>Créer l'Invite Repo Bootstrap : <code>.github/prompts/repo-bootstrap.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/repo-bootstrap.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Inspecter les manifestes de paquets/build (<code>package.json</code>, <code>pyproject.toml</code>, <code>go.mod</code>, <code>Cargo.toml</code>, <code>pom.xml</code>, <code>build.gradle</code>, <code>Makefile</code>), workflows CI (<code>.github/workflows/</code>) et configs linter/typecheck.
+              2. Renseigner <code>.aidd/PROJECT_CONVENTIONS.md</code> en conservant les lignes exactes analysées par machine, notamment <code>- **Test Command:** `&lt;commande détectée ou NONE&gt;`</code> (remplacer <code>&lt;command or NONE&gt;</code> par la vraie commande ou <code>NONE</code> littéral s'il n'y a pas de tests).
+              3. S'assurer que <code>.aidd/INDEX.md</code> et <code>.aidd/PROJECT_STATE.md</code> existent avec des en-têtes valides sans écraser les lignes existantes.
+              4. Afficher la pile détectée, les commandes écrites et recommander <code>/gps-navigator</code>.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/repo-bootstrap.prompt.md &amp;&amp; grep -q "^mode: agent$" .github/prompts/repo-bootstrap.prompt.md &amp;&amp; grep -q "Test Command:" .github/prompts/repo-bootstrap.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/repo-bootstrap.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_1_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.2">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.2" />
+              <span class="task-id-pill">Tâche 3.2</span>
+              <span>Créer l'Invite Voie Rapide Quick-Fix : <code>.github/prompts/quick-fix.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/quick-fix.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Contrôle du rayon d'impact : confirmer que la modification touche &le; 3 fichiers sans rupture d'API publique ni de schéma. Sinon, abandonner et recommander <code>@analyst</code> &rarr; <code>@pm</code>.
+              2. Créer <code>.aidd/work/stories/STORY-XXX-&lt;slug&gt;.md</code> depuis <code>.aidd/templates/story-packet.md</code> avec <code>lane: quick-fix</code>, des <code>AC-*</code> concis et les fichiers autorisés explicites. Enregistrer la ligne dans <code>PROJECT_STATE.md</code> et <code>INDEX.md</code>.
+              3. Agir en tant que <code>@developer</code> : implémenter le correctif + test unitaire, exécuter les commandes de <code>PROJECT_CONVENTIONS.md</code> et coller la sortie brute sous <code>## Execution Evidence</code> (en retirant <code>PENDING_EVIDENCE</code>).
+              4. Définir <code>status: IN_REVIEW</code>, <code>next_step: skill:two-hat-review</code>, mettre à jour <code>PROJECT_STATE.md</code> (<code>Epic = QUICK-FIX</code>, <code>Sprint = HOTFIX</code>, <code>Status = IN_REVIEW</code>, <code>Evidence Logged = YES</code>), synchroniser <code>.aidd/board.html</code> et s'arrêter — ne jamais s'auto-approuver <code>DONE</code>.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/quick-fix.prompt.md &amp;&amp; grep -q "lane: quick-fix" .github/prompts/quick-fix.prompt.md &amp;&amp; grep -q "two-hat-review" .github/prompts/quick-fix.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/quick-fix.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_2_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.3">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.3" />
+              <span class="task-id-pill">Tâche 3.3</span>
+              <span>Créer l'Invite Two-Hat Review : <code>.github/prompts/two-hat-review.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/two-hat-review.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Basculer strictement sur les règles de lecture/audit de <code>@qa-reviewer</code> (interdiction d'éditer le code applicatif ou de test).
+              2. Sélectionner le Story Packet <code>IN_REVIEW</code> cible depuis <code>.aidd/PROJECT_STATE.md</code> (ou l'argument utilisateur).
+              3. Vérifier que <code>## Execution Evidence</code> est renseigné et ne contient pas <code>PENDING_EVIDENCE</code>.
+              4. Inspecter <code>git diff</code> ligne par ligne face à chaque <code>AC-*</code> et <code>## Architectural &amp; UX Constraints (Inline)</code>.
+              5. Ré-exécuter indépendamment build, lint, typecheck et <code>Test Command</code> de <code>.aidd/PROJECT_CONVENTIONS.md</code>.
+              6. Mettre à jour <code>## Review Verdict</code> avec <code>- **Verdict:** APPROVED</code> (passant le Story Packet et <code>PROJECT_STATE.md</code> à <code>DONE</code>) OU <code>- **Verdict:** CHANGES_REQUESTED</code> (repassant à <code>IN_PROGRESS</code> avec les défauts actionnables).
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/two-hat-review.prompt.md &amp;&amp; grep -q -- "- \*\*Verdict:\*\* APPROVED" .github/prompts/two-hat-review.prompt.md &amp;&amp; grep -q "CHANGES_REQUESTED" .github/prompts/two-hat-review.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/two-hat-review.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_3_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.4">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.4" />
+              <span class="task-id-pill">Tâche 3.4</span>
+              <span>Créer l'Invite Rétrospective : <code>.github/prompts/retrospective.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/retrospective.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Inspecter les Story Packets terminés dans <code>.aidd/work/stories/</code>, les notes de revue (en particulier les cycles <code>CHANGES_REQUESTED</code>) et <code>git log -n 20 --oneline</code>.
+              2. Extraire les tendances concrètes : ce qui a fonctionné, ce qui a causé des reprises et les règles manquantes.
+              3. Rédiger des ajouts minimaux à fort signal pour <code>.aidd/PROJECT_CONVENTIONS.md</code> (ou les listes de contrôle des agents) et ne les appliquer qu'après confirmation explicite de l'utilisateur.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/retrospective.prompt.md &amp;&amp; grep -q "PROJECT_CONVENTIONS.md" .github/prompts/retrospective.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/retrospective.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_4_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.5">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.5" />
+              <span class="task-id-pill">Tâche 3.5</span>
+              <span>Créer l'Invite Table Ronde : <code>.github/prompts/roundtable-panel.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/roundtable-panel.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire le sujet de décision, <code>.aidd/PROJECT_CONVENTIONS.md</code> et tout artefact Brief/Spec/Arch/Story référencé.
+              2. Sélectionner 3 à 4 personas pertinents parmi <code>.github/agents/*.agent.md</code> (<code>analyst</code>, <code>pm</code>, <code>architect</code>, <code>ux-designer</code>, <code>qa-reviewer</code>).
+              3. Faire critiquer les options par chaque persona strictement depuis son périmètre de responsabilité (en exposant angles morts et compromis).
+              4. Produire une synthèse structurée : <strong>Options Evaluated</strong>, <strong>Persona Critiques</strong>, <strong>Recommended Decision</strong>, <strong>Mitigations</strong> et <strong>Next Step</strong> (jeton <code>next_step:</code>).
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/roundtable-panel.prompt.md &amp;&amp; grep -q "Recommended Decision" .github/prompts/roundtable-panel.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/roundtable-panel.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_5_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.6">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.6" />
+              <span class="task-id-pill">Tâche 3.6</span>
+              <span>Créer le Miroir Copilot Agent Skill : <code>.github/skills/gps-navigator/SKILL.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/skills/gps-navigator/SKILL.md</span></div>
+          <p>Refléter exactement les étapes de routage déterministes et le format de sortie en 4 puces de <code>.github/prompts/gps-navigator.prompt.md</code> avec le frontmatter Copilot Skill :</p>
+          <div class="code-panel">
+            <div class="code-head"><span>Frontmatter Requis — .github/skills/gps-navigator/SKILL.md</span></div>
+            <pre><code>---
+name: gps-navigator
+description: Routeur de flux en lecture seule inspectant .aidd/, le frontmatter des artefacts et git status pour recommander une unique prochaine étape.
+---</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/skills/gps-navigator/SKILL.md &amp;&amp; grep -q "^name: gps-navigator$" .github/skills/gps-navigator/SKILL.md &amp;&amp; grep -q "PROJECT_STATE.md" .github/skills/gps-navigator/SKILL.md &amp;&amp; echo "TASK_3_6_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.7">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.7" />
+              <span class="task-id-pill">Tâche 3.7</span>
+              <span>Créer l'Invite de Synchronisation Kanban : <code>.github/prompts/board-sync.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/board-sync.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire `.aidd/PROJECT_STATE.md` en entier et les en-têtes/critères `AC-*` de `.aidd/work/stories/*.md` (pour calculer le nombre de tâches cochées `[x]` / `[ ]`).
+              2. Remplacer le contenu du bloc `&lt;script id="aidd-state-snapshot" type="text/markdown"&gt;...&lt;/script&gt;` dans `.aidd/board.html` par le contenu exact de `.aidd/PROJECT_STATE.md` (et mettre à jour l'horodatage `data-synced-at`).
+              3. Ne modifier aucune règle de statut ni aucun verdict `DONE` ; afficher le résumé des compteurs par colonne (`BACKLOG`, `READY`, `IN_PROGRESS`, `BLOCKED`, `IN_REVIEW`, `DONE`) et indiquer d'ouvrir `.aidd/board.html`.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/board-sync.prompt.md &amp;&amp; grep -q "aidd-state-snapshot" .github/prompts/board-sync.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/board-sync.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_7_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.8">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.8" />
+              <span class="task-id-pill">Tâche 3.8</span>
+              <span>Créer l'Invite de Documentation Projet (LLM + Dev) : <code>.github/prompts/doc-project.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/doc-project.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire `.aidd/PROJECT_CONVENTIONS.md`, les manifestes racine, la structure des dossiers, les points d'entrée, les routes/API principales et les fichiers de tests.
+              2. Générer ou mettre à jour `.aidd/PROJECT_CONTEXT.md` (<strong>optimisé pour les LLM</strong>, &le; 150 lignes) contenant : carte concise des dossiers, points d'entrée exacts, flux de données, invariants techniques, pièges connus et commandes critiques.
+              3. Générer ou mettre à jour `docs/DEVELOPER_GUIDE.md` (<strong>optimisé pour un développeur humain</strong>) contenant : vue d'ensemble de l'architecture (avec diagramme ASCII ou Mermaid), prérequis &amp; démarrage local pas-à-pas, conventions du dépôt, guide des tests et dépannage courant.
+              4. Enregistrer ou mettre à jour la ligne `DOC-01` dans `.aidd/INDEX.md` et recommander `/gps-navigator` (ou `@analyst`) pour la suite.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/doc-project.prompt.md &amp;&amp; grep -q "PROJECT_CONTEXT.md" .github/prompts/doc-project.prompt.md &amp;&amp; grep -q "DEVELOPER_GUIDE.md" .github/prompts/doc-project.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/doc-project.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_8_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.9">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.9" />
+              <span class="task-id-pill">Tâche 3.9</span>
+              <span>Créer l'Invite de Brainstorming &amp; Idéation : <code>.github/prompts/brainstorm.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/brainstorm.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire le sujet/objectif de l'utilisateur et les options choisies (ou proposer 3–4 techniques adaptées si aucune n'est fournie, avec `.aidd/brainstorm-selector.html`).
+              2. Appliquer le mode de facilitation demandé : <code>Facilitator</code> (questions guidées tour par tour), <code>Creative Partner</code> (rebonds rapides « Oui, et... ») ou <code>Ideate for me</code> (génération autonome complète puis synthèse).
+              3. Exécuter les techniques sélectionnées (ex. <em>SCAMPER</em>, <em>Six Thinking Hats</em>, <em>First Principles</em>, <em>Reverse Brainstorming</em>, <em>Five Whys</em>, <em>How Might We</em>, <em>Crazy 8s</em>, <em>Assumption Reversal</em>, <em>Role Playing</em>, <em>Yes And Building</em>, <em>Provocation</em>, <em>Morphological Analysis</em>) en gardant la divergence avant la convergence.
+              4. Regrouper les idées par thèmes, faire ressortir les 3 pistes les plus prometteuses et proposer de consigner le résultat dans `.aidd/work/briefs/IDEA-XX-&lt;slug&gt;.md` (`next_step: analyst:brief`) pour passer à `@analyst`.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/brainstorm.prompt.md &amp;&amp; grep -q "Facilitator" .github/prompts/brainstorm.prompt.md &amp;&amp; grep -q "SCAMPER" .github/prompts/brainstorm.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/brainstorm.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_9_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.10">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.10" />
+              <span class="task-id-pill">Tâche 3.10</span>
+              <span>Créer l'Invite de Réalignement en Cours de Sprint : <code>.github/prompts/correct-course.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/correct-course.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire le changement demandé par l'utilisateur, `.aidd/PROJECT_STATE.md`, `.aidd/INDEX.md` et les artefacts `BRIEF-XX` / `SPEC-XX` / `ARCH-XX` / `STORY-XXX` impactés.
+              2. Évaluer la matrice d'impact (périmètre fonctionnel, frontières d'architecture, UX et stories en cours `IN_PROGRESS` / `READY`).
+              3. Produire une <strong>Proposition de Changement de Sprint</strong> listant les actions exactes par story (`KEEP` | `UPDATE_AC` | `SPLIT` | `BLOCK` | `DROP`) et le nouvel ordonnancement de `Sprint`.
+              4. Appliquer les mises à jour aux artefacts, à `PROJECT_STATE.md` et à `.aidd/board.html` uniquement après confirmation explicite de l'utilisateur.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/correct-course.prompt.md &amp;&amp; grep -q "PROJECT_STATE.md" .github/prompts/correct-course.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/correct-course.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_10_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.11">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.11" />
+              <span class="task-id-pill">Tâche 3.11</span>
+              <span>Créer l'Invite de Critique Approfondie : <code>.github/prompts/deep-critique.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/deep-critique.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire l'artefact cible (`BRIEF-XX`, `SPEC-XX`, `ARCH-XX` ou `STORY-XXX`) et `.aidd/PROJECT_CONVENTIONS.md`.
+              2. Appliquer le prisme choisi (ou recommander le plus adapté) : <code>Pre-Mortem</code> (comment cela échoue en production dans 6 mois), <code>Red Team</code> (failles sécurité/abus/contournement), <code>Socratic</code> (questions révélant les angles morts) ou <code>First Principles</code> (suppression des hypothèses gratuites).
+              3. Lister les faiblesses classées par sévérité avec des correctifs précis sur l'artefact cible, et n'éditer le fichier qu'après validation utilisateur.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/deep-critique.prompt.md &amp;&amp; grep -q "Pre-Mortem" .github/prompts/deep-critique.prompt.md &amp;&amp; grep -q "Red Team" .github/prompts/deep-critique.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/deep-critique.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_11_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.12">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.12" />
+              <span class="task-id-pill">Tâche 3.12</span>
+              <span>Créer l'Invite de Revue Guidée Humaine : <code>.github/prompts/walkthrough.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/walkthrough.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Inspecter `git diff` (ou le Story Packet `STORY-XXX` cible) en lecture seule.
+              2. Produire un guide structuré pour un relecteur humain : <strong>Pourquoi ce changement</strong>, <strong>Carte des fichiers modifiés</strong>, <strong>Points critiques à vérifier ligne par ligne</strong> (logique métier, sécurité, cas limites) et <strong>Plan de test manuel rapide</strong>.
+              3. Ne modifier aucun fichier et rappeler `/two-hat-review` si la story est prête pour la validation formelle.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/walkthrough.prompt.md &amp;&amp; grep -q "git diff" .github/prompts/walkthrough.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/walkthrough.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_12_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.13">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.13" />
+              <span class="task-id-pill">Tâche 3.13</span>
+              <span>Créer l'Invite Forge d'Idée &amp; PR/FAQ : <code>.github/prompts/forge-idea.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/forge-idea.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Mettre à l'épreuve une idée brute par un questionnement incisif multi-angles (valeur utilisateur réelle, faisabilité, modèle d'adoption, pire objection client).
+              2. Si l'utilisateur choisit le format <code>PR/FAQ</code> (Working Backwards), rédiger d'abord le communiqué de presse du produit fini puis la FAQ client et parties prenantes.
+              3. Produire un verdict clair (<code>GO</code> | <code>PIVOT</code> | <code>DROP</code>) et, en cas de <code>GO</code>, créer `.aidd/work/briefs/IDEA-XX-&lt;slug&gt;.md` (`next_step: analyst:brief`).
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/forge-idea.prompt.md &amp;&amp; grep -q "PR/FAQ" .github/prompts/forge-idea.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/forge-idea.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_13_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.14">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.14" />
+              <span class="task-id-pill">Tâche 3.14</span>
+              <span>Créer l'Invite Studio Créatif : <code>.github/prompts/creative-studio.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/creative-studio.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Identifier l'atelier demandé parmi 4 modes : <code>Design Thinking</code> (empathie, définition, prototypage rapide), <code>Innovation Strategy</code> (rupture marché &amp; proposition de valeur), <code>Storytelling</code> (arc narratif produit) ou <code>Presentation Outline</code> (structure de pitch/slides).
+              2. Conduire l'atelier en étapes courtes et interactives avec l'utilisateur.
+              3. Synthétiser un livrable structuré sous `.aidd/work/briefs/` (avec `next_step: analyst:brief`) prêt pour la phase de spécification.
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/creative-studio.prompt.md &amp;&amp; grep -q "Design Thinking" .github/prompts/creative-studio.prompt.md &amp;&amp; grep -q "Storytelling" .github/prompts/creative-studio.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/creative-studio.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_14_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="3.15">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="3.15" />
+              <span class="task-id-pill">Tâche 3.15</span>
+              <span>Créer l'Invite d'Audit Qualité &amp; Traçabilité : <code>.github/prompts/test-audit.prompt.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.github/prompts/test-audit.prompt.md</span></div>
+          <ul>
+            <li><strong>Deterministic Steps :</strong>
+              1. Lire `.aidd/PROJECT_CONVENTIONS.md`, la ou les specs/stories cibles (`SPEC-XX`, `STORY-XXX`) et les fichiers de tests associés.
+              2. Construire une <strong>Matrice de Traçabilité</strong> (`AC-*` &harr; fichier/nom de test &harr; statut `COVERED` / `GAP`) et identifier tout critère sans test automatisé.
+              3. Réaliser un <strong>Audit NFR</strong> (Exigences Non Fonctionnelles) sur 4 axes : <strong>Sécurité</strong> (entrées, authz, secrets), <strong>Performance</strong> (requêtes N+1, boucles bornées), <strong>Fiabilité</strong> (gestion d'erreurs, timeouts, idempotence) et <strong>Maintenabilité</strong>.
+              4. Produire un verdict de porte qualité (<code>PASS</code> | <code>CONCERNS</code> | <code>FAIL</code>) avec les lacunes exactes à corriger avant `/two-hat-review` (sans éditer le code applicatif).
+            </li>
+          </ul>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .github/prompts/test-audit.prompt.md &amp;&amp; grep -q "Matrice de Traçabilité" .github/prompts/test-audit.prompt.md &amp;&amp; grep -q "Audit NFR" .github/prompts/test-audit.prompt.md &amp;&amp; for h in "## Purpose" "## Inputs" "## Deterministic Steps" "## Output Format"; do grep -q "^$h$" .github/prompts/test-audit.prompt.md || exit 1; done &amp;&amp; echo "TASK_3_15_OK"</code></pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- SECTION 07: PHASE 4 -->
+      <section class="spec-section" id="sec-07">
+        <h2><span class="sec-num">07</span> Phase 4 — Garde-fous Pré-Commit Multi-OS &amp; Documentation d'Installation</h2>
+        <p class="sec-lead"><code>pre-commit.sh</code> (bash POSIX) et <code>pre-commit.ps1</code> (PowerShell) implémentent une logique de porte identique sans aucune dépendance tierce.</p>
+
+        <article class="task-card" data-task-id="4.1">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="4.1" />
+              <span class="task-id-pill">Tâche 4.1</span>
+              <span>Créer le Garde-fou Pré-Commit Bash POSIX : <code>.aidd/guards/pre-commit.sh</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.aidd/guards/pre-commit.sh (chmod +x)</span></div>
+          <div class="code-panel">
+            <div class="code-head"><span>Contenu Exact — .aidd/guards/pre-commit.sh</span></div>
+            <pre><code>#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_FILE=".aidd/PROJECT_STATE.md"
+CONVENTIONS_FILE=".aidd/PROJECT_CONVENTIONS.md"
+STORIES_DIR=".aidd/work/stories"
+
+validate_done_story_file() {
+  local story_file="$1"
+  if [[ ! -f "$story_file" ]]; then
+    echo "[aidd gate] ERROR: Story packet not found: $story_file" &gt;&amp;2
+    exit 1
+  fi
+
+  if ! grep -q "^## Execution Evidence" "$story_file"; then
+    echo "[aidd gate] ERROR: $story_file is DONE but missing '## Execution Evidence' heading." &gt;&amp;2
+    exit 1
+  fi
+
+  if grep -q "PENDING_EVIDENCE" "$story_file"; then
+    echo "[aidd gate] ERROR: $story_file is DONE but still contains placeholder PENDING_EVIDENCE." &gt;&amp;2
+    exit 1
+  fi
+
+  local evidence_lines
+  evidence_lines=$(awk '
+    /^## Execution Evidence/ { flag=1; next }
+    /^## / { flag=0 }
+    flag &amp;&amp; !/^```/ &amp;&amp; NF &gt; 0 { count++ }
+    END { print count+0 }
+  ' "$story_file")
+
+  if [[ "$evidence_lines" -lt 1 ]]; then
+    echo "[aidd gate] ERROR: $story_file is DONE but '## Execution Evidence' has no command output." &gt;&amp;2
+    exit 1
+  fi
+
+  if ! grep -Eiq '^- \*\*Verdict:\*\* `?APPROVED`?[[:space:]]*$' "$story_file"; then
+    echo "[aidd gate] ERROR: $story_file is DONE but lacks '- **Verdict:** APPROVED' under Review Verdict." &gt;&amp;2
+    exit 1
+  fi
+}
+
+# 1. Validate DONE rows in PROJECT_STATE.md (9 columns: Story ID | Epic | Sprint | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged)
+if [[ -f "$STATE_FILE" ]]; then
+  while IFS='|' read -r _ c_id _ _ _ _ _ _ c_status c_evid _; do
+    story_id=$(echo "${c_id:-}" | xargs)
+    status_val=$(echo "${c_status:-}" | tr '[:lower:]' '[:upper:]' | xargs)
+    evid_val=$(echo "${c_evid:-}" | tr '[:lower:]' '[:upper:]' | xargs)
+
+    if [[ "$status_val" == "DONE" &amp;&amp; -n "$story_id" ]]; then
+      if [[ "$evid_val" != "YES" ]]; then
+        echo "[aidd gate] ERROR: $story_id is marked DONE in $STATE_FILE without Evidence Logged = YES." &gt;&amp;2
+        exit 1
+      fi
+      matched_file=$(find "$STORIES_DIR" -maxdepth 1 -type f -name "${story_id}*.md" 2&gt;/dev/null | head -n 1 || true)
+      if [[ -z "$matched_file" ]]; then
+        echo "[aidd gate] ERROR: Missing story file in $STORIES_DIR for DONE story $story_id." &gt;&amp;2
+        exit 1
+      fi
+      validate_done_story_file "$matched_file"
+    fi
+  done &lt; &lt;(grep -E '^\|' "$STATE_FILE" | tail -n +3 || true)
+fi
+
+# 2. Validate any story file under .aidd/work/stories/*.md with frontmatter status: DONE
+if [[ -d "$STORIES_DIR" ]]; then
+  for sf in "$STORIES_DIR"/*.md; do
+    [[ -e "$sf" ]] || continue
+    if awk 'NR==1 &amp;&amp; /^---$/ {in_fm=1; next} in_fm &amp;&amp; /^---$/ {exit} in_fm &amp;&amp; tolower($0) ~ /^status:[[:space:]]*done([[:space:]]|$)/ {found=1} END {exit !found}' "$sf"; then
+      validate_done_story_file "$sf"
+    fi
+  done
+fi
+
+# 3. Execute machine-parsed Test Command from PROJECT_CONVENTIONS.md (if configured)
+if [[ -f "$CONVENTIONS_FILE" ]]; then
+  test_cmd=$(sed -n 's/^- \*\*Test Command:\*\*[[:space:]]*`\([^`]*\)`.*/\1/p' "$CONVENTIONS_FILE" | head -n 1)
+  if [[ -n "$test_cmd" &amp;&amp; "$test_cmd" != "NONE" &amp;&amp; "$test_cmd" != "&lt;"* ]]; then
+    echo "[aidd gate] Running Test Command: $test_cmd"
+    bash -c "$test_cmd"
+  else
+    echo "[aidd gate] Test Command is NONE or unconfigured; skipping test execution."
+  fi
+fi
+
+echo "[aidd gate] Passed."</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>chmod +x .aidd/guards/pre-commit.sh &amp;&amp; bash -n .aidd/guards/pre-commit.sh &amp;&amp; bash .aidd/guards/pre-commit.sh &amp;&amp; echo "TASK_4_1_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="4.2">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="4.2" />
+              <span class="task-id-pill">Tâche 4.2</span>
+              <span>Créer le Garde-fou Pré-Commit PowerShell : <code>.aidd/guards/pre-commit.ps1</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.aidd/guards/pre-commit.ps1</span></div>
+          <div class="code-panel">
+            <div class="code-head"><span>Contenu Exact — .aidd/guards/pre-commit.ps1</span></div>
+            <pre><code>$ErrorActionPreference = "Stop"
+
+$StateFile = ".aidd/PROJECT_STATE.md"
+$ConventionsFile = ".aidd/PROJECT_CONVENTIONS.md"
+$StoriesDir = ".aidd/work/stories"
+
+function Test-DoneStoryFile {
+    param([string]$FilePath)
+
+    if (-not (Test-Path $FilePath)) {
+        [Console]::Error.WriteLine("[aidd gate] ERROR: Story packet not found: $FilePath")
+        exit 1
+    }
+
+    $lines = Get-Content -Path $FilePath
+    $raw = $lines -join "`n"
+
+    if ($raw -notmatch '(?m)^## Execution Evidence\s*$') {
+        [Console]::Error.WriteLine("[aidd gate] ERROR: $FilePath is DONE but missing '## Execution Evidence' heading.")
+        exit 1
+    }
+
+    if ($raw -match 'PENDING_EVIDENCE') {
+        [Console]::Error.WriteLine("[aidd gate] ERROR: $FilePath is DONE but still contains placeholder PENDING_EVIDENCE.")
+        exit 1
+    }
+
+    $inEvidence = $false
+    $evidenceCount = 0
+    foreach ($line in $lines) {
+        if ($line -match '^## Execution Evidence\s*$') { $inEvidence = $true; continue }
+        if ($inEvidence -and $line -match '^## ') { $inEvidence = $false; break }
+        if ($inEvidence -and ($line -notmatch '^```') -and ($line.Trim().Length -gt 0)) {
+            $evidenceCount++
+        }
+    }
+
+    if ($evidenceCount -lt 1) {
+        [Console]::Error.WriteLine("[aidd gate] ERROR: $FilePath is DONE but '## Execution Evidence' has no command output.")
+        exit 1
+    }
+
+    if ($raw -notmatch '(?mi)^- \*\*Verdict:\*\* `?APPROVED`?\s*$') {
+        [Console]::Error.WriteLine("[aidd gate] ERROR: $FilePath is DONE but lacks '- **Verdict:** APPROVED' under Review Verdict.")
+        exit 1
+    }
+}
+
+# 1. Validate DONE rows in PROJECT_STATE.md (9 columns)
+if (Test-Path $StateFile) {
+    $tableLines = Get-Content -Path $StateFile | Where-Object { $_ -match '^\|' } | Select-Object -Skip 2
+    foreach ($row in $tableLines) {
+        $cols = $row.Split('|') | ForEach-Object { $_.Trim() }
+        if ($cols.Count -lt 10) { continue }
+        $storyId = $cols[1]
+        $status  = $cols[8].ToUpperInvariant()
+        $evid    = $cols[9].ToUpperInvariant()
+
+        if ($status -eq "DONE" -and $storyId.Length -gt 0) {
+            if ($evid -ne "YES") {
+                [Console]::Error.WriteLine("[aidd gate] ERROR: $storyId is marked DONE in $StateFile without Evidence Logged = YES.")
+                exit 1
+            }
+            $match = Get-ChildItem -Path $StoriesDir -Filter "$storyId*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $match) {
+                [Console]::Error.WriteLine("[aidd gate] ERROR: Missing story file in $StoriesDir for DONE story $storyId.")
+                exit 1
+            }
+            Test-DoneStoryFile -FilePath $match.FullName
+        }
+    }
+}
+
+# 2. Validate any story file under .aidd/work/stories/*.md with frontmatter status: DONE
+if (Test-Path $StoriesDir) {
+    $storyFiles = Get-ChildItem -Path $StoriesDir -Filter "*.md" -File -ErrorAction SilentlyContinue
+    foreach ($sf in $storyFiles) {
+        $sfLines = Get-Content -Path $sf.FullName
+        if ($sfLines.Count -gt 2 -and $sfLines[0].Trim() -eq "---") {
+            $isDone = $false
+            for ($i = 1; $i -lt $sfLines.Count; $i++) {
+                if ($sfLines[$i].Trim() -eq "---") { break }
+                if ($sfLines[$i] -match '(?i)^status:\s*done(\s|$)') { $isDone = $true }
+            }
+            if ($isDone) {
+                Test-DoneStoryFile -FilePath $sf.FullName
+            }
+        }
+    }
+}
+
+# 3. Execute machine-parsed Test Command from PROJECT_CONVENTIONS.md (if configured)
+if (Test-Path $ConventionsFile) {
+    $convRaw = Get-Content -Path $ConventionsFile -Raw
+    if ($convRaw -match '(?m)^- \*\*Test Command:\*\*\s*`([^`]*)`') {
+        $testCmd = $Matches[1].Trim()
+        if ($testCmd.Length -gt 0 -and $testCmd -ne "NONE" -and -not $testCmd.StartsWith("&lt;")) {
+            Write-Host "[aidd gate] Running Test Command: $testCmd"
+            Invoke-Expression $testCmd
+            if ($LASTEXITCODE -ne 0) {
+                [Console]::Error.WriteLine("[aidd gate] ERROR: Test Command exited with code $LASTEXITCODE.")
+                exit $LASTEXITCODE
+            }
+        } else {
+            Write-Host "[aidd gate] Test Command is NONE or unconfigured; skipping test execution."
+        }
+    }
+}
+
+Write-Host "[aidd gate] Passed."
+exit 0</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .aidd/guards/pre-commit.ps1 &amp;&amp; grep -q "Test-DoneStoryFile" .aidd/guards/pre-commit.ps1 &amp;&amp; (command -v pwsh &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwsh -NoProfile -File .aidd/guards/pre-commit.ps1 || echo "pwsh_not_installed_checked") &amp;&amp; echo "TASK_4_2_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="4.3">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="4.3" />
+              <span class="task-id-pill">Tâche 4.3</span>
+              <span>Créer le Guide de Démarrage &amp; Installation Non Destructive : <code>.aidd/README.md</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.aidd/README.md</span></div>
+          <p>Rédiger <code>.aidd/README.md</code> en français couvrant :</p>
+          <ol>
+            <li><strong>Démarrage en 3 Étapes :</strong> Copier <code>.github/</code> + <code>.aidd/</code> dans le dépôt &rarr; exécuter <code>/repo-bootstrap</code> (puis <code>/doc-project</code> pour documenter le projet pour les LLM et les devs) &rarr; exécuter <code>/gps-navigator</code> à tout moment.</li>
+            <li><strong>Antisèche des 6 Agents &amp; 15 Invites Slash :</strong> Tableaux Markdown clairs listant les noms d'invocation (incluant <code>/doc-project</code>, <code>/brainstorm</code>, <code>/forge-idea</code>, <code>/creative-studio</code>, <code>/deep-critique</code>, <code>/correct-course</code>, <code>/walkthrough</code>, <code>/test-audit</code>, <code>/quick-fix</code> et <code>/board-sync</code>), responsabilités et limites strictes, plus l'ouverture de <code>.aidd/board.html</code> et <code>.aidd/brainstorm-selector.html</code>.</li>
+            <li><strong>Installation Non Destructive du Hook Git Pré-Commit (macOS/Linux &amp; Windows) :</strong> Expliquer comment ajouter (<code>&gt;&gt;</code>) plutôt qu'écraser un fichier <code>.git/hooks/pre-commit</code> d'entreprise existant, en appelant <code>bash .aidd/guards/pre-commit.sh</code> sous POSIX ou <code>pwsh</code>/<code>powershell.exe -NoProfile -ExecutionPolicy Bypass -File .aidd/guards/pre-commit.ps1</code> sous Windows.</li>
+          </ol>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .aidd/README.md &amp;&amp; grep -q "pre-commit.sh" .aidd/README.md &amp;&amp; grep -q "pre-commit.ps1" .aidd/README.md &amp;&amp; echo "TASK_4_3_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="4.4">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="4.4" />
+              <span class="task-id-pill">Tâche 4.4</span>
+              <span>Créer le Tableau Kanban Visuel Autonome : <code>.aidd/board.html</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.aidd/board.html</span></div>
+          <p>Créer <code>.aidd/board.html</code> comme une page HTML/CSS/JS 100 % autonome (zéro serveur, zéro CDN externe, interface en français) respectant ces exigences :</p>
+          <ol>
+            <li><strong>Chargement Hybride sans CORS :</strong> Lit au démarrage un bloc intégré <code>&lt;script id="aidd-state-snapshot" type="text/markdown"&gt;...&lt;/script&gt;</code> contenant le tableau Markdown 9 colonnes de <code>PROJECT_STATE.md</code> (initialisé avec l'en-tête vide), <strong>ET</strong> propose un bouton <em>Charger PROJECT_STATE.md</em> + zone glisser-déposer pour recharger en direct depuis le disque.</li>
+            <li><strong>6 Colonnes Kanban :</strong> <code>BACKLOG</code> | <code>READY</code> | <code>IN_PROGRESS</code> | <code>BLOCKED</code> | <code>IN_REVIEW</code> | <code>DONE</code> (avec compteur par colonne).</li>
+            <li><strong>Filtres &amp; Badges :</strong> Sélecteurs dynamiques <strong>Epic</strong> et <strong>Sprint</strong>, recherche texte, et badge distinctif <code>quick-fix</code> sur les cartes de la voie rapide + bouton d'en-tête <em>Copier commande /quick-fix</em>.</li>
+            <li><strong>Surveillance en Lecture Seule + Copie 1-Clic (Porte Two-Hat) :</strong> Aucun glisser-déposer vers <code>DONE</code>. Cliquer sur une carte copie la prochaine commande Copilot exacte selon le statut (<code>READY/IN_PROGRESS</code> &rarr; <code>@developer sur STORY-XXX</code>, <code>IN_REVIEW</code> &rarr; <code>/two-hat-review STORY-XXX</code>, <code>BLOCKED</code> &rarr; <code>/roundtable-panel STORY-XXX</code>) et affiche l'état <code>Evidence Logged</code> + verrouillage <code>DONE</code>.</li>
+          </ol>
+          <div class="code-panel">
+            <div class="code-head"><span>Contrat HTML Minimum — .aidd/board.html</span></div>
+            <pre><code>&lt;!-- Doit contenir exactement ce bloc mis à jour par les agents et /board-sync --&gt;
+&lt;script id="aidd-state-snapshot" type="text/markdown" data-synced-at="UNSYNCED"&gt;
+# Project Delivery State
+
+| Story ID | Epic | Sprint | Lane | Title | Owner Persona | Reviewer | Status | Evidence Logged |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+&lt;/script&gt;</code></pre>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .aidd/board.html &amp;&amp; grep -q 'id="aidd-state-snapshot"' .aidd/board.html &amp;&amp; grep -q "BACKLOG" .aidd/board.html &amp;&amp; grep -q "quick-fix" .aidd/board.html &amp;&amp; echo "TASK_4_4_OK"</code></pre>
+          </div>
+        </article>
+
+        <article class="task-card" data-task-id="4.5">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="4.5" />
+              <span class="task-id-pill">Tâche 4.5</span>
+              <span>Créer le Sélecteur Visuel de Brainstorming : <code>.aidd/brainstorm-selector.html</code></span>
+            </label>
+          </div>
+          <div class="target-list"><span class="target-pill">.aidd/brainstorm-selector.html</span></div>
+          <p>Créer <code>.aidd/brainstorm-selector.html</code> comme une page HTML/CSS/JS 100 % autonome (zéro serveur, zéro dépendance externe, thème sombre/clair, interface en français) permettant de composer une session <code>/brainstorm</code> en 1 clic :</p>
+          <ol>
+            <li><strong>Sélecteur de Mode de Facilitation :</strong> Boutons exclusifs <code>Facilitator</code> (guidé par questions), <code>Creative Partner</code> (co-idéation rapide) et <code>Ideate for me</code> (génération autonome).</li>
+            <li><strong>Filtres par Objectif &amp; Catégories :</strong> Puces d'objectif (<code>Nouvelle fonctionnalité</code>, <code>Concept inédit</code>, <code>Stratégie</code>, <code>Planification</code>, <code>Diagnostic</code>, <code>Déblocage</code>) filtrant les cartes par tags, plus compteurs <code>Random</code>, <code>Invent</code> et <code>AI picks</code> avec alerte visuelle si le total dépasse 4–5 techniques.</li>
+            <li><strong>Catalogue de Techniques (min. 20 cartes en 4 catégories) :</strong> <em>Structurées</em> (<code>SCAMPER</code>, <code>Six Thinking Hats</code>, <code>Lotus Blossom</code>, <code>Disney Method</code>, <code>Starbursting</code>, <code>Mind Mapping</code>, <code>Crazy 8s</code>, <code>How Might We</code>), <em>Profondes</em> (<code>Five Whys</code>, <code>Assumption Reversal</code>, <code>Question Storming</code>, <code>Causal Loop Mapping</code>, <code>Morphological Analysis</code>), <em>Créatives</em> (<code>First Principles Thinking</code>, <code>Reverse Brainstorming</code>, <code>Provocation Technique</code>, <code>Worst Possible Idea</code>) et <em>Collaboratives</em> (<code>Yes And Building</code>, <code>Brain Writing Round Robin</code>, <code>Random Stimulation</code>, <code>Role Playing</code>).</li>
+            <li><strong>Composeur de Prompt 1-Clic :</strong> Bouton <em>Copier le prompt /brainstorm</em> générant l'invite structurée (<code>/brainstorm</code> + mode + techniques sélectionnées + tirages aléatoires éventuels) prête à coller dans GitHub Copilot.</li>
+          </ol>
+          <div class="code-panel">
+            <div class="code-head"><span>Commande de Vérification</span></div>
+            <pre><code>test -f .aidd/brainstorm-selector.html &amp;&amp; grep -q "SCAMPER" .aidd/brainstorm-selector.html &amp;&amp; grep -q "Facilitator" .aidd/brainstorm-selector.html &amp;&amp; grep -q "/brainstorm" .aidd/brainstorm-selector.html &amp;&amp; echo "TASK_4_5_OK"</code></pre>
+          </div>
+        </article>
+      </section>
+
+      <!-- SECTION 08: END-TO-END SMOKE SUITE -->
+      <section class="spec-section" id="sec-08">
+        <h2><span class="sec-num">08</span> Vérification Bout-en-Bout &amp; Suite de Tests de Fumée (3 Cas)</h2>
+        <p class="sec-lead">Exécutez ce script après avoir terminé toutes les tâches. Chaque contrôle doit réussir et afficher <code>ALL_WHITE_ROOM_CHECKS_PASSED</code>.</p>
+
+        <article class="task-card" data-task-id="5.1">
+          <div class="task-top">
+            <label class="task-label">
+              <input type="checkbox" class="task-check" data-id="5.1" />
+              <span class="task-id-pill">Tâche 5.1</span>
+              <span>Exécuter l'Audit Complet du Manifeste + Tests de Fumée Positif/Négatifs</span>
+            </label>
+          </div>
+          <div class="code-panel">
+            <div class="code-head"><span>Script Complet de Vérification &amp; Smoke Test 3 Cas (bash POSIX + pwsh optionnel)</span></div>
+            <pre><code>#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== 1. Verifying all 35 deliverable files exist ==="
+REQUIRED_FILES=(
+  ".github/copilot-instructions.md"
+  ".github/agents/analyst.agent.md"
+  ".github/agents/pm.agent.md"
+  ".github/agents/architect.agent.md"
+  ".github/agents/ux-designer.agent.md"
+  ".github/agents/developer.agent.md"
+  ".github/agents/qa-reviewer.agent.md"
+  ".github/prompts/gps-navigator.prompt.md"
+  ".github/prompts/repo-bootstrap.prompt.md"
+  ".github/prompts/doc-project.prompt.md"
+  ".github/prompts/brainstorm.prompt.md"
+  ".github/prompts/forge-idea.prompt.md"
+  ".github/prompts/creative-studio.prompt.md"
+  ".github/prompts/deep-critique.prompt.md"
+  ".github/prompts/correct-course.prompt.md"
+  ".github/prompts/walkthrough.prompt.md"
+  ".github/prompts/test-audit.prompt.md"
+  ".github/prompts/quick-fix.prompt.md"
+  ".github/prompts/two-hat-review.prompt.md"
+  ".github/prompts/retrospective.prompt.md"
+  ".github/prompts/roundtable-panel.prompt.md"
+  ".github/prompts/board-sync.prompt.md"
+  ".github/skills/gps-navigator/SKILL.md"
+  ".aidd/README.md"
+  ".aidd/board.html"
+  ".aidd/brainstorm-selector.html"
+  ".aidd/INDEX.md"
+  ".aidd/PROJECT_STATE.md"
+  ".aidd/PROJECT_CONVENTIONS.md"
+  ".aidd/templates/brief.md"
+  ".aidd/templates/spec.md"
+  ".aidd/templates/architecture.md"
+  ".aidd/templates/story-packet.md"
+  ".aidd/guards/pre-commit.sh"
+  ".aidd/guards/pre-commit.ps1"
+)
+for f in "${REQUIRED_FILES[@]}"; do
+  [[ -f "$f" ]] || { echo "MISSING FILE: $f" &gt;&amp;2; exit 1; }
+done
+
+echo "=== 2. Running 3-Case Pre-Commit Guard Smoke Tests ==="
+SMOKE_STORY=".aidd/work/stories/STORY-999-smoke-test.md"
+BAK_STATE=$(mktemp)
+cp .aidd/PROJECT_CONVENTIONS.md "${BAK_STATE}.conv"
+cp .aidd/PROJECT_STATE.md "$BAK_STATE"
+
+cleanup() {
+  rm -f "$SMOKE_STORY" "${BAK_STATE}.conv"
+  mv -f "$BAK_STATE" .aidd/PROJECT_STATE.md
+}
+trap cleanup EXIT
+
+# Case 1: Valid DONE story with real Execution Evidence + APPROVED verdict -> MUST PASS (exit 0)
+cat &gt; "$SMOKE_STORY" &lt;&lt;'EOF'
+---
+id: STORY-999
+title: Smoke Test Story
+lane: quick-fix
+status: DONE
+owner: developer
+reviewer: qa-reviewer
+next_step: DONE
+---
+
+## Execution Evidence
+```text
+$ echo "unit tests passed"
+unit tests passed (3 assertions, 0 failures)
+```
+
+## Review Verdict
+- **Reviewer:** `qa-reviewer`
+- **Verdict:** APPROVED
+- **Diff &amp; Verification Notes:** Verified diff and re-ran tests.
+EOF
+echo "| STORY-999 | EPIC-01 | SPRINT-01 | quick-fix | Smoke Test Story | developer | qa-reviewer | DONE | YES |" &gt;&gt; .aidd/PROJECT_STATE.md
+bash .aidd/guards/pre-commit.sh
+if command -v pwsh &gt;/dev/null 2&gt;&amp;1; then pwsh -NoProfile -File .aidd/guards/pre-commit.ps1; fi
+
+# Case 2: DONE story missing Execution Evidence (still PENDING_EVIDENCE) -> MUST FAIL (non-zero)
+sed 's/unit tests passed (3 assertions, 0 failures)/PENDING_EVIDENCE/' "$SMOKE_STORY" &gt; "${SMOKE_STORY}.tmp" &amp;&amp; mv "${SMOKE_STORY}.tmp" "$SMOKE_STORY"
+if bash .aidd/guards/pre-commit.sh &gt;/dev/null 2&gt;&amp;1; then
+  echo "SMOKE FAIL: Case 2 (missing evidence) should have exited non-zero!" &gt;&amp;2
+  exit 1
+fi
+if command -v pwsh &gt;/dev/null 2&gt;&amp;1; then
+  if pwsh -NoProfile -File .aidd/guards/pre-commit.ps1 &gt;/dev/null 2&gt;&amp;1; then
+    echo "SMOKE FAIL (pwsh): Case 2 should have exited non-zero!" &gt;&amp;2
+    exit 1
+  fi
+fi
+
+# Case 3: DONE story with Evidence restored, but Verdict is PENDING -> MUST FAIL (non-zero)
+cat &gt; "$SMOKE_STORY" &lt;&lt;'EOF'
+---
+id: STORY-999
+title: Smoke Test Story
+lane: quick-fix
+status: DONE
+owner: developer
+reviewer: qa-reviewer
+next_step: DONE
+---
+
+## Execution Evidence
+```text
+$ npm test
+PASS (4 tests)
+```
+
+## Review Verdict
+- **Reviewer:** `qa-reviewer`
+- **Verdict:** PENDING
+EOF
+if bash .aidd/guards/pre-commit.sh &gt;/dev/null 2&gt;&amp;1; then
+  echo "SMOKE FAIL: Case 3 (missing APPROVED verdict) should have exited non-zero!" &gt;&amp;2
+  exit 1
+fi
+if command -v pwsh &gt;/dev/null 2&gt;&amp;1; then
+  if pwsh -NoProfile -File .aidd/guards/pre-commit.ps1 &gt;/dev/null 2&gt;&amp;1; then
+    echo "SMOKE FAIL (pwsh): Case 3 should have exited non-zero!" &gt;&amp;2
+    exit 1
+  fi
+fi
+
+echo "ALL_WHITE_ROOM_CHECKS_PASSED"</code></pre>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <strong>AiDD (AI Driven Development)</strong> (<code>.github/</code> + <code>.aidd/</code>) &bull; Spécification Autonome en Chambre Blanche &bull; Zéro Dépendance Externe
+  </footer>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "aidd_white_room_spec_fr_v2";
+      let state = {};
+      try {
+        state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch (_) {
+        state = {};
+      }
+
+      function persist() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (_) {}
+      }
+
+      function copyToClipboard(text, btn) {
+        const flash = () => {
+          if (!btn) return;
+          const prev = btn.textContent;
+          btn.classList.add("copied");
+          btn.textContent = "Copié !";
+          setTimeout(() => {
+            btn.classList.remove("copied");
+            btn.textContent = prev;
+          }, 1400);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(flash).catch(() => legacyCopy(text, flash));
+        } else {
+          legacyCopy(text, flash);
+        }
+      }
+
+      function legacyCopy(text, cb) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); cb(); } finally { document.body.removeChild(ta); }
+      }
+
+      // Attach Copy buttons to every .code-panel automatically
+      document.querySelectorAll(".code-panel").forEach((panel) => {
+        const head = panel.querySelector(".code-head");
+        const code = panel.querySelector("pre code");
+        if (!head || !code) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "sm";
+        btn.textContent = "Copier";
+        btn.addEventListener("click", () => copyToClipboard(code.textContent, btn));
+        head.appendChild(btn);
+      });
+
+      // Wire task checkboxes & progress bar
+      const checks = Array.from(document.querySelectorAll(".task-check"));
+      function refreshProgress() {
+        let done = 0;
+        checks.forEach((cb) => {
+          const id = cb.getAttribute("data-id");
+          const checked = !!state[id];
+          cb.checked = checked;
+          const card = cb.closest(".task-card");
+          if (card) card.classList.toggle("done", checked);
+          if (checked) done++;
+        });
+        const total = checks.length;
+        const pct = total ? Math.round((done / total) * 100) : 0;
+        document.getElementById("progress-text").textContent = `${done} / ${total} tâches terminées (${pct}%)`;
+        document.getElementById("progress-fill").style.width = `${pct}%`;
+      }
+
+      checks.forEach((cb) => {
+        cb.addEventListener("change", () => {
+          const id = cb.getAttribute("data-id");
+          if (cb.checked) state[id] = true;
+          else delete state[id];
+          persist();
+          refreshProgress();
+        });
+      });
+
+      document.getElementById("reset-checks").addEventListener("click", () => {
+        state = {};
+        persist();
+        refreshProgress();
+      });
+
+      // Search / Filter task cards
+      const filterInput = document.getElementById("task-filter");
+      filterInput.addEventListener("input", () => {
+        const q = filterInput.value.trim().toLowerCase();
+        document.querySelectorAll(".task-card").forEach((card) => {
+          const match = !q || card.textContent.toLowerCase().includes(q);
+          card.style.display = match ? "" : "none";
+        });
+      });
+
+      // Extract clean Markdown from semantic DOM for 1-click LLM prompt export
+      function extractCleanMarkdown() {
+        const out = [];
+        out.push("# AiDD (AI Driven Development) (`.github/` + `.aidd/`) — Spécification Complète en Chambre Blanche");
+        out.push("");
+        document.querySelectorAll("#spec-root > .spec-section").forEach((sec) => {
+          const h2 = sec.querySelector(":scope > h2");
+          if (h2) out.push(`## ${h2.textContent.trim()}`);
+          out.push("");
+
+          sec.querySelectorAll(":scope > p, :scope > .callout, :scope > .grid-2, :scope > .table-wrap, :scope > .code-panel, :scope > h3, :scope > article.task-card").forEach((node) => {
+            if (node.tagName === "H3") {
+              out.push(`### ${node.textContent.trim()}`);
+              out.push("");
+            } else if (node.tagName === "P") {
+              out.push(node.textContent.trim());
+              out.push("");
+            } else if (node.classList.contains("callout")) {
+              const title = node.querySelector(".callout-title");
+              if (title) out.push(`> **${title.textContent.trim()}**`);
+              node.querySelectorAll("p, li").forEach((el) => {
+                out.push(`> - ${el.textContent.replace(/\s+/g, " ").trim()}`);
+              });
+              out.push("");
+            } else if (node.classList.contains("table-wrap")) {
+              const rows = Array.from(node.querySelectorAll("tr"));
+              rows.forEach((r, idx) => {
+                const cells = Array.from(r.querySelectorAll("th, td")).map((c) => c.textContent.replace(/\s+/g, " ").trim());
+                out.push(`| ${cells.join(" | ")} |`);
+                if (idx === 0) out.push(`| ${cells.map(() => ":---").join(" | ")} |`);
+              });
+              out.push("");
+            } else if (node.classList.contains("code-panel")) {
+              const label = node.querySelector(".code-head span");
+              const code = node.querySelector("pre code");
+              if (label) out.push(`#### ${label.textContent.trim()}`);
+              if (code) {
+                out.push("````text");
+                out.push(code.textContent);
+                out.push("````");
+                out.push("");
+              }
+            } else if (node.classList.contains("grid-2")) {
+              node.querySelectorAll("h3, h4, p, li, .code-panel").forEach((sub) => {
+                if (sub.tagName === "H3" || sub.tagName === "H4") {
+                  out.push(`#### ${sub.textContent.trim()}`);
+                } else if (sub.tagName === "LI") {
+                  out.push(`- ${sub.textContent.replace(/\s+/g, " ").trim()}`);
+                } else if (sub.classList.contains("code-panel")) {
+                  const lbl = sub.querySelector(".code-head span");
+                  const cd = sub.querySelector("pre code");
+                  if (lbl) out.push(`**${lbl.textContent.trim()}**`);
+                  if (cd) {
+                    out.push("````markdown");
+                    out.push(cd.textContent);
+                    out.push("````");
+                  }
+                }
+              });
+              out.push("");
+            } else if (node.classList.contains("task-card")) {
+              const title = node.querySelector(".task-label");
+              if (title) out.push(`### ${title.textContent.replace(/\s+/g, " ").trim()}`);
+              const pills = Array.from(node.querySelectorAll(".target-pill")).map((p) => p.textContent.trim());
+              if (pills.length) out.push(`- **Cibles :** ${pills.join(", ")}`);
+              node.querySelectorAll(":scope > p, :scope > ul > li, :scope > ol > li").forEach((li) => {
+                out.push(`- ${li.textContent.replace(/\s+/g, " ").trim()}`);
+              });
+              node.querySelectorAll(".code-panel").forEach((cp) => {
+                const lbl = cp.querySelector(".code-head span");
+                const cd = cp.querySelector("pre code");
+                if (lbl) out.push(`\n**${lbl.textContent.trim()}**`);
+                if (cd) {
+                  out.push("````text");
+                  out.push(cd.textContent);
+                  out.push("````");
+                }
+              });
+              out.push("");
+            }
+          });
+        });
+        return out.join("\n");
+      }
+
+      document.getElementById("copy-master-md").addEventListener("click", function () {
+        copyToClipboard(extractCleanMarkdown(), this);
+      });
+
+      document.getElementById("download-master-md").addEventListener("click", function () {
+        const md = extractCleanMarkdown();
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "aidd-white-room-spec.md";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      refreshProgress();
+    })();
+  </script>
+</body>
+</html>
