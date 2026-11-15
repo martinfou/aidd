@@ -1,0 +1,3277 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cockpit">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:;" />
+  <title>AiDD Flight Deck — Hybrid Dual-Layer HTML Review Layer Brainstorm (105 Ideas)</title>
+  <style>
+    :root,
+    [data-theme="cockpit"] {
+      --bg-void: #070a0f;
+      --bg-deck: #0c1119;
+      --bg-panel: #111824;
+      --bg-panel-elevated: #162030;
+      --bg-panel-hover: #1b273a;
+      --bg-code: #090d14;
+      --border-hairline: #1f2d42;
+      --border-strong: #2d4261;
+      --text-primary: #e6edf7;
+      --text-secondary: #95a7c0;
+      --text-muted: #60738f;
+      --accent-cyan: #38bdf8;
+      --accent-cyan-soft: rgba(56, 189, 248, 0.13);
+      --accent-emerald: #10b981;
+      --accent-emerald-soft: rgba(16, 185, 129, 0.14);
+      --accent-amber: #f59e0b;
+      --accent-amber-soft: rgba(245, 158, 11, 0.14);
+      --accent-crimson: #f43f5e;
+      --accent-crimson-soft: rgba(244, 63, 94, 0.14);
+      --accent-violet: #a78bfa;
+      --accent-violet-soft: rgba(167, 139, 250, 0.14);
+      --shadow-elevated: 0 18px 42px rgba(0, 0, 0, 0.48);
+      --grid-line: rgba(56, 189, 248, 0.035);
+      --prose-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      --mono-font: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    [data-theme="editorial"] {
+      --bg-void: #f4f1ea;
+      --bg-deck: #fbf9f5;
+      --bg-panel: #ffffff;
+      --bg-panel-elevated: #f3efe6;
+      --bg-panel-hover: #ece6da;
+      --bg-code: #eee9de;
+      --border-hairline: #dcd4c6;
+      --border-strong: #b8ad99;
+      --text-primary: #18181b;
+      --text-secondary: #3f3f46;
+      --text-muted: #6b6860;
+      --accent-cyan: #0369a1;
+      --accent-cyan-soft: rgba(3, 105, 161, 0.1);
+      --accent-emerald: #047857;
+      --accent-emerald-soft: rgba(4, 120, 87, 0.1);
+      --accent-amber: #b45309;
+      --accent-amber-soft: rgba(180, 83, 9, 0.11);
+      --accent-crimson: #be123c;
+      --accent-crimson-soft: rgba(190, 18, 60, 0.1);
+      --accent-violet: #6d28d9;
+      --accent-violet-soft: rgba(109, 40, 217, 0.1);
+      --shadow-elevated: 0 12px 30px rgba(24, 24, 27, 0.08);
+      --grid-line: rgba(24, 24, 27, 0.03);
+      --prose-font: Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    }
+
+    [data-theme="aaa"] {
+      --bg-void: #000000;
+      --bg-deck: #050505;
+      --bg-panel: #0a0a0a;
+      --bg-panel-elevated: #121212;
+      --bg-panel-hover: #1c1c1c;
+      --bg-code: #000000;
+      --border-hairline: #525252;
+      --border-strong: #a3a3a3;
+      --text-primary: #ffffff;
+      --text-secondary: #e5e5e5;
+      --text-muted: #bdbdbd;
+      --accent-cyan: #67e8f9;
+      --accent-cyan-soft: rgba(103, 232, 249, 0.2);
+      --accent-emerald: #6ee7b7;
+      --accent-emerald-soft: rgba(110, 231, 183, 0.2);
+      --accent-amber: #fde047;
+      --accent-amber-soft: rgba(253, 224, 71, 0.2);
+      --accent-crimson: #fda4af;
+      --accent-crimson-soft: rgba(253, 164, 175, 0.2);
+      --accent-violet: #ddd6fe;
+      --accent-violet-soft: rgba(221, 214, 254, 0.2);
+      --shadow-elevated: 0 0 0 1px #ffffff;
+      --grid-line: rgba(255, 255, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-void);
+      background-image:
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--text-primary);
+      font-family: var(--prose-font);
+      line-height: 1.55;
+      padding-bottom: 108px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code, pre, .mono {
+      font-family: var(--mono-font);
+    }
+
+    .inline-code {
+      font-family: var(--mono-font);
+      font-size: 0.84em;
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      background: var(--bg-code);
+      border: 1px solid var(--border-hairline);
+      color: var(--accent-cyan);
+      white-space: nowrap;
+    }
+
+    /* Top Avionics Telemetry Bar */
+    .telemetry-bar {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      background: color-mix(in srgb, var(--bg-deck) 92%, transparent);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-strong);
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avionics-bezel {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      display: inline-block;
+    }
+
+    .csp-badge {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 4px;
+      background: var(--accent-emerald-soft);
+      color: var(--accent-emerald);
+      border: 1px solid color-mix(in srgb, var(--accent-emerald) 40%, transparent);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-pill {
+      text-decoration: none;
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .nav-pill:hover {
+      color: var(--text-primary);
+      background: var(--bg-panel-elevated);
+      border-color: var(--border-hairline);
+    }
+
+    .nav-pill.climax {
+      color: var(--accent-amber);
+      border-color: color-mix(in srgb, var(--accent-amber) 45%, transparent);
+      background: var(--accent-amber-soft);
+      font-weight: 600;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box input {
+      background: var(--bg-code);
+      color: var(--text-primary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      padding: 6px 28px 6px 10px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      width: 210px;
+      transition: border-color 0.15s ease, width 0.2s ease;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      width: 260px;
+    }
+
+    .kbd-hint {
+      position: absolute;
+      right: 7px;
+      font-family: var(--mono-font);
+      font-size: 10px;
+      color: var(--text-muted);
+      border: 1px solid var(--border-hairline);
+      border-radius: 3px;
+      padding: 0 4px;
+      pointer-events: none;
+    }
+
+    .theme-switcher {
+      display: inline-flex;
+      background: var(--bg-code);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .theme-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      padding: 5px 9px;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .theme-btn.active {
+      background: var(--bg-panel-elevated);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 28px 22px;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(155deg, var(--bg-deck) 0%, var(--bg-panel) 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 34px 36px;
+      box-shadow: var(--shadow-elevated);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald), var(--accent-amber));
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 16px;
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .meta-chip {
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: var(--bg-code);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-secondary);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 3vw, 2.55rem);
+      line-height: 1.16;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 .hl {
+      color: var(--accent-cyan);
+    }
+
+    .hero-goal {
+      font-size: 1.04rem;
+      color: var(--text-secondary);
+      max-width: 68ch;
+      margin-bottom: 22px;
+    }
+
+    /* Dual-Layer Mini Schematic in Hero */
+    .dual-layer-card {
+      background: var(--bg-code);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 18px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+    }
+
+    .dl-layer {
+      padding: 11px 13px;
+      border-radius: 7px;
+      border: 1px solid var(--border-hairline);
+      background: var(--bg-panel);
+    }
+
+    .dl-layer + .dl-bridge {
+      text-align: center;
+      padding: 7px 0;
+      color: var(--accent-amber);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+
+    .dl-title {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .dl-sub {
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    /* 4 Pillars Filter Strip */
+    .pillars-strip {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-hairline);
+    }
+
+    .pillars-label {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 960px) {
+      .pillars-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 560px) {
+      .pillars-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pillar-btn {
+      text-align: left;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 11px 13px;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pillar-btn:hover {
+      border-color: var(--accent-cyan);
+      background: var(--bg-panel-hover);
+    }
+
+    .pillar-btn.active {
+      border-color: var(--accent-cyan);
+      background: var(--accent-cyan-soft);
+      box-shadow: inset 0 0 0 1px var(--accent-cyan);
+    }
+
+    .pillar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .pillar-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Global Filter Status Banner */
+    .filter-hud {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--bg-deck);
+      border: 1px solid var(--border-hairline);
+      border-radius: 10px;
+      padding: 12px 18px;
+      margin-bottom: 32px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+    }
+
+    .filter-hud-left, .filter-hud-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hud-btn {
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .hud-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      background: var(--bg-panel-hover);
+    }
+
+    .hud-btn.active {
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+      background: var(--accent-amber-soft);
+    }
+
+    /* Section Headers */
+    .technique-section {
+      margin-bottom: 54px;
+      scroll-margin-top: 76px;
+    }
+
+    .section-eyebrow {
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-cyan);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: clamp(1.4rem, 2.3vw, 1.9rem);
+      letter-spacing: -0.015em;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      max-width: 72ch;
+      font-size: 0.96rem;
+      margin-top: 4px;
+    }
+
+    /* ==========================================================
+       TECHNIQUE 1: TRIZ CONTRADICTION TENSION VISUALIZER
+       ========================================================== */
+    .triz-tension-arena {
+      background: var(--bg-deck);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .tension-poles {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 900px) {
+      .tension-poles {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pole-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 10px;
+      padding: 16px 18px;
+      position: relative;
+    }
+
+    .pole-human {
+      border-left: 3px solid var(--accent-amber);
+    }
+
+    .pole-llm {
+      border-right: 3px solid var(--accent-cyan);
+    }
+
+    .pole-tag {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .pole-human .pole-tag { color: var(--accent-amber); }
+    .pole-llm .pole-tag { color: var(--accent-cyan); }
+
+    .pole-title {
+      font-size: 1.06rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .pole-list {
+      list-style: none;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      display: grid;
+      gap: 4px;
+    }
+
+    .pole-fulcrum {
+      background: var(--bg-code);
+      border: 1px dashed var(--accent-emerald);
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-width: 230px;
+    }
+
+    .fulcrum-badge {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      color: var(--accent-emerald);
+      background: var(--accent-emerald-soft);
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subdomain-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-hairline);
+    }
+
+    .sub-tab {
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 7px;
+      padding: 8px 13px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .sub-tab:hover {
+      border-color: var(--accent-emerald);
+      color: var(--text-primary);
+    }
+
+    .sub-tab.active {
+      background: var(--accent-emerald-soft);
+      color: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      font-weight: 700;
+    }
+
+    .triz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 12px;
+    }
+
+    .triz-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-left: 3px solid var(--accent-emerald);
+      border-radius: 9px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .triz-card:hover {
+      background: var(--bg-panel-hover);
+      border-color: var(--border-strong);
+      border-left-color: var(--accent-cyan);
+    }
+
+    .triz-card.selected {
+      border-color: var(--accent-amber);
+      border-left-color: var(--accent-amber);
+      background: color-mix(in srgb, var(--accent-amber-soft) 42%, var(--bg-panel));
+    }
+
+    /* ==========================================================
+       TECHNIQUE 2: MORPHOLOGICAL 5D ZWICKY COMBINATOR
+       ========================================================== */
+    .morph-explorer {
+      background: var(--bg-deck);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .morph-presets {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-hairline);
+    }
+
+    .preset-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .preset-btn {
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+      background: var(--accent-cyan-soft);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    .zwicky-matrix {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      .zwicky-matrix {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 620px) {
+      .zwicky-matrix {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .zwicky-col {
+      background: var(--bg-code);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .zwicky-col-hdr {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-hairline);
+      margin-bottom: 2px;
+    }
+
+    .zwicky-cell {
+      text-align: left;
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 5px;
+      padding: 7px 9px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .zwicky-cell:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .zwicky-cell.active {
+      background: var(--accent-cyan-soft);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .zwicky-recipe {
+      margin-top: 14px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .morph-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 12px;
+    }
+
+    .morph-card {
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-elevated) 55%, transparent), var(--bg-panel));
+      border: 1px solid var(--border-hairline);
+      border-radius: 9px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .morph-card:hover {
+      border-color: var(--accent-cyan);
+      background: var(--bg-panel-hover);
+    }
+
+    .morph-card.breakthrough-card {
+      border-color: var(--accent-emerald);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-emerald) 35%, transparent);
+    }
+
+    .morph-card.selected {
+      border-color: var(--accent-amber);
+      background: color-mix(in srgb, var(--accent-amber-soft) 42%, var(--bg-panel));
+    }
+
+    /* ==========================================================
+       TECHNIQUE 3: CROSS-POLLINATION INDUSTRY LENS SWITCHER
+       ========================================================== */
+    .lens-console {
+      background: var(--bg-deck);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .lens-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 980px) {
+      .lens-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 540px) {
+      .lens-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .lens-btn {
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .lens-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+      background: var(--bg-panel-hover);
+    }
+
+    .lens-btn.active {
+      background: var(--accent-violet-soft);
+      color: var(--text-primary);
+      border-color: var(--accent-violet);
+      box-shadow: inset 0 0 0 1px var(--accent-violet);
+    }
+
+    .lens-btn-title {
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .lens-count {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--bg-code);
+      color: var(--text-muted);
+    }
+
+    .lens-briefing {
+      margin-top: 14px;
+      padding: 13px 16px;
+      border-radius: 8px;
+      background: var(--bg-code);
+      border-left: 3px solid var(--accent-violet);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.91rem;
+      color: var(--text-secondary);
+    }
+
+    .cross-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 12px;
+    }
+
+    .cross-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-top: 2px solid var(--accent-violet);
+      border-radius: 9px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.15s ease;
+    }
+
+    .cross-card:hover {
+      border-color: var(--accent-violet);
+      background: var(--bg-panel-hover);
+    }
+
+    .cross-card.selected {
+      border-color: var(--accent-amber);
+      border-top-color: var(--accent-amber);
+      background: color-mix(in srgb, var(--accent-amber-soft) 42%, var(--bg-panel));
+    }
+
+    /* Shared Card Internals */
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .idea-id {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mini-tag {
+      font-family: var(--mono-font);
+      font-size: 10.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-code);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-secondary);
+    }
+
+    .mini-tag.pillar {
+      color: var(--accent-cyan);
+    }
+
+    .mini-tag.highlight {
+      background: var(--accent-emerald-soft);
+      color: var(--accent-emerald);
+      border-color: color-mix(in srgb, var(--accent-emerald) 45%, transparent);
+    }
+
+    .idea-body {
+      font-size: 0.94rem;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid color-mix(in srgb, var(--border-hairline) 65%, transparent);
+    }
+
+    .star-btn {
+      background: var(--bg-code);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 5px;
+      padding: 4px 10px;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.14s ease;
+    }
+
+    .star-btn:hover {
+      border-color: var(--accent-amber);
+      color: var(--text-primary);
+    }
+
+    .star-btn.starred {
+      background: var(--accent-amber-soft);
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+      font-weight: 700;
+    }
+
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      background: var(--bg-panel);
+      border: 1px dashed var(--border-strong);
+      border-radius: 10px;
+      color: var(--text-muted);
+      font-family: var(--mono-font);
+      font-size: 13px;
+    }
+
+    /* ==========================================================
+       ACT IV — CLIMAX: SYNTHESIS, PIPELINE & LIVE COCKPIT DEMO
+       ========================================================== */
+    .climax-shell {
+      background: linear-gradient(165deg, var(--bg-deck) 0%, var(--bg-panel) 100%);
+      border: 2px solid var(--accent-amber);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow-elevated);
+      scroll-margin-top: 76px;
+    }
+
+    .breakthroughs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 22px 0 32px;
+    }
+
+    @media (max-width: 1024px) {
+      .breakthroughs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .bt-monument {
+      background: var(--bg-code);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    .bt-num {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--accent-amber);
+    }
+
+    .bt-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .bt-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Interactive 5-Node Architectural Loop */
+    .arch-loop-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 30px;
+    }
+
+    .arch-loop-hdr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .pipeline-nodes {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 1024px) {
+      .pipeline-nodes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pipe-node {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 9px;
+      padding: 13px;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      transition: all 0.18s ease;
+      position: relative;
+    }
+
+    .pipe-node:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .pipe-node.active {
+      border-color: var(--accent-cyan);
+      background: var(--accent-cyan-soft);
+      box-shadow: 0 0 0 1px var(--accent-cyan);
+    }
+
+    .pipe-node.pulsing {
+      border-color: var(--accent-emerald);
+      box-shadow: 0 0 18px var(--accent-emerald-soft);
+    }
+
+    .pipe-step {
+      font-family: var(--mono-font);
+      font-size: 10.5px;
+      color: var(--accent-cyan);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .pipe-name {
+      font-family: var(--mono-font);
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      word-break: break-word;
+    }
+
+    .pipe-sub {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    .node-inspector {
+      margin-top: 14px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 9px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .node-inspector {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .inspector-pre {
+      background: var(--bg-void);
+      border: 1px solid var(--border-hairline);
+      border-radius: 7px;
+      padding: 12px;
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: var(--accent-emerald);
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Interactive Mini Live Prototype (.aidd/cockpit.html) */
+    .proto-frame {
+      background: var(--bg-void);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .proto-titlebar {
+      background: var(--bg-panel-elevated);
+      border-bottom: 1px solid var(--border-hairline);
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+    }
+
+    .proto-mode-tabs {
+      display: inline-flex;
+      gap: 4px;
+      background: var(--bg-code);
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid var(--border-hairline);
+    }
+
+    .proto-tab {
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .proto-tab.active {
+      background: var(--bg-panel-elevated);
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .proto-body {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 0;
+    }
+
+    .proto-body.single-col {
+      grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 980px) {
+      .proto-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .proto-pane {
+      padding: 20px;
+      border-right: 1px solid var(--border-hairline);
+    }
+
+    .proto-pane:last-child {
+      border-right: none;
+    }
+
+    .lineage-strip {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .lineage-node {
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      color: var(--text-secondary);
+    }
+
+    .lineage-node.current {
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    .story-hdr-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 9px;
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .ac-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .ac-row {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .ac-row.risk-flagged {
+      border-left: 3px solid var(--accent-amber);
+    }
+
+    .ac-row-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .ac-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      cursor: pointer;
+    }
+
+    .ac-label input {
+      margin-top: 3px;
+      accent-color: var(--accent-emerald);
+    }
+
+    .clause-pin-btn {
+      background: var(--bg-code);
+      color: var(--text-muted);
+      border: 1px solid var(--border-hairline);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-family: var(--mono-font);
+      font-size: 10.5px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .clause-pin-btn:hover, .clause-pin-btn.has-note {
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+    }
+
+    .pin-editor {
+      margin-top: 8px;
+      display: none;
+    }
+
+    .pin-editor.open {
+      display: block;
+    }
+
+    .pin-editor input {
+      width: 100%;
+      background: var(--bg-void);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      padding: 6px 9px;
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+    }
+
+    .gate-switches {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-hairline);
+      border-radius: 9px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .switch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 560px) {
+      .switch-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .gate-sw {
+      background: var(--bg-code);
+      color: var(--text-muted);
+      border: 1px solid var(--border-hairline);
+      border-radius: 6px;
+      padding: 7px 6px;
+      font-family: var(--mono-font);
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.14s ease;
+    }
+
+    .gate-sw.armed {
+      background: var(--accent-emerald-soft);
+      color: var(--accent-emerald);
+      border-color: var(--accent-emerald);
+      font-weight: 700;
+    }
+
+    .verdict-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .verdict-btn {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-family: var(--mono-font);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border-hairline);
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      transition: all 0.15s ease;
+    }
+
+    .verdict-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .verdict-btn.approve-active {
+      background: var(--accent-emerald);
+      color: #04130d;
+      border-color: var(--accent-emerald);
+    }
+
+    .verdict-btn.changes-active {
+      background: var(--accent-crimson);
+      color: #ffffff;
+      border-color: var(--accent-crimson);
+    }
+
+    /* Docked Spec Selection & Export Bar */
+    .spec-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 95;
+      background: color-mix(in srgb, var(--bg-deck) 95%, transparent);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border-strong);
+      padding: 12px 22px;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .spec-dock-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dock-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-family: var(--mono-font);
+      font-size: 12px;
+    }
+
+    .dock-count-pill {
+      background: var(--accent-amber-soft);
+      color: var(--accent-amber);
+      border: 1px solid var(--accent-amber);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .dock-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cta-copy-btn {
+      background: var(--accent-emerald);
+      color: #03150e;
+      border: none;
+      border-radius: 7px;
+      padding: 9px 16px;
+      font-family: var(--mono-font);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, filter 0.15s ease;
+    }
+
+    .cta-copy-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Preview */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      background: rgba(3, 6, 12, 0.76);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-deck);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      width: min(880px, 100%);
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-elevated);
+    }
+
+    .modal-hdr {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono-font);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      padding: 18px 20px;
+      overflow-y: auto;
+    }
+
+    .modal-body textarea {
+      width: 100%;
+      height: 360px;
+      background: var(--bg-void);
+      color: var(--text-primary);
+      border: 1px solid var(--border-hairline);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 76px;
+      right: 24px;
+      z-index: 140;
+      background: var(--bg-panel-elevated);
+      color: var(--accent-emerald);
+      border: 1px solid var(--accent-emerald);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      box-shadow: var(--shadow-elevated);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media print {
+      .telemetry-bar, .spec-dock, .filter-hud {
+        display: none !important;
+      }
+      body {
+        background: #ffffff;
+        color: #000000;
+        padding-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP AVIONICS TELEMETRY BAR -->
+  <header class="telemetry-bar">
+    <div class="brand-cluster">
+      <span class="avionics-bezel"><span class="led"></span> AiDD FLIGHT DECK // KEEPSAKE</span>
+      <span class="csp-badge" title="Strict Content-Security-Policy: zero external requests, zero CDN">CSP LOCKED · 0 CDN · 105 IDEAS</span>
+    </div>
+
+    <nav class="nav-links" aria-label="Technique sections">
+      <a class="nav-pill" href="#sec-triz">01 TRIZ (35)</a>
+      <a class="nav-pill" href="#sec-morph">02 MORPHOLOGICAL (35)</a>
+      <a class="nav-pill" href="#sec-cross">03 CROSS-POLLINATION (35)</a>
+      <a class="nav-pill climax" href="#sec-synthesis">04 SYNTHESIS &amp; LIVE COCKPIT</a>
+    </nav>
+
+    <div class="toolbar-right">
+      <div class="search-box">
+        <input id="globalSearch" type="search" placeholder="Filter 105 ideas (e.g. CORS, AC, diff)..." aria-label="Search all 105 ideas" />
+        <span class="kbd-hint">/</span>
+      </div>
+      <div class="theme-switcher" role="group" aria-label="Reading Theme">
+        <button class="theme-btn active" data-set-theme="cockpit" title="Midnight Slate (Dark Cockpit)">Cockpit</button>
+        <button class="theme-btn" data-set-theme="editorial" title="Editorial Paper">Paper</button>
+        <button class="theme-btn" data-set-theme="aaa" title="WCAG AAA High-Contrast">AAA</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HERO: SESSION MANDATE & DUAL-LAYER ARCHITECTURE -->
+    <section class="hero">
+      <div class="hero-meta">
+        <span class="meta-chip">SESSION: 2026-11-14T23:03</span>
+        <span class="meta-chip">MODE: AUTONOMOUS</span>
+        <span class="meta-chip">STATUS: COMPLETE</span>
+        <span class="meta-chip">CANONICAL SOURCE: .memlog.md (105 / 105 IDEAS)</span>
+      </div>
+
+      <div class="hero-grid">
+        <div>
+          <h1>Hybrid <span class="hl">Dual-Layer HTML Review</span> Experience over Markdown in AiDD</h1>
+          <p class="hero-goal">
+            Keep clean <code class="inline-code">.md</code> files as canonical source for LLMs and Git diffs while giving humans zero-server interactive HTML sign-offs, visual clarity, diagrams, traceability, and seamless cross-artifact navigation.
+          </p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="#sec-synthesis" class="cta-copy-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+              ▼ Jump to Synthesis &amp; Live Cockpit Prototype
+            </a>
+            <button type="button" class="hud-btn" id="btnPreviewModalTop">Inspect Selected Spec Bundle</button>
+          </div>
+        </div>
+
+        <div class="dual-layer-card" aria-label="Dual-Layer Principle">
+          <div class="dl-layer">
+            <div class="dl-title">
+              <span style="color:var(--accent-cyan);">LAYER 1 · CANONICAL LLM &amp; GIT TRUTH</span>
+              <span>.aidd/work/*.md</span>
+            </div>
+            <div class="dl-sub">100% pure Markdown · Zero HTML token waste · Clean Git PR diffs · Progressive enhancement invariant</div>
+          </div>
+          <div class="dl-bridge">⇅ sync-state (&lt;80ms) · &lt;script src="views/aidd-data.js"&gt; · @aidd-review-patch ⇅</div>
+          <div class="dl-layer">
+            <div class="dl-title">
+              <span style="color:var(--accent-amber);">LAYER 2 · HUMAN DARK-COCKPIT REVIEW</span>
+              <span>.aidd/cockpit.html</span>
+            </div>
+            <div class="dl-sub">Zero-server file:/// · Anomaly-only color discipline · X-ray traceability · Prompt compiler &amp; createWritable()</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pillars-strip">
+        <div class="pillars-label">
+          <span>4 Non-Negotiable Architectural Pillars — Click any pillar to filter all 3 techniques:</span>
+          <button type="button" class="hud-btn" id="btnClearPillar" style="padding:3px 9px; font-size:11px; display:none;">Reset Pillar Filter ✕</button>
+        </div>
+        <div class="pillars-grid" id="pillarsGrid">
+          <button type="button" class="pillar-btn" data-pillar="P1">
+            <span class="pillar-top"><span>PILLAR 01</span><span id="count-P1">0</span></span>
+            <span class="pillar-name">Interactive Sign-Off &amp; Agent Loop</span>
+          </button>
+          <button type="button" class="pillar-btn" data-pillar="P2">
+            <span class="pillar-top"><span>PILLAR 02</span><span id="count-P2">0</span></span>
+            <span class="pillar-name">Visual Clarity &amp; Risk Highlighting</span>
+          </button>
+          <button type="button" class="pillar-btn" data-pillar="P3">
+            <span class="pillar-top"><span>PILLAR 03</span><span id="count-P3">0</span></span>
+            <span class="pillar-name">Seamless Cross-Artifact Navigation</span>
+          </button>
+          <button type="button" class="pillar-btn" data-pillar="P4">
+            <span class="pillar-top"><span>PILLAR 04</span><span id="count-P4">0</span></span>
+            <span class="pillar-name">Zero-Server &amp; Zero-Diff-Noise Offline</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GLOBAL FILTER & BOOKMARK HUD -->
+    <div class="filter-hud">
+      <div class="filter-hud-left">
+        <span id="visibleSummary" style="color:var(--text-secondary);">Showing <strong style="color:var(--text-primary);">105</strong> of 105 ideas</span>
+        <button type="button" class="hud-btn" id="btnStarredOnly">★ Starred Only (<span id="starredCountInline">0</span>)</button>
+        <button type="button" class="hud-btn" id="btnResetAllFilters">Reset All Filters</button>
+      </div>
+      <div class="filter-hud-right">
+        <button type="button" class="hud-btn" id="btnSelectRecommended">★ Load Recommended Core MVP (14)</button>
+        <button type="button" class="hud-btn" id="btnSelectVisible">+ Star All Visible</button>
+        <button type="button" class="hud-btn" id="btnClearStars">Clear Stars</button>
+      </div>
+    </div>
+
+    <!-- ==========================================================
+         TECHNIQUE 1: TRIZ CONTRADICTION (#001 - #035)
+         ========================================================== -->
+    <section class="technique-section" id="sec-triz">
+      <div class="section-eyebrow">TECHNIQUE 01 // DEEP CONTRADICTION RESOLUTION · IDEAS #001–#035</div>
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">TRIZ Contradiction Arena</h2>
+          <p class="section-desc">
+            Instead of trading off human UX against LLM token/Git hygiene, TRIZ separates the two worlds in <strong>Space</strong>, <strong>Time</strong>, <strong>Direction (Inversion)</strong>, and <strong>Self-Service Micro-Visualizations</strong>.
+          </p>
+        </div>
+        <span class="meta-chip mono" id="trizVisibleBadge">35 / 35 visible</span>
+      </div>
+
+      <div class="triz-tension-arena">
+        <div class="tension-poles">
+          <div class="pole-card pole-human">
+            <div class="pole-tag">Pole A · Improving Parameter</div>
+            <div class="pole-title">Rich Interactive Human HTML</div>
+            <ul class="pole-list">
+              <li>• Interactive sign-offs, hover clause pins &amp; verdict gates</li>
+              <li>• SVG completion rings, module boundary maps &amp; clean diffs</li>
+              <li>• Instant keyboard triage &amp; executive stakeholder clarity</li>
+            </ul>
+          </div>
+
+          <div class="pole-fulcrum">
+            <span class="fulcrum-badge">ZERO COMPROMISE</span>
+            <strong style="font-size:0.95rem; margin-bottom:4px;">TRIZ Dual-Layer Bridge</strong>
+            <span style="font-size:11.5px; color:var(--text-secondary);">
+              Ephemeral views + &lt;80ms sync-state + Browser-as-Prompt-Compiler
+            </span>
+          </div>
+
+          <div class="pole-card pole-llm">
+            <div class="pole-tag">Pole B · Preserved Invariant</div>
+            <div class="pole-title">Clean Zero-Server Markdown</div>
+            <ul class="pole-list">
+              <li>• Zero HTML noise polluting Git PR diffs or merge history</li>
+              <li>• Zero LLM tokens wasted emitting brittle HTML markup</li>
+              <li>• Zero Node/Python web server required to open locally</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="subdomain-bar" id="trizTabs" role="tablist" aria-label="TRIZ Sub-domains">
+          <button type="button" class="sub-tab active" data-triz="ALL">All TRIZ Resolution Ideas (35)</button>
+          <button type="button" class="sub-tab" data-triz="space">Separation in Space (11)</button>
+          <button type="button" class="sub-tab" data-triz="time">Separation in Time (6)</button>
+          <button type="button" class="sub-tab" data-triz="inversion">Inversion: Browser as Prompt Compiler (5)</button>
+          <button type="button" class="sub-tab" data-triz="microviz">Self-Service Micro-Visualizations (13)</button>
+        </div>
+      </div>
+
+      <div class="triz-grid" id="trizGrid"></div>
+    </section>
+
+    <!-- ==========================================================
+         TECHNIQUE 2: MORPHOLOGICAL ANALYSIS (#036 - #070)
+         ========================================================== -->
+    <section class="technique-section" id="sec-morph">
+      <div class="section-eyebrow">TECHNIQUE 02 // SYSTEMATIC ARCHITECTURAL SPACE · IDEAS #036–#070</div>
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">5D Morphological Combinator &amp; Cockpit Blueprint</h2>
+          <p class="section-desc">
+            Explore the 5 orthogonal architectural dimensions below. Click any cell in the Zwicky Matrix (or pick a preset stack) to isolate matching architectural components across Unified Cockpit topology, Stage-Specific UX, and the Zero-CORS <code class="inline-code">&lt;script src='views/aidd-data.js'&gt;</code> breakthrough.
+          </p>
+        </div>
+        <span class="meta-chip mono" id="morphVisibleBadge">35 / 35 visible</span>
+      </div>
+
+      <div class="morph-explorer">
+        <div class="morph-presets">
+          <div class="preset-group">
+            <span class="mono" style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Presets:</span>
+            <button type="button" class="preset-btn active" data-morph-preset="all">All 35 Blueprint Ideas</button>
+            <button type="button" class="preset-btn" data-morph-preset="zerocors">⚡ Zero-CORS &amp; Zero-Merge-Conflict Stack</button>
+            <button type="button" class="preset-btn" data-morph-preset="judge">⚖️ Tech-Lead Two-Hat Judge</button>
+            <button type="button" class="preset-btn" data-morph-preset="specstudio">🧭 PM / UX Spec &amp; Scope Studio</button>
+          </div>
+          <button type="button" class="hud-btn" id="btnClearMorph" style="padding:4px 10px; font-size:11px;">Clear Matrix Selection</button>
+        </div>
+
+        <div class="zwicky-matrix" id="zwickyMatrix">
+          <div class="zwicky-col">
+            <div class="zwicky-col-hdr">D1 · Cockpit Topology</div>
+            <button type="button" class="zwicky-cell" data-mcell="cockpit-core"><span>5-View Unified Cockpit</span><span class="mono">#36-38</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="comparators"><span>Split &amp; 3-Pane Judge</span><span class="mono">#39-40</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="atlas-heatmap"><span>Traceability, ADR &amp; Atlas</span><span class="mono">#41-43</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="flow-ops"><span>Bottleneck &amp; Fast-Lane</span><span class="mono">#44-45</span></button>
+          </div>
+
+          <div class="zwicky-col">
+            <div class="zwicky-col-hdr">D2 · Stage-Specific UX</div>
+            <button type="button" class="zwicky-cell" data-mcell="upstream-ux"><span>IDEA &amp; BRIEF Shapers</span><span class="mono">#46-47</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="spec-arch-ux"><span>SPEC 4-State &amp; ARCH Tree</span><span class="mono">#48-49</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="story-ux"><span>STORY Pre-Flight &amp; Chapters</span><span class="mono">#50-51</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="governance-ux"><span>NFR, Pivot, Debate &amp; Retro</span><span class="mono">#52-55</span></button>
+          </div>
+
+          <div class="zwicky-col">
+            <div class="zwicky-col-hdr">D3 · Zero-CORS Transport</div>
+            <button type="button" class="zwicky-cell" data-mcell="script-src"><span>&lt;script src="aidd-data.js"&gt;</span><span class="mono">#56</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="zero-conflict"><span>Zero Git Merge Conflicts</span><span class="mono">#57</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="dual-boot"><span>Dual-Bootstrap Picker</span><span class="mono">#58</span></button>
+          </div>
+
+          <div class="zwicky-col">
+            <div class="zwicky-col-hdr">D4 · IDE &amp; PR Bridge</div>
+            <button type="button" class="zwicky-cell" data-mcell="cosign-peek"><span>Co-Sign &amp; &lt;/&gt; Raw Peek</span><span class="mono">#59-60</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="deeplinks"><span>vscode:// &amp; Mention Chips</span><span class="mono">#61,63</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="pr-export"><span>1-Click GitHub PR Exporter</span><span class="mono">#62</span></button>
+          </div>
+
+          <div class="zwicky-col">
+            <div class="zwicky-col-hdr">D5 · Telemetry &amp; Ergonomics</div>
+            <button type="button" class="zwicky-cell" data-mcell="budget-themes"><span>LLM Budget &amp; 3 Themes</span><span class="mono">#64-65</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="cmdk-inbox"><span>Cmd+K &amp; Smart Inbox</span><span class="mono">#66-67</span></button>
+            <button type="button" class="zwicky-cell" data-mcell="search-spark"><span>Sparklines, Search &amp; Alias</span><span class="mono">#68-70</span></button>
+          </div>
+        </div>
+
+        <div class="zwicky-recipe" id="zwickyRecipe">
+          <span>Active Combinator Filter: <strong style="color:var(--accent-cyan);">All 5 Dimensions Open (Showing full 35-idea blueprint)</strong></span>
+          <span style="color:var(--text-muted);">Tip: Toggle multiple cells across columns to compose a custom cockpit slice</span>
+        </div>
+      </div>
+
+      <div class="morph-grid" id="morphGrid"></div>
+    </section>
+
+    <!-- ==========================================================
+         TECHNIQUE 3: CROSS-POLLINATION (#071 - #105)
+         ========================================================== -->
+    <section class="technique-section" id="sec-cross">
+      <div class="section-eyebrow">TECHNIQUE 03 // HIGH-STAKES DOMAIN TRANSFER · IDEAS #071–#105</div>
+      <div class="section-header-row">
+        <div>
+          <h2 class="section-title">Cross-Pollination Industry Lens Switcher</h2>
+          <p class="section-desc">
+            How do high-reliability professions review dense telemetry without fatigue or rubber-stamping? Switch across 7 external industry lenses transferred directly into AiDD's zero-server review cockpit.
+          </p>
+        </div>
+        <span class="meta-chip mono" id="crossVisibleBadge">35 / 35 visible</span>
+      </div>
+
+      <div class="lens-console">
+        <div class="lens-strip" id="lensStrip" role="tablist" aria-label="Industry Lenses">
+          <button type="button" class="lens-btn active" data-lens="ALL">
+            <span class="lens-btn-title">🌐 All Industry Lenses</span>
+            <span class="lens-count">35</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="aviation">
+            <span class="lens-btn-title">✈️ Aviation Flight-Deck</span>
+            <span class="lens-count">5</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="radiology">
+            <span class="lens-btn-title">🩻 Medical Radiology</span>
+            <span class="lens-count">5</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="legal">
+            <span class="lens-btn-title">⚖️ Legal &amp; Bloomberg</span>
+            <span class="lens-count">5</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="gamedev">
+            <span class="lens-btn-title">🎮 Video Game HUDs</span>
+            <span class="lens-count">5</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="daw">
+            <span class="lens-btn-title">🎚️ Film &amp; Music DAWs</span>
+            <span class="lens-count">5</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="kitchen">
+            <span class="lens-btn-title">🍽️ Michelin Pass &amp; Print</span>
+            <span class="lens-count">5</span>
+          </button>
+          <button type="button" class="lens-btn" data-lens="wildcards">
+            <span class="lens-btn-title">⚡ Loop-Closing Wildcards</span>
+            <span class="lens-count">5</span>
+          </button>
+        </div>
+
+        <div class="lens-briefing" id="lensBriefing">
+          <span><strong>All 7 Cross-Pollinated Domains Active:</strong> Combining Airbus anomaly discipline, diagnostic X-ray anti-complacency, clause-level precision, tactical HUD radar, DAW track soloing, Michelin pass expediting, and InfoSec-locked loop closure.</span>
+        </div>
+      </div>
+
+      <div class="cross-grid" id="crossGrid"></div>
+    </section>
+
+    <!-- ==========================================================
+         ACT IV — VISUAL CLIMAX: SYNTHESIS & MINI LIVE PROTOTYPE
+         ========================================================== -->
+    <section class="climax-shell" id="sec-synthesis">
+      <div class="section-eyebrow" style="color:var(--accent-amber);">ACT IV // ARCHITECTURAL CLIMAX · THE 3 SESSION BREAKTHROUGHS &amp; END-TO-END LOOP</div>
+      <h2 class="section-title">Synthesis: Zero-CORS Dual-Layer Cockpit Architecture</h2>
+      <p class="section-desc">
+        Distilled from 105 ideas across TRIZ, Morphological Analysis, and Cross-Pollination, three structural breakthroughs resolve every contradiction simultaneously.
+      </p>
+
+      <!-- 3 BREAKTHROUGH MONUMENTS -->
+      <div class="breakthroughs-grid">
+        <article class="bt-monument">
+          <span class="bt-num">Breakthrough #1 · Transport &amp; Git Hygiene</span>
+          <h3 class="bt-title">Zero-CORS, Zero-Git-Noise Transport</h3>
+          <p class="bt-text">
+            Commit a single static <code class="inline-code">.aidd/cockpit.html</code> once and have <code class="inline-code">sync-state.sh/.ps1</code> generate a gitignored <code class="inline-code">.aidd/views/aidd-data.js</code> loaded via <code class="inline-code">&lt;script src='views/aidd-data.js'&gt;</code> — <code class="inline-code">&lt;script src&gt;</code> bypasses <code class="inline-code">file:///</code> CORS in Chrome, Safari, Firefox &amp; Edge while producing zero HTML Git diffs or merge conflicts.
+          </p>
+        </article>
+
+        <article class="bt-monument">
+          <span class="bt-num">Breakthrough #2 · Token &amp; Cognitive Economy</span>
+          <h3 class="bt-title">Zero-LLM-HTML Token Rule</h3>
+          <p class="bt-text">
+            LLMs never waste tokens or risk broken markup generating HTML for Briefs, Specs, or Stories; LLMs write 100% pure Markdown, and <code class="inline-code">cockpit.html</code> turns Markdown conventions (YAML frontmatter, Context Capsules, AC checkboxes, Allowed Paths, Execution Evidence) into interactive diagrams, progress rings, X-ray traceability, and Dark-Cockpit anomaly alerts.
+          </p>
+        </article>
+
+        <article class="bt-monument">
+          <span class="bt-num">Breakthrough #3 · Bi-Directional Loop Closure</span>
+          <h3 class="bt-title">Browser as Prompt Compiler</h3>
+          <p class="bt-text">
+            Every human review interaction in <code class="inline-code">cockpit.html</code> (hover clause comments, Scope toggles, Open-Question answers, Blind Second-Opinion checks, Two-Hat Verdict switches) compiles into a surgical <code class="inline-code">@aidd-review-patch</code> clipboard prompt for any agent — with optional direct disk write-back via <code class="inline-code">FileSystemFileHandle.createWritable()</code>.
+          </p>
+        </article>
+      </div>
+
+      <!-- INTERACTIVE END-TO-END ARCHITECTURAL LOOP DIAGRAM -->
+      <div class="arch-loop-box">
+        <div class="arch-loop-hdr">
+          <div>
+            <div class="mono" style="font-size:11px; color:var(--accent-cyan); text-transform:uppercase;">Interactive Architecture Loop</div>
+            <strong style="font-size:1.05rem;">Click any stage in the pipeline to inspect its exact payload &amp; guarantees</strong>
+          </div>
+          <button type="button" class="hud-btn" id="btnSimulatePulse" style="border-color:var(--accent-emerald); color:var(--accent-emerald);">
+            ▶ Simulate End-to-End Sync &amp; Sign-Off Pulse
+          </button>
+        </div>
+
+        <div class="pipeline-nodes" id="pipelineNodes">
+          <button type="button" class="pipe-node active" data-node="0">
+            <div class="pipe-step"><span>STAGE 01</span><span>GIT TRACKED</span></div>
+            <div class="pipe-name">.aidd/work/*.md</div>
+            <div class="pipe-sub">Canonical pure Markdown authored by LLMs &amp; devs</div>
+          </button>
+
+          <button type="button" class="pipe-node" data-node="1">
+            <div class="pipe-step"><span>STAGE 02</span><span>&lt;80ms BUILD</span></div>
+            <div class="pipe-name">sync-state.sh / .ps1</div>
+            <div class="pipe-sub">Indexes YAML, ACs, git diff &amp; SHA-256 checksums</div>
+          </button>
+
+          <button type="button" class="pipe-node" data-node="2">
+            <div class="pipe-step"><span>STAGE 03</span><span>GITIGNORED</span></div>
+            <div class="pipe-name">.aidd/views/aidd-data.js</div>
+            <div class="pipe-sub">Zero-CORS JS payload · Zero PR diff noise</div>
+          </button>
+
+          <button type="button" class="pipe-node" data-node="3">
+            <div class="pipe-step"><span>STAGE 04</span><span>STATIC COMMITTED</span></div>
+            <div class="pipe-name">.aidd/cockpit.html</div>
+            <div class="pipe-sub">Dark-Cockpit 5-View UI over file:/// in all browsers</div>
+          </button>
+
+          <button type="button" class="pipe-node" data-node="4">
+            <div class="pipe-step"><span>STAGE 05</span><span>LOOP CLOSURE</span></div>
+            <div class="pipe-name">@aidd-review-patch</div>
+            <div class="pipe-sub">Universal clipboard prompt OR createWritable() save</div>
+          </button>
+        </div>
+
+        <div class="node-inspector" id="nodeInspector">
+          <div>
+            <div class="mono" style="font-size:11px; color:var(--accent-amber); margin-bottom:4px;" id="inspEyebrow">STAGE 01 // CANONICAL TRUTH</div>
+            <h4 style="font-size:1.05rem; margin-bottom:8px;" id="inspTitle">.aidd/work/*.md — 100% Progressive Enhancement Invariant</h4>
+            <p style="font-size:0.9rem; color:var(--text-secondary);" id="inspDesc"></p>
+          </div>
+          <pre class="inspector-pre" id="inspCode"></pre>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE MINI LIVE PROTOTYPE OF .aidd/cockpit.html -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+          <div>
+            <div class="mono" style="font-size:11px; color:var(--accent-emerald); text-transform:uppercase;">Interactive Mini Live Prototype</div>
+            <h3 style="font-size:1.25rem;">Test-Drive <code class="inline-code">.aidd/cockpit.html</code> Dual-Layer Sign-Off Right Now</h3>
+          </div>
+          <span class="mono" style="font-size:11.5px; color:var(--text-muted);">Toggle ACs, add clause pins, flip the 4 Aviation Gate switches &amp; copy the live <code class="inline-code">@aidd-review-patch</code></span>
+        </div>
+
+        <div class="proto-frame">
+          <div class="proto-titlebar">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span style="color:var(--accent-cyan); font-weight:700;">.aidd/cockpit.html#STORY-101</span>
+              <span class="mini-tag highlight">SHA-256 SEAL: VERIFIED (d9a4…8f1c)</span>
+              <span class="mini-tag">BLAST RADIUS: 2 / 3 FILES (OK)</span>
+            </div>
+            <div class="proto-mode-tabs" role="tablist">
+              <button type="button" class="proto-tab active" data-proto-view="split">Dual-Layer Split</button>
+              <button type="button" class="proto-tab" data-proto-view="html">Human Cockpit Only</button>
+              <button type="button" class="proto-tab" data-proto-view="md">&lt;/&gt; Raw .md Peek</button>
+            </div>
+          </div>
+
+          <div class="proto-body" id="protoBody">
+            <!-- Left Pane: Rendered Dark Cockpit HTML -->
+            <div class="proto-pane" id="protoHtmlPane">
+              <div class="lineage-strip">
+                <span>LINEAGE:</span>
+                <span class="lineage-node">IDEA-01</span><span>→</span>
+                <span class="lineage-node">BRIEF-01</span><span>→</span>
+                <span class="lineage-node">SPEC-02</span><span>→</span>
+                <span class="lineage-node">ARCH-04</span><span>→</span>
+                <span class="lineage-node current">STORY-101 (IN_REVIEW)</span>
+              </div>
+
+              <div class="story-hdr-card">
+                <div>
+                  <div class="mono" style="font-size:11px; color:var(--text-muted);">STORY-101 · owner: @developer · reviewer: @qa-reviewer + Human</div>
+                  <strong style="font-size:1rem;">Load gitignored views/aidd-data.js in static cockpit.html</strong>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <svg width="46" height="46" viewBox="0 0 44 44" aria-label="AC Completion Ring">
+                    <circle cx="22" cy="22" r="17" fill="none" stroke="var(--border-strong)" stroke-width="4"></circle>
+                    <circle id="protoRingCircle" cx="22" cy="22" r="17" fill="none" stroke="var(--accent-emerald)" stroke-width="4"
+                      stroke-dasharray="106.8" stroke-dashoffset="35.6" stroke-linecap="round" transform="rotate(-90 22 22)"></circle>
+                    <text id="protoRingText" x="22" y="26" text-anchor="middle" fill="var(--text-primary)" font-family="monospace" font-size="10" font-weight="700">2/3</text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Acceptance Criteria with Clause Pins & Risk Gutter -->
+              <div class="ac-list">
+                <div class="ac-row">
+                  <div class="ac-row-main">
+                    <label class="ac-label">
+                      <input type="checkbox" class="proto-ac-cb" data-ac="AC-1" checked />
+                      <span><strong class="mono">§AC-1</strong> <span class="mini-tag">[Auto Integration]</span> Static <code class="inline-code">.aidd/cockpit.html</code> loads <code class="inline-code">views/aidd-data.js</code> over <code class="inline-code">file:///</code> with zero CORS errors.</span>
+                    </label>
+                    <button type="button" class="clause-pin-btn" data-pin-btn="AC-1">+ Comment</button>
+                  </div>
+                  <div class="pin-editor" id="pin-wrap-AC-1">
+                    <input type="text" class="proto-pin-input" data-pin-ac="AC-1" placeholder="Inline note for §AC-1..." />
+                  </div>
+                </div>
+
+                <div class="ac-row">
+                  <div class="ac-row-main">
+                    <label class="ac-label">
+                      <input type="checkbox" class="proto-ac-cb" data-ac="AC-2" checked />
+                      <span><strong class="mono">§AC-2</strong> <span class="mini-tag">[Auto Unit]</span> <code class="inline-code">.gitignore</code> excludes <code class="inline-code">.aidd/views/</code> so <code class="inline-code">git status</code> reports zero HTML/JS diff noise.</span>
+                    </label>
+                    <button type="button" class="clause-pin-btn" data-pin-btn="AC-2">+ Comment</button>
+                  </div>
+                  <div class="pin-editor" id="pin-wrap-AC-2">
+                    <input type="text" class="proto-pin-input" data-pin-ac="AC-2" placeholder="Inline note for §AC-2..." />
+                  </div>
+                </div>
+
+                <div class="ac-row risk-flagged">
+                  <div class="ac-row-main">
+                    <label class="ac-label">
+                      <input type="checkbox" class="proto-ac-cb" data-ac="AC-3" />
+                      <span><strong class="mono">§AC-3</strong> <span class="mini-tag" style="color:var(--accent-amber); border-color:var(--accent-amber);">[Manual Human Check · RISK: CSP / security]</span> Strict CSP meta header blocks all external network / token exfiltration.</span>
+                    </label>
+                    <button type="button" class="clause-pin-btn has-note" data-pin-btn="AC-3">1 Note</button>
+                  </div>
+                  <div class="pin-editor open" id="pin-wrap-AC-3">
+                    <input type="text" class="proto-pin-input" data-pin-ac="AC-3" value="Verify img-src allows inline SVG data: URIs for completion rings." />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Blind Second-Opinion Toggle -->
+              <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--bg-panel); padding:9px 12px; border-radius:8px; border:1px solid var(--border-hairline); font-size:12px;">
+                <span>🩻 <strong>Radiology Blind Second-Opinion:</strong> <span id="blindOpinionText" style="color:var(--text-muted);">Hidden until human gut-check (prevents rubber-stamping)</span></span>
+                <button type="button" class="hud-btn" id="btnToggleBlind" style="padding:3px 9px; font-size:11px;">Reveal @qa-reviewer Note</button>
+              </div>
+
+              <!-- Aviation Challenge-Response 4-Switch Gate Lock -->
+              <div class="gate-switches">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--mono-font); font-size:11px;">
+                  <span>✈️ AVIATION CHALLENGE-RESPONSE GATE LOCK (Arm all 4 to unlock APPROVED):</span>
+                  <span id="gateLockStatus" style="color:var(--accent-amber);">3 / 4 ARMED — LOCKED</span>
+                </div>
+                <div class="switch-grid">
+                  <button type="button" class="gate-sw armed" data-gate="Scope">[✓] Scope</button>
+                  <button type="button" class="gate-sw armed" data-gate="Tests">[✓] Tests</button>
+                  <button type="button" class="gate-sw armed" data-gate="Evidence">[✓] Evidence</button>
+                  <button type="button" class="gate-sw" data-gate="Security">[ ] Security</button>
+                </div>
+              </div>
+
+              <div class="verdict-row">
+                <button type="button" class="verdict-btn" id="btnVerdictApprove" disabled>LOCKED: Toggle 4 Gate Switches to APPROVE</button>
+                <button type="button" class="verdict-btn changes-active" id="btnVerdictChanges">CHANGES_REQUESTED</button>
+              </div>
+            </div>
+
+            <!-- Right Pane: Canonical Raw .md + Compiled @aidd-review-patch -->
+            <div class="proto-pane" id="protoMdPane" style="background:var(--bg-code);">
+              <div style="margin-bottom:14px;">
+                <div class="mono" style="font-size:11px; color:var(--accent-cyan); margin-bottom:6px;">CANONICAL SOURCE ON DISK: .aidd/work/stories/STORY-101.md</div>
+                <pre class="inspector-pre" id="protoRawMd" style="color:var(--text-secondary); margin-bottom:0;"></pre>
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <span class="mono" style="font-size:11px; color:var(--accent-amber); font-weight:700;">LIVE COMPILED PROMPT: @aidd-review-patch</span>
+                  <button type="button" class="hud-btn" id="btnCopyDemoPatch" style="padding:4px 10px; font-size:11px; border-color:var(--accent-emerald); color:var(--accent-emerald);">
+                    Copy @aidd-review-patch
+                  </button>
+                </div>
+                <pre class="inspector-pre" id="protoPatchOut"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- DOCKED SPEC COMPILER BAR -->
+  <aside class="spec-dock" aria-label="Selected Ideas for AiDD Spec">
+    <div class="spec-dock-inner">
+      <div class="dock-stats">
+        <span class="dock-count-pill">★ <span id="dockSelectedCount">0</span> / 105 Selected</span>
+        <span style="color:var(--text-secondary);">Star your favorite ideas across any technique to compile a ready-to-paste AiDD Spec brief.</span>
+      </div>
+      <div class="dock-actions">
+        <button type="button" class="hud-btn" id="btnOpenSpecModal">Preview Markdown Bundle</button>
+        <button type="button" class="cta-copy-btn" id="btnCopySelectedSpec">Copy Selected Ideas for AiDD Spec</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MODAL FOR PREVIEWING SPEC MARKDOWN EXPORT -->
+  <div class="modal-backdrop" id="specModal" role="dialog" aria-modal="true" aria-labelledby="specModalTitle">
+    <div class="modal-card">
+      <div class="modal-hdr">
+        <span id="specModalTitle">Compiled AiDD Spec Input Bundle</span>
+        <button type="button" class="hud-btn" id="btnCloseSpecModal">Close ✕</button>
+      </div>
+      <div class="modal-body">
+        <textarea id="specModalTextarea" readonly aria-label="Compiled Markdown Spec"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+          <button type="button" class="cta-copy-btn" id="btnModalCopy">Copy Selected Ideas for AiDD Spec</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard!</div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // All 105 ideas verbatim from .memlog.md organized across the 3 techniques
+      var IDEAS = [
+        // ============================================================
+        // TECHNIQUE 1: TRIZ CONTRADICTION (#001 - #035)
+        // ============================================================
+        { id: 1, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4", mvp: true,
+          text: "Gitignored .aidd/views/ ephemeral HTML cache generated by sync-state so Git PR diffs have zero HTML noise while humans always have rich local HTML" },
+        { id: 2, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4",
+          text: "Single shared viewer-shell.html template + pure awk/PowerShell injector wrapping raw Markdown inside <script type='text/markdown'> so one template renders every artifact" },
+        { id: 3, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4",
+          text: "Optional Git post-checkout and post-merge hook silently refreshing local HTML views whenever a branch switches" },
+        { id: 4, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4",
+          text: "Zero-Build DropZone Shell (.aidd/review.html) using webkitdirectory / showDirectoryPicker to load an entire .aidd/ folder live with zero scripts" },
+        { id: 5, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4",
+          text: "Serverless live-reload inside HTML cockpit by polling FileSystemFileHandle.getFile().lastModified every 1500ms as LLMs edit Markdown on disk" },
+        { id: 6, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P1", mvp: true,
+          text: "Direct disk write-back via Chromium FileSystemFileHandle.createWritable() so clicking Approve or checking an AC updates the .md file directly without a backend" },
+        { id: 7, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P1",
+          text: "Universal browser fallback: when createWritable() is unavailable (Safari/Firefox), seamlessly switch action button to Copy Deterministic Agent Patch Prompt" },
+        { id: 8, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4",
+          text: "Polyglot .md.html export option that renders cleanly in Markdown viewers while opening locally as a styled self-bootstrapping HTML page" },
+        { id: 9, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4", mvp: true,
+          text: "Embedded <12KB zero-CDN micro-parser rendering YAML frontmatter, GFM tables, callouts, checklists, and lightweight SVG diagrams completely offline" },
+        { id: 10, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P4",
+          text: "Ephemeral CI Review Pack: aidd-gate.yml uploads a single-file downloadable aidd-pr-review.html artifact on every GitHub Pull Request" },
+        { id: 11, tech: "triz", sub: "space", subLabel: "Separation in Space", pillar: "P3",
+          text: "Portable PR Time-Capsule HTML generated by /walkthrough bundling Story Packet + git diff + Execution Evidence into one shareable file for Slack or email" },
+
+        { id: 12, tech: "triz", sub: "time", subLabel: "Separation in Time", pillar: "P4",
+          text: "Two-speed workflow: stream raw Markdown during LLM generation for speed/token savings, then compile HTML view in <80ms during sync-state handoff" },
+        { id: 13, tech: "triz", sub: "time", subLabel: "Separation in Time", pillar: "P2",
+          text: "Offline side-by-side Git Diff injection: sync-state embeds git diff main...HEAD into the local data bundle so humans review code and ACs in one tab" },
+        { id: 14, tech: "triz", sub: "time", subLabel: "Separation in Time", pillar: "P2", mvp: true,
+          text: "SHA-256 Tamper & Drift Seal: embed source .md checksum into the HTML view and flash an amber warning if the underlying .md edited since last sync" },
+        { id: 15, tech: "triz", sub: "time", subLabel: "Separation in Time", pillar: "P4", mvp: true,
+          text: "Zero-LLM-HTML Rule: LLMs never spend tokens generating HTML tags for Briefs/Specs/Stories; they write pure Markdown and deterministic scripts/JS render the UI" },
+        { id: 16, tech: "triz", sub: "time", subLabel: "Separation in Time", pillar: "P2",
+          text: "Print-to-PDF Executive CSS (@media print) baked into the viewer so Cmd+P exports any Brief or Spec as a clean stakeholder PDF" },
+        { id: 17, tech: "triz", sub: "time", subLabel: "Separation in Time", pillar: "P3",
+          text: "Deterministic URL hash deep-linking (cockpit.html#STORY-101/AC-2) so reviewers can share exact section/AC links with teammates" },
+
+        { id: 18, tech: "triz", sub: "inversion", subLabel: "Inversion: Prompt Compiler", pillar: "P1",
+          text: "localStorage review draft persistence keyed by (repo, artifact_id, sha256) so half-finished human reviews survive browser restarts" },
+        { id: 19, tech: "triz", sub: "inversion", subLabel: "Inversion: Prompt Compiler", pillar: "P1", mvp: true,
+          text: "Paragraph & AC hover [+ Comment] pins that compile all human inline notes into one surgical structured prompt for @pm, @architect, or @developer" },
+        { id: 20, tech: "triz", sub: "inversion", subLabel: "Inversion: Prompt Compiler", pillar: "P1", mvp: true,
+          text: "Interactive Two-Hat Verdict Composer: toggling APPROVED vs CHANGES_REQUESTED builds the exact /two-hat-review command pre-filled with line-level defects" },
+        { id: 21, tech: "triz", sub: "inversion", subLabel: "Inversion: Prompt Compiler", pillar: "P1",
+          text: "Interactive Open-Questions Resolver on BRIEF-XX: renders Open Questions as clickable option pills + write-in boxes that compile answers for @analyst/@pm" },
+        { id: 22, tech: "triz", sub: "inversion", subLabel: "Inversion: Prompt Compiler", pillar: "P1",
+          text: "Scope-Creep Trapdoor button ('Park to Backlog') during Story review so tangential ideas become new BACKLOG items instead of bloating the active story" },
+
+        { id: 23, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "Visual Quick-Fix Blast-Radius Meter highlighting 1..3 touched code files in green and flashing crimson if >3 files are staged" },
+        { id: 24, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P3",
+          text: "YAML Frontmatter Pill Header transforming raw --- metadata into status badges, owner chips, upstream breadcrumbs, and a clickable next_step launcher" },
+        { id: 25, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "Pinned Context Capsule Executive Banner with 'TL;DR Focus Mode' vs 'Full Detail Mode' toggle to eliminate wall-of-text fatigue" },
+        { id: 26, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "Auto-computed SVG completion rings derived from standard - [x] / - [ ] AC-* Markdown checkboxes across Kanban cards and Story headers" },
+        { id: 27, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "ANSI & Test-Runner Log Beautifier turning raw ## Execution Evidence text into collapsible green PASS / red FAIL summary blocks" },
+        { id: 28, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "Auto-generated SVG Module Boundary Diagram parsed directly from ARCH-XX 'Modules Modifiables' (green) vs 'Modules Interdits' (red locked)" },
+        { id: 29, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P3", mvp: true,
+          text: "Automatic Lineage Breadcrumb Strip (IDEA -> BRIEF -> SPEC -> ARCH -> STORY-101..104) computed from upstream: frontmatter pointers" },
+        { id: 30, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P3",
+          text: "Inline Convention Hover Previews showing matching rules from PROJECT_CONVENTIONS.md when hovering paths or commands" },
+        { id: 31, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "Revision Redline Diff Toggle comparing current SPEC-XX against previous Git commit (HEAD~1) with word-level green/red highlights" },
+        { id: 32, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P2",
+          text: "Automated Security & Risk Margin Gutter flagging keywords like auth, token, secret, DELETE, migration, concurrency in Specs and Stories" },
+        { id: 33, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P3",
+          text: "Instant FR/EN Chrome UI Switcher translating interface labels without touching underlying Markdown files" },
+        { id: 34, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P3",
+          text: "Keyboard-first Linear/Vim review hotkeys (j/k navigate, a approve, c comment, 1-6 switch stage, / search) for rapid tech-lead triage" },
+        { id: 35, tech: "triz", sub: "microviz", subLabel: "Self-Service Micro-Viz", pillar: "P4",
+          text: "Single-file HTML Bundle Export button packing the entire workspace state into one portable HTML file on demand" },
+
+        // ============================================================
+        // TECHNIQUE 2: MORPHOLOGICAL ANALYSIS (#036 - #070)
+        // ============================================================
+        { id: 36, tech: "morph", mcell: "cockpit-core", dimLabel: "D1 · Topology", pillar: "P3", mvp: true,
+          text: "Unified 5-View AiDD Cockpit (.aidd/cockpit.html): GPS Pulse, Kanban Board, Artifact Reader, Traceability/NFR Matrix, and Brainstorm Composer in one app" },
+        { id: 37, tech: "morph", mcell: "cockpit-core", dimLabel: "D1 · Topology", pillar: "P4",
+          text: "Workspace JSON/JS Data Bundle generated by sync-state indexing INDEX.md, PROJECT_STATE.md, PROJECT_CONVENTIONS.md, and all .aidd/work/**/*.md" },
+        { id: 38, tech: "morph", mcell: "cockpit-core", dimLabel: "D1 · Topology", pillar: "P3",
+          text: "Slide-over Story Inspector Drawer on the Kanban board so clicking STORY-101 previews ACs, constraints, and evidence without leaving the board" },
+        { id: 39, tech: "morph", mcell: "comparators", dimLabel: "D1 · Comparators", pillar: "P2",
+          text: "50/50 Split-Screen Spec-vs-Story Comparator to verify PM story slicing preserved every requirement and edge case from SPEC-XX" },
+        { id: 40, tech: "morph", mcell: "comparators", dimLabel: "D1 · Comparators", pillar: "P1",
+          text: "3-Pane Two-Hat Judge Workspace: Left = Story ACs & Constraints, Center = Git Diff, Right = Execution Evidence & Verdict Composer" },
+        { id: 41, tech: "morph", mcell: "atlas-heatmap", dimLabel: "D1 · Traceability", pillar: "P2", mvp: true,
+          text: "Interactive AC-to-Story-to-Test Traceability Heatmap where unmapped gaps glow crimson and click straight to the uncovered requirement" },
+        { id: 42, tech: "morph", mcell: "atlas-heatmap", dimLabel: "D1 · Traceability", pillar: "P3",
+          text: "Searchable ADR Architecture Decision Gallery aggregated automatically from ## Key Decisions across all ARCH-XX files" },
+        { id: 43, tech: "morph", mcell: "atlas-heatmap", dimLabel: "D1 · Traceability", pillar: "P3",
+          text: "Interactive Onboarding Atlas rendering PROJECT_CONTEXT.md + DEVELOPER_GUIDE.md into a visual repo map for new human developers" },
+        { id: 44, tech: "morph", mcell: "flow-ops", dimLabel: "D1 · Flow Ops", pillar: "P2",
+          text: "Flow Bottleneck Detector banner on Kanban highlighting queue pile-ups (e.g. 4 stories waiting in IN_REVIEW) with 1-click review queue mode" },
+        { id: 45, tech: "morph", mcell: "flow-ops", dimLabel: "D1 · Flow Ops", pillar: "P2",
+          text: "Dedicated Quick-Fix Audit Filter displaying all fast-lane stories alongside their staged file count (<=3) to prevent fast-lane abuse" },
+
+        { id: 46, tech: "morph", mcell: "upstream-ux", dimLabel: "D2 · IDEA/BRIEF", pillar: "P1",
+          text: "IDEA-XX Interactive Impact-vs-Effort Matrix where humans click their Top 3 brainstormed ideas to generate the @analyst BRIEF-XX prompt" },
+        { id: 47, tech: "morph", mcell: "upstream-ux", dimLabel: "D2 · IDEA/BRIEF", pillar: "P1",
+          text: "BRIEF-XX Interactive Scope Sorter letting reviewers toggle items between In-Scope and Out-of-Scope and export the diff prompt" },
+        { id: 48, tech: "morph", mcell: "spec-arch-ux", dimLabel: "D2 · SPEC/ARCH", pillar: "P2",
+          text: "SPEC-XX 4-State UX Completeness Grid (Empty | Loading | Success | Error + A11y) automatically highlighting unspecified UI states in red" },
+        { id: 49, tech: "morph", mcell: "spec-arch-ux", dimLabel: "D2 · SPEC/ARCH", pillar: "P2",
+          text: "ARCH-XX Visual Repo Firewall Tree coloring repo directories Green (Allowed), Grey (Read-Only), or Red (Forbidden) for upcoming stories" },
+        { id: 50, tech: "morph", mcell: "story-ux", dimLabel: "D2 · STORY UX", pillar: "P2",
+          text: "STORY-XXX Definition-of-Ready Pre-Flight Meter scoring AC testability, path scoping, and UX state clarity before @developer starts coding" },
+        { id: 51, tech: "morph", mcell: "story-ux", dimLabel: "D2 · STORY UX", pillar: "P1",
+          text: "Guided Walkthrough Storyboard grouping git diff files into logical reading chapters (Contracts -> Domain -> UI -> Tests) with per-chapter sign-off" },
+        { id: 52, tech: "morph", mcell: "governance-ux", dimLabel: "D2 · Governance", pillar: "P2",
+          text: "NFR 4-Pillar Visual Scorecard (Security, Performance, Reliability, Maintainability) rendering /test-audit findings with severity filters" },
+        { id: 53, tech: "morph", mcell: "governance-ux", dimLabel: "D2 · Governance", pillar: "P1",
+          text: "Mid-Sprint Pivot Simulator (/correct-course) previewing Before vs After Kanban impact (KEEP / UPDATE_AC / SPLIT / DROP) prior to confirmation" },
+        { id: 54, tech: "morph", mcell: "governance-ux", dimLabel: "D2 · Governance", pillar: "P1",
+          text: "Roundtable Debate Arena (/roundtable-panel) displaying side-by-side persona critiques (@pm, @architect, @ux, @qa) with a human 'Select Winner' button" },
+        { id: 55, tech: "morph", mcell: "governance-ux", dimLabel: "D2 · Governance", pillar: "P1",
+          text: "Retrospective Rule Promoter turning /retrospective lessons into checkable convention cards that build a clean patch for PROJECT_CONVENTIONS.md" },
+
+        { id: 56, tech: "morph", mcell: "script-src", dimLabel: "D3 · BREAKTHROUGH", pillar: "P4", mvp: true, breakthrough: true,
+          text: "CORS-Free <script src='views/aidd-data.js'> Architecture: commit static cockpit.html ONCE and load gitignored aidd-data.js over file:/// in every browser with zero CORS errors" },
+        { id: 57, tech: "morph", mcell: "zero-conflict", dimLabel: "D3 · BREAKTHROUGH", pillar: "P4", breakthrough: true,
+          text: "Zero Git Merge Conflicts Forever: because sync-state writes gitignored .aidd/views/aidd-data.js instead of mutating HTML, parallel branches never conflict on UI files" },
+        { id: 58, tech: "morph", mcell: "dual-boot", dimLabel: "D3 · Transport", pillar: "P4",
+          text: "Dual-Bootstrap Fallback in cockpit.html: auto-loads views/aidd-data.js if present, otherwise shows a 1-click 'Open .aidd/ Folder' picker" },
+
+        { id: 59, tech: "morph", mcell: "cosign-peek", dimLabel: "D4 · Bridge", pillar: "P1",
+          text: "Human Co-Signature Stamp optional metadata recording human walkthrough approval alongside AI qa-reviewer Two-Hat approval" },
+        { id: 60, tech: "morph", mcell: "cosign-peek", dimLabel: "D4 · Bridge", pillar: "P3",
+          text: "1-Click Raw Markdown Peek (</>) toggle on every rendered section showing exact source lines and file path" },
+        { id: 61, tech: "morph", mcell: "deeplinks", dimLabel: "D4 · Bridge", pillar: "P3",
+          text: "IDE Protocol Deep-Links (vscode://file/, cursor://file/) on every file path and AC reference to jump straight to the exact line in the editor" },
+        { id: 62, tech: "morph", mcell: "pr-export", dimLabel: "D4 · Bridge", pillar: "P1",
+          text: "1-Click 'Copy as GitHub PR Body' exporter formatting Context Capsule, checked ACs, and Execution Evidence summary for Pull Requests" },
+        { id: 63, tech: "morph", mcell: "deeplinks", dimLabel: "D4 · Bridge", pillar: "P3",
+          text: "Auto-linked Artifact Mentions turning text like STORY-101, SPEC-02, or AC-3 into hoverable preview chips across all rendered docs" },
+
+        { id: 64, tech: "morph", mcell: "budget-themes", dimLabel: "D5 · Ergonomics", pillar: "P2",
+          text: "LLM Context-Budget Gauge per file (e.g. PROJECT_CONTEXT.md 112/150 lines) warning visually when an artifact grows too large for optimal LLM attention" },
+        { id: 65, tech: "morph", mcell: "budget-themes", dimLabel: "D5 · Ergonomics", pillar: "P2",
+          text: "3 Reading Themes: Midnight Slate (code/diff review), Editorial Paper (long Spec reading), and WCAG AAA High-Contrast" },
+        { id: 66, tech: "morph", mcell: "cmdk-inbox", dimLabel: "D5 · Ergonomics", pillar: "P3", mvp: true,
+          text: "Cmd+K / Ctrl+K Instant Command Palette inside cockpit.html to jump to any story, spec, AC, ADR, or copy any /prompt in <200ms" },
+        { id: 67, tech: "morph", mcell: "cmdk-inbox", dimLabel: "D5 · Ergonomics", pillar: "P1",
+          text: "'Needs Human Attention' Smart Inbox filtering the entire project down to open Brief questions, unapproved Specs, BLOCKED stories, and IN_REVIEW gates" },
+        { id: 68, tech: "morph", mcell: "search-spark", dimLabel: "D5 · Ergonomics", pillar: "P2",
+          text: "Zero-Dependency SVG Velocity & Rework Sparklines computed from story statuses and Review Verdict history" },
+        { id: 69, tech: "morph", mcell: "search-spark", dimLabel: "D5 · Ergonomics", pillar: "P3",
+          text: "Offline Search Index across all Briefs, Specs, Architecture ADRs, and Story Packets with highlighted snippet previews" },
+        { id: 70, tech: "morph", mcell: "search-spark", dimLabel: "D5 · Ergonomics", pillar: "P4",
+          text: "One-Command 'aidd-open' alias note in README opening .aidd/cockpit.html after running sync-state.sh/.ps1" },
+
+        // ============================================================
+        // TECHNIQUE 3: CROSS-POLLINATION (#071 - #105)
+        // ============================================================
+        { id: 71, tech: "cross", lens: "aviation", lensLabel: "✈️ Aviation Flight-Deck", pillar: "P2", mvp: true,
+          text: "Airbus 'Dark Cockpit' Color Discipline: healthy items stay calm slate grey; bright color ONLY illuminates anomalies, blockers, gaps, and pending human gates" },
+        { id: 72, tech: "cross", lens: "aviation", lensLabel: "✈️ Aviation Flight-Deck", pillar: "P1",
+          text: "Aviation Challenge-Response Gate Lock: human reviewer toggles 4 verification switches (Scope, Tests, Evidence, Security) to unlock the Approve command button" },
+        { id: 73, tech: "cross", lens: "aviation", lensLabel: "✈️ Aviation Flight-Deck", pillar: "P1",
+          text: "QRH Emergency Recovery Cards on BLOCKED stories offering context-specific 1-click unblocking playbooks (/roundtable-panel, /correct-course)" },
+        { id: 74, tech: "cross", lens: "aviation", lensLabel: "✈️ Aviation Flight-Deck", pillar: "P3",
+          text: "Flight-Recorder Chronology Ribbon on each Story showing timestamped state transitions and review cycles" },
+        { id: 75, tech: "cross", lens: "aviation", lensLabel: "✈️ Aviation Flight-Deck", pillar: "P2",
+          text: "Visual 'Hold Short' Runway Bars on Kanban between IN_PROGRESS->IN_REVIEW (Evidence Gate) and IN_REVIEW->DONE (Two-Hat Gate)" },
+
+        { id: 76, tech: "cross", lens: "radiology", lensLabel: "🩻 Medical Radiology", pillar: "P2",
+          text: "Diagnostic Diff Loupe dimming unchanged context lines to 40% opacity while spotlighting modified conditions, loops, and auth checks at 100%" },
+        { id: 77, tech: "cross", lens: "radiology", lensLabel: "🩻 Medical Radiology", pillar: "P1",
+          text: "Blind Second-Opinion Toggle hiding AI qa-reviewer notes until the human clicks their own gut-check per AC to prevent automation complacency" },
+        { id: 78, tech: "cross", lens: "radiology", lensLabel: "🩻 Medical Radiology", pillar: "P2",
+          text: "Orphan-Requirement X-Ray Mode highlighting any SPEC-XX paragraph or AC that has zero downstream STORY-XXX linked to it" },
+        { id: 79, tech: "cross", lens: "radiology", lensLabel: "🩻 Medical Radiology", pillar: "P2",
+          text: "Rubber-Stamp Breaker spotlighting the single highest-risk AC or file at the top of the review card first" },
+        { id: 80, tech: "cross", lens: "radiology", lensLabel: "🩻 Medical Radiology", pillar: "P2",
+          text: "Verification Modality Badges per AC ([Auto Unit], [Auto Integration], [Manual Human Check]) so humans focus eyes where automation cannot reach" },
+
+        { id: 81, tech: "cross", lens: "legal", lensLabel: "⚖️ Legal & Bloomberg", pillar: "P1",
+          text: "Numbered Legal Clause Rail (§1.1, AC-2) with margin pin comments that reference exact clause IDs in generated agent prompts" },
+        { id: 82, tech: "cross", lens: "legal", lensLabel: "⚖️ Legal & Bloomberg", pillar: "P2",
+          text: "Live Scope-Breach Siren comparing git status/diff modified paths against Story Packet 'Fichiers Autorisés' and flagging unauthorized edits in red" },
+        { id: 83, tech: "cross", lens: "legal", lensLabel: "⚖️ Legal & Bloomberg", pillar: "P2",
+          text: "4-Box Executive Term-Sheet Bento at top of every Brief & Spec (Problem, Outcome, Hard Non-Goals, Blast Radius) readable in 15 seconds" },
+        { id: 84, tech: "cross", lens: "legal", lensLabel: "⚖️ Legal & Bloomberg", pillar: "P2",
+          text: "Hidden-Assumption Scanner extracting sentences with 'TBD', 'TODO', 'assume', 'later', or '?' across all specs into a single Watchlist panel" },
+        { id: 85, tech: "cross", lens: "legal", lensLabel: "⚖️ Legal & Bloomberg", pillar: "P1",
+          text: "Bloomberg Consensus Strip showing @pm, @architect, @ux-designer, and @qa-reviewer readiness signals at the top of a Spec" },
+
+        { id: 86, tech: "cross", lens: "gamedev", lensLabel: "🎮 Video Game HUDs", pillar: "P2",
+          text: "Codebase 'Fog of War' Map illuminating documented/tested modules from PROJECT_CONTEXT.md while marking undocumented legacy folders with caution fog" },
+        { id: 87, tech: "cross", lens: "gamedev", lensLabel: "🎮 Video Game HUDs", pillar: "P2",
+          text: "4 NFR Shield Icons (Security, Perf, Reliability, A11y) on Story cards that light up emerald once audited by /test-audit" },
+        { id: 88, tech: "cross", lens: "gamedev", lensLabel: "🎮 Video Game HUDs", pillar: "P3",
+          text: "Story Dependency Connectors warning when a READY story depends on an unfinished upstream story" },
+        { id: 89, tech: "cross", lens: "gamedev", lensLabel: "🎮 Video Game HUDs", pillar: "P2",
+          text: "Parallel-Agent File Collision Radar scanning 'Fichiers Autorisés' across READY/IN_PROGRESS stories and warning if two stories touch the same files" },
+        { id: 90, tech: "cross", lens: "gamedev", lensLabel: "🎮 Video Game HUDs", pillar: "P2",
+          text: "First-Pass Two-Hat Yield Metric tracking % of stories approved on first review without CHANGES_REQUESTED rework" },
+
+        { id: 91, tech: "cross", lens: "daw", lensLabel: "🎚️ Film & Music DAWs", pillar: "P2",
+          text: "DAW 'Solo / Mute' Persona Track Filters in long Specs: solo just UX/A11y sections, or just Architecture/Security sections, with 1 click" },
+        { id: 92, tech: "cross", lens: "daw", lensLabel: "🎚️ Film & Music DAWs", pillar: "P3",
+          text: "Sprint Timeline Scrubber replaying recent git log snapshots of PROJECT_STATE.md so humans see how scope moved over the week" },
+        { id: 93, tech: "cross", lens: "daw", lensLabel: "🎚️ Film & Music DAWs", pillar: "P3",
+          text: "Pinned Reference Monitor keeping BRIEF-XX problem statement docked in a thin top bar while reviewing SPEC-XX or STORY-XXX" },
+        { id: 94, tech: "cross", lens: "daw", lensLabel: "🎚️ Film & Music DAWs", pillar: "P3",
+          text: "Scrollbar Minimap Density Strip showing markers for warnings, unchecked ACs, code blocks, and human comments in long artifacts" },
+        { id: 95, tech: "cross", lens: "daw", lensLabel: "🎚️ Film & Music DAWs", pillar: "P3",
+          text: "5-Minute Human Review Playlist sequencing pending human review tasks in optimal dependency order" },
+
+        { id: 96, tech: "cross", lens: "kitchen", lensLabel: "🍽️ Michelin Pass & Print", pillar: "P2",
+          text: "Chef's Pass Expediter View for IN_REVIEW stories displaying diff size (+lines/-lines), evidence line count, and test command status at a glance" },
+        { id: 97, tech: "cross", lens: "kitchen", lensLabel: "🍽️ Michelin Pass & Print", pillar: "P2",
+          text: "Editorial 68ch Prose Measure paired with full-width breakout tables and diagrams for effortless long-form reading" },
+        { id: 98, tech: "cross", lens: "kitchen", lensLabel: "🍽️ Michelin Pass & Print", pillar: "P2",
+          text: "Zero-CDN Lightweight Architecture Diagram Renderer turning simple arrow lists ([UI] -> [API] -> [DB]) into crisp inline SVG boxes" },
+        { id: 99, tech: "cross", lens: "kitchen", lensLabel: "🍽️ Michelin Pass & Print", pillar: "P1",
+          text: "Interactive 'Defer AC to Next Sprint' simulator button on SPEC-XX that previews scope reduction and copies a /correct-course prompt" },
+        { id: 100, tech: "cross", lens: "kitchen", lensLabel: "🍽️ Michelin Pass & Print", pillar: "P4",
+          text: "Self-Auditing Zero-Network Security Badge + strict Content-Security-Policy meta tag proving zero external HTTP requests in corporate repos" },
+
+        { id: 101, tech: "cross", lens: "wildcards", lensLabel: "⚡ Loop-Closing Wildcards", pillar: "P4",
+          text: "Strict CSP Meta Lock (default-src 'none'; script-src 'unsafe-inline' file:; style-src 'unsafe-inline') inside HTML views for instant enterprise InfoSec approval" },
+        { id: 102, tech: "cross", lens: "wildcards", lensLabel: "⚡ Loop-Closing Wildcards", pillar: "P1", mvp: true,
+          text: "Standardized @aidd-review-patch Clipboard Format so any inline human edits/comments/verdicts paste cleanly into Copilot, Claude, Cursor, or Antigravity" },
+        { id: 103, tech: "cross", lens: "wildcards", lensLabel: "⚡ Loop-Closing Wildcards", pillar: "P1",
+          text: "Dual-Action Commit Bar on every review screen: 'Copy Prompt for Agent (Universal)' + 'Write to .md Now (Chromium Direct Access)'" },
+        { id: 104, tech: "cross", lens: "wildcards", lensLabel: "⚡ Loop-Closing Wildcards", pillar: "P4", mvp: true,
+          text: "Replace standalone board.html with unified .aidd/cockpit.html + gitignored .aidd/views/aidd-data.js so Kanban, Docs, Diffs, and Sign-Offs live in one zero-server app" },
+        { id: 105, tech: "cross", lens: "wildcards", lensLabel: "⚡ Loop-Closing Wildcards", pillar: "P4",
+          text: "100% Progressive Enhancement Invariant: deleting .aidd/views/ loses zero data because .aidd/work/*.md remains the sole canonical truth" }
+      ];
+
+      var LENS_DESCRIPTIONS = {
+        ALL: "<strong>All 7 Cross-Pollinated Domains Active:</strong> Combining Airbus anomaly discipline, diagnostic X-ray anti-complacency, clause-level precision, tactical HUD radar, DAW track soloing, Michelin pass expediting, and InfoSec-locked loop closure.",
+        aviation: "<strong>✈️ Aviation Flight-Deck Principle:</strong> On an Airbus A350 flight deck, normal telemetry stays calm dark slate so human eyes lock onto amber/crimson anomalies in milliseconds — paired with physical challenge-response switches before critical gate transitions.",
+        radiology: "<strong>🩻 Medical Radiology Principle:</strong> Radiologists fight 'satisfaction of search' and AI automation bias using blind first-reads, dimmed surrounding tissue contrast, X-ray orphan tracing, and explicit manual-check modality tags.",
+        legal: "<strong>⚖️ Legal Redlining &amp; Bloomberg Terminal Principle:</strong> High-stakes contracts rely on numbered clause rails (§1.1, AC-2), live unauthorized-scope sirens, 15-second executive term-sheet bentos, and multi-party consensus strips.",
+        gamedev: "<strong>🎮 Strategy &amp; Video Game HUD Principle:</strong> Complex real-time state becomes scannable via Fog-of-War repo coverage maps, 4-shield NFR indicators, dependency connectors, and parallel-agent collision radar.",
+        daw: "<strong>🎚️ Film NLE &amp; Music DAW Principle:</strong> Long multi-disciplinary Specs behave like multi-track timelines: solo just the UX or Security track, scrub sprint history, pin the Brief reference monitor, and scan scrollbar density markers.",
+        kitchen: "<strong>🍽️ Michelin Kitchen Pass &amp; Print Editorial Principle:</strong> The expediter chef needs instant ticket telemetry (+lines/-lines, evidence status) while long-form specs demand effortless 68ch typography with full-width diagram breakouts.",
+        wildcards: "<strong>⚡ Loop-Closing Enterprise Wildcards:</strong> Lock InfoSec trust with strict zero-network CSP headers, unify board.html into cockpit.html, standardize @aidd-review-patch, and guarantee 100% progressive enhancement."
+      };
+
+      var PIPELINE_STAGES = [
+        {
+          eyebrow: "STAGE 01 // CANONICAL TRUTH (GIT TRACKED)",
+          title: ".aidd/work/*.md — 100% Progressive Enhancement Invariant",
+          desc: "LLMs and developers read and write pure, clean Markdown files only. Zero HTML tags consume LLM context budget, and deleting .aidd/views/ loses zero project state.",
+          code: "---\nid: STORY-101\nstatus: IN_REVIEW\nupstream: ARCH-04\nallowed_paths:\n  - .aidd/cockpit.html\n  - scripts/sync-state.sh\n---\n# Context Capsule\nLoad gitignored aidd-data.js over file:/// with zero CORS errors.\n\n## Acceptance Criteria\n- [x] AC-1: Static cockpit.html loads views/aidd-data.js\n- [x] AC-2: .gitignore excludes .aidd/views/\n- [ ] AC-3: Strict CSP meta header blocks external requests"
+        },
+        {
+          eyebrow: "STAGE 02 // DETERMINISTIC COMPILER (<80ms)",
+          title: "sync-state.sh / sync-state.ps1 — Fast Local Indexer",
+          desc: "Runs during workflow handoffs (or optional git post-checkout hook). Parses YAML frontmatter, AC checkboxes, git diff main...HEAD, and computes SHA-256 tamper/drift seals.",
+          code: "$ ./scripts/sync-state.sh\n[sync-state] Indexed 14 artifacts in .aidd/work/** (42ms)\n[sync-state] Embedded git diff main...HEAD (+118 / -9 lines)\n[sync-state] Computed SHA-256 drift seals for all Markdown sources\n[sync-state] Wrote .aidd/views/aidd-data.js (gitignored)"
+        },
+        {
+          eyebrow: "STAGE 03 // EPHEMERAL TRANSPORT BUNDLE (GITIGNORED)",
+          title: ".aidd/views/aidd-data.js — Zero CORS & Zero Merge Conflicts",
+          desc: "Because browsers block fetch('data.json') on file:/// origins due to CORS, wrapping the workspace JSON in window.__AIDD_DATA__ inside a .js script loads natively in Chrome, Safari, Firefox, and Edge — while staying 100% gitignored.",
+          code: "// AUTO-GENERATED BY sync-state — GITIGNORED (.aidd/views/)\nwindow.__AIDD_DATA__ = {\n  generatedAt: \"2026-11-14T23:03:00Z\",\n  stories: {\n    \"STORY-101\": {\n      sha256: \"d9a4c17e...8f1c\",\n      status: \"IN_REVIEW\",\n      acs: [{ id: \"AC-1\", done: true }, { id: \"AC-2\", done: true }, { id: \"AC-3\", done: false }]\n    }\n  }\n};"
+        },
+        {
+          eyebrow: "STAGE 04 // UNIFIED HUMAN FLIGHT DECK (COMMITTED ONCE)",
+          title: ".aidd/cockpit.html — Static Shell + Embedded <12KB Micro-Parser",
+          desc: "Committed once to the repo. Opens directly from disk over file:/// with strict CSP lock, rendering GPS Pulse, Kanban, Artifact Reader, Traceability Heatmap, and Two-Hat Judge Workspace.",
+          code: "<meta http-equiv=\"Content-Security-Policy\"\n      content=\"default-src 'none'; script-src 'unsafe-inline' file:; style-src 'unsafe-inline'\">\n<!-- Zero-CORS local data transport -->\n<script src=\"views/aidd-data.js\"><\/script>\n<script>\n  if (!window.__AIDD_DATA__) {\n    renderFolderPickerFallback(); // showDirectoryPicker / webkitdirectory\n  } else {\n    mountDarkCockpit(window.__AIDD_DATA__);\n  }\n<\/script>"
+        },
+        {
+          eyebrow: "STAGE 05 // BI-DIRECTIONAL AGENT LOOP CLOSURE",
+          title: "@aidd-review-patch Clipboard + Optional createWritable()",
+          desc: "Every human sign-off switch, scope toggle, or clause pin compiles into a deterministic @aidd-review-patch prompt ready to paste into Antigravity, Claude, Cursor, or Copilot — or writes directly to .md in Chromium.",
+          code: "@aidd-review-patch\ntarget: .aidd/work/stories/STORY-101.md\nsha256: d9a4c17e...8f1c\nverdict: CHANGES_REQUESTED\nchecked_acs: [AC-1, AC-2]\nunchecked_acs: [AC-3]\ncomments:\n  - clause: §AC-3\n    note: \"Verify img-src allows inline SVG data: URIs for completion rings.\"\ncommand: /two-hat-review STORY-101 --verdict CHANGES_REQUESTED"
+        }
+      ];
+
+      // State
+      var state = {
+        search: "",
+        pillar: null,
+        starredOnly: false,
+        trizSub: "ALL",
+        morphCells: {},
+        crossLens: "ALL",
+        starred: {}
+      };
+
+      // Load persisted stars or seed with Recommended MVP so Spec Exporter is immediately useful
+      var STORAGE_KEY = "aidd_brainstorm_html_review_stars_v1";
+      try {
+        var saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          state.starred = JSON.parse(saved) || {};
+        } else {
+          for (var i = 0; i < IDEAS.length; i++) {
+            if (IDEAS[i].mvp) state.starred[IDEAS[i].id] = true;
+          }
+        }
+      } catch (e) {
+        for (var j = 0; j < IDEAS.length; j++) {
+          if (IDEAS[j].mvp) state.starred[IDEAS[j].id] = true;
+        }
+      }
+
+      function saveStars() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.starred));
+        } catch (e) {}
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatIdeaText(raw) {
+        var esc = escapeHtml(raw);
+        // Highlight inline technical tokens safely after HTML escaping
+        esc = esc.replace(/(&lt;script[^&]*&gt;|&lt;\/&gt;|&lt;12KB|&lt;80ms|&lt;=3|&lt;200ms)/g, '<code class="inline-code">$1</code>');
+        esc = esc.replace(/(\.aidd\/[a-zA-Z0-9_.*\/-]+|views\/aidd-data\.js|aidd-data\.js|cockpit\.html|viewer-shell\.html|board\.html|aidd-pr-review\.html|aidd-gate\.yml|PROJECT_[A-Z_]+\.md|DEVELOPER_GUIDE\.md|INDEX\.md|@[a-z-]+|\/[a-z-]+|createWritable\(\)|showDirectoryPicker|webkitdirectory|file:\/\/\/|vscode:\/\/file\/|cursor:\/\/file\/)/g, '<code class="inline-code">$1</code>');
+        return esc;
+      }
+
+      function padId(n) {
+        return "#" + (n < 10 ? "00" + n : n < 100 ? "0" + n : n);
+      }
+
+      function matchesGlobalFilters(idea) {
+        if (state.starredOnly && !state.starred[idea.id]) return false;
+        if (state.pillar && idea.pillar !== state.pillar) return false;
+        if (state.search) {
+          var q = state.search.toLowerCase();
+          var hay = (padId(idea.id) + " " + idea.text + " " + (idea.subLabel || "") + " " + (idea.dimLabel || "") + " " + (idea.lensLabel || "") + " " + idea.pillar).toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      }
+
+      function activeMorphCount() {
+        return Object.keys(state.morphCells).length;
+      }
+
+      function matchesSectionFilter(idea) {
+        if (idea.tech === "triz") {
+          return state.trizSub === "ALL" || idea.sub === state.trizSub;
+        }
+        if (idea.tech === "morph") {
+          if (activeMorphCount() === 0) return true;
+          return !!state.morphCells[idea.mcell];
+        }
+        if (idea.tech === "cross") {
+          return state.crossLens === "ALL" || idea.lens === state.crossLens;
+        }
+        return true;
+      }
+
+      function renderCard(idea, cls) {
+        var isStarred = !!state.starred[idea.id];
+        var tagLabel = idea.subLabel || idea.dimLabel || idea.lensLabel || "";
+        var extraClass = isStarred ? " selected" : "";
+        if (idea.breakthrough) extraClass += " breakthrough-card";
+
+        return (
+          '<article class="' + cls + extraClass + '" data-idea-id="' + idea.id + '">' +
+            '<div>' +
+              '<div class="card-top">' +
+                '<span class="idea-id">' + padId(idea.id) + '</span>' +
+                '<div class="badge-row">' +
+                  (idea.breakthrough ? '<span class="mini-tag highlight">BREAKTHROUGH</span>' : '') +
+                  '<span class="mini-tag">' + escapeHtml(tagLabel) + '</span>' +
+                  '<span class="mini-tag pillar">' + idea.pillar + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<p class="idea-body" style="margin-top:9px;">' + formatIdeaText(idea.text) + '</p>' +
+            '</div>' +
+            '<div class="card-footer">' +
+              '<span class="mono" style="font-size:10.5px; color:var(--text-muted);">' +
+                (idea.mvp ? '★ Core MVP Candidate' : 'AiDD Dual-Layer') +
+              '</span>' +
+              '<button type="button" class="star-btn' + (isStarred ? ' starred' : '') + '" data-toggle-star="' + idea.id + '">' +
+                (isStarred ? '★ Selected' : '☆ Select for Spec') +
+              '</button>' +
+            '</div>' +
+          '</article>'
+        );
+      }
+
+      function renderAll() {
+        var trizHtml = [];
+        var morphHtml = [];
+        var crossHtml = [];
+        var pillarCounts = { P1: 0, P2: 0, P3: 0, P4: 0 };
+
+        for (var i = 0; i < IDEAS.length; i++) {
+          var item = IDEAS[i];
+          pillarCounts[item.pillar] = (pillarCounts[item.pillar] || 0) + 1;
+
+          if (!matchesGlobalFilters(item) || !matchesSectionFilter(item)) continue;
+
+          if (item.tech === "triz") trizHtml.push(renderCard(item, "triz-card"));
+          else if (item.tech === "morph") morphHtml.push(renderCard(item, "morph-card"));
+          else if (item.tech === "cross") crossHtml.push(renderCard(item, "cross-card"));
+        }
+
+        document.getElementById("count-P1").textContent = pillarCounts.P1 + " ideas";
+        document.getElementById("count-P2").textContent = pillarCounts.P2 + " ideas";
+        document.getElementById("count-P3").textContent = pillarCounts.P3 + " ideas";
+        document.getElementById("count-P4").textContent = pillarCounts.P4 + " ideas";
+
+        document.getElementById("trizGrid").innerHTML = trizHtml.length
+          ? trizHtml.join("")
+          : '<div class="empty-state">No TRIZ ideas match the active filter combination.</div>';
+
+        document.getElementById("morphGrid").innerHTML = morphHtml.length
+          ? morphHtml.join("")
+          : '<div class="empty-state">No Morphological ideas match the active Zwicky cells / search filter.</div>';
+
+        document.getElementById("crossGrid").innerHTML = crossHtml.length
+          ? crossHtml.join("")
+          : '<div class="empty-state">No Cross-Pollination ideas match the active lens / search filter.</div>';
+
+        document.getElementById("trizVisibleBadge").textContent = trizHtml.length + " / 35 visible";
+        document.getElementById("morphVisibleBadge").textContent = morphHtml.length + " / 35 visible";
+        document.getElementById("crossVisibleBadge").textContent = crossHtml.length + " / 35 visible";
+
+        var totalVisible = trizHtml.length + morphHtml.length + crossHtml.length;
+        document.getElementById("visibleSummary").innerHTML =
+          'Showing <strong style="color:var(--text-primary);">' + totalVisible + "</strong> of 105 ideas";
+
+        var starredIds = getStarredIds();
+        document.getElementById("starredCountInline").textContent = starredIds.length;
+        document.getElementById("dockSelectedCount").textContent = starredIds.length;
+
+        document.getElementById("btnStarredOnly").classList.toggle("active", state.starredOnly);
+        document.getElementById("btnClearPillar").style.display = state.pillar ? "inline-block" : "none";
+
+        var pBtns = document.querySelectorAll("[data-pillar]");
+        for (var p = 0; p < pBtns.length; p++) {
+          pBtns[p].classList.toggle("active", pBtns[p].getAttribute("data-pillar") === state.pillar);
+        }
+
+        updateMorphRecipe(morphHtml.length);
+      }
+
+      function updateMorphRecipe(visibleCount) {
+        var keys = Object.keys(state.morphCells);
+        var box = document.getElementById("zwickyRecipe");
+        if (keys.length === 0) {
+          box.innerHTML =
+            '<span>Active Combinator Filter: <strong style="color:var(--accent-cyan);">All 5 Dimensions Open (' + visibleCount + ' matching ideas)</strong></span>' +
+            '<span style="color:var(--text-muted);">Tip: Toggle multiple cells across columns to compose a custom cockpit slice</span>';
+        } else {
+          box.innerHTML =
+            '<span>Custom Cockpit Slice: <strong style="color:var(--accent-emerald);">' + keys.join(" + ") + "</strong> (" + visibleCount + " ideas)</span>" +
+            '<span style="color:var(--text-muted);">Click cells to add/remove architectural traits</span>';
+        }
+      }
+
+      function getStarredIds() {
+        var out = [];
+        for (var i = 0; i < IDEAS.length; i++) {
+          if (state.starred[IDEAS[i].id]) out.push(IDEAS[i].id);
+        }
+        return out;
+      }
+
+      function buildSpecMarkdown() {
+        var selected = [];
+        for (var i = 0; i < IDEAS.length; i++) {
+          if (state.starred[IDEAS[i].id]) selected.push(IDEAS[i]);
+        }
+        var lines = [
+          "# AiDD Spec Input — Hybrid Dual-Layer HTML Review Layer",
+          "",
+          "- **Source Brainstorm:** Hybrid Dual-Layer HTML Review Experience over Markdown in AiDD (2026-11-14)",
+          "- **Core Mandate:** Keep clean `.md` files as canonical truth for LLMs and Git diffs while giving humans zero-server interactive HTML sign-offs, visual clarity, traceability, and cross-artifact navigation.",
+          "- **Selected Ideas Count:** " + selected.length + " / 105",
+          "",
+          "## Core Architectural Breakthroughs",
+          "1. **Zero-CORS, Zero-Git-Noise Transport:** Commit static `.aidd/cockpit.html` once; `sync-state.sh/.ps1` writes gitignored `.aidd/views/aidd-data.js` loaded via `<script src='views/aidd-data.js'>` over `file:///`.",
+          "2. **Zero-LLM-HTML Token Rule:** LLMs write 100% pure Markdown; `cockpit.html` deterministically renders progress rings, module boundary diagrams, traceability heatmaps, and Dark-Cockpit alerts.",
+          "3. **Browser as Prompt Compiler:** Human review actions compile into standardized `@aidd-review-patch` clipboard prompts (plus optional Chromium `FileSystemFileHandle.createWritable()` disk write-back).",
+          "",
+          "## Selected Brainstorm Ideas (" + selected.length + ")"
+        ];
+
+        if (selected.length === 0) {
+          lines.push("- *(No individual ideas starred yet — star ideas in `brainstorm.html` to populate this list.)*");
+        } else {
+          var groups = [
+            { key: "triz", title: "### 1. TRIZ Contradiction Resolutions" },
+            { key: "morph", title: "### 2. Morphological Cockpit Architecture" },
+            { key: "cross", title: "### 3. Cross-Pollinated High-Reliability UX" }
+          ];
+          for (var g = 0; g < groups.length; g++) {
+            var bucket = [];
+            for (var k = 0; k < selected.length; k++) {
+              if (selected[k].tech === groups[g].key) bucket.push(selected[k]);
+            }
+            if (bucket.length) {
+              lines.push("");
+              lines.push(groups[g].title);
+              for (var b = 0; b < bucket.length; b++) {
+                var it = bucket[b];
+                var meta = it.subLabel || it.dimLabel || it.lensLabel;
+                lines.push("- **[" + padId(it.id) + " · " + it.pillar + " · " + meta + "]** " + it.text);
+              }
+            }
+          }
+        }
+        return lines.join("\n");
+      }
+
+      function showToast(msg) {
+        var t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(function () {
+          t.classList.remove("show");
+        }, 2400);
+      }
+
+      function copyText(text, label) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            showToast(label);
+          }).catch(function () {
+            fallbackCopy(text, label);
+          });
+        } else {
+          fallbackCopy(text, label);
+        }
+      }
+
+      function fallbackCopy(text, label) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta);
+        showToast(label);
+      }
+
+      // Event Delegation for Star Buttons
+      document.addEventListener("click", function (e) {
+        var starBtn = e.target.closest("[data-toggle-star]");
+        if (starBtn) {
+          var id = parseInt(starBtn.getAttribute("data-toggle-star"), 10);
+          if (state.starred[id]) delete state.starred[id];
+          else state.starred[id] = true;
+          saveStars();
+          renderAll();
+          return;
+        }
+
+        // Theme Switcher
+        var themeBtn = e.target.closest("[data-set-theme]");
+        if (themeBtn) {
+          var theme = themeBtn.getAttribute("data-set-theme");
+          document.documentElement.setAttribute("data-theme", theme);
+          var allT = document.querySelectorAll("[data-set-theme]");
+          for (var i = 0; i < allT.length; i++) {
+            allT[i].classList.toggle("active", allT[i] === themeBtn);
+          }
+          return;
+        }
+
+        // Pillar Filter
+        var pillarBtn = e.target.closest("[data-pillar]");
+        if (pillarBtn) {
+          var p = pillarBtn.getAttribute("data-pillar");
+          state.pillar = state.pillar === p ? null : p;
+          renderAll();
+          return;
+        }
+
+        // TRIZ Sub-domain Tabs
+        var trizTab = e.target.closest("[data-triz]");
+        if (trizTab) {
+          state.trizSub = trizTab.getAttribute("data-triz");
+          var tabs = document.querySelectorAll("[data-triz]");
+          for (var t = 0; t < tabs.length; t++) {
+            tabs[t].classList.toggle("active", tabs[t] === trizTab);
+          }
+          renderAll();
+          return;
+        }
+
+        // Morphological Zwicky Cell
+        var mcellBtn = e.target.closest("[data-mcell]");
+        if (mcellBtn) {
+          var key = mcellBtn.getAttribute("data-mcell");
+          if (state.morphCells[key]) delete state.morphCells[key];
+          else state.morphCells[key] = true;
+          syncMorphCellButtons();
+          clearPresetActive();
+          renderAll();
+          return;
+        }
+
+        // Morphological Presets
+        var presetBtn = e.target.closest("[data-morph-preset]");
+        if (presetBtn) {
+          var preset = presetBtn.getAttribute("data-morph-preset");
+          state.morphCells = {};
+          if (preset === "zerocors") {
+            state.morphCells["cockpit-core"] = true;
+            state.morphCells["script-src"] = true;
+            state.morphCells["zero-conflict"] = true;
+            state.morphCells["dual-boot"] = true;
+          } else if (preset === "judge") {
+            state.morphCells["comparators"] = true;
+            state.morphCells["story-ux"] = true;
+            state.morphCells["cosign-peek"] = true;
+            state.morphCells["cmdk-inbox"] = true;
+          } else if (preset === "specstudio") {
+            state.morphCells["upstream-ux"] = true;
+            state.morphCells["spec-arch-ux"] = true;
+            state.morphCells["atlas-heatmap"] = true;
+            state.morphCells["budget-themes"] = true;
+          }
+          syncMorphCellButtons();
+          var pBtns = document.querySelectorAll("[data-morph-preset]");
+          for (var pb = 0; pb < pBtns.length; pb++) {
+            pBtns[pb].classList.toggle("active", pBtns[pb] === presetBtn);
+          }
+          renderAll();
+          return;
+        }
+
+        // Cross-Pollination Industry Lens
+        var lensBtn = e.target.closest("[data-lens]");
+        if (lensBtn) {
+          var lens = lensBtn.getAttribute("data-lens");
+          state.crossLens = lens;
+          var lBtns = document.querySelectorAll("[data-lens]");
+          for (var lb = 0; lb < lBtns.length; lb++) {
+            lBtns[lb].classList.toggle("active", lBtns[lb] === lensBtn);
+          }
+          document.getElementById("lensBriefing").innerHTML =
+            "<span>" + (LENS_DESCRIPTIONS[lens] || LENS_DESCRIPTIONS.ALL) + "</span>";
+          renderAll();
+          return;
+        }
+
+        // Architecture Pipeline Node Inspector
+        var pipeNode = e.target.closest("[data-node]");
+        if (pipeNode) {
+          selectPipelineStage(parseInt(pipeNode.getAttribute("data-node"), 10));
+          return;
+        }
+
+        // Prototype View Mode Tabs
+        var protoTab = e.target.closest("[data-proto-view]");
+        if (protoTab) {
+          var mode = protoTab.getAttribute("data-proto-view");
+          var pTabs = document.querySelectorAll("[data-proto-view]");
+          for (var pt = 0; pt < pTabs.length; pt++) {
+            pTabs[pt].classList.toggle("active", pTabs[pt] === protoTab);
+          }
+          var body = document.getElementById("protoBody");
+          var htmlPane = document.getElementById("protoHtmlPane");
+          var mdPane = document.getElementById("protoMdPane");
+          if (mode === "split") {
+            body.classList.remove("single-col");
+            htmlPane.style.display = "block";
+            mdPane.style.display = "block";
+          } else if (mode === "html") {
+            body.classList.add("single-col");
+            htmlPane.style.display = "block";
+            mdPane.style.display = "none";
+          } else {
+            body.classList.add("single-col");
+            htmlPane.style.display = "none";
+            mdPane.style.display = "block";
+          }
+          return;
+        }
+
+        // Prototype Pin Editor Toggle
+        var pinBtn = e.target.closest("[data-pin-btn]");
+        if (pinBtn) {
+          var acKey = pinBtn.getAttribute("data-pin-btn");
+          var wrap = document.getElementById("pin-wrap-" + acKey);
+          wrap.classList.toggle("open");
+          if (wrap.classList.contains("open")) {
+            wrap.querySelector("input").focus();
+          }
+          return;
+        }
+
+        // Prototype Gate Switches
+        var gateSw = e.target.closest("[data-gate]");
+        if (gateSw) {
+          var gName = gateSw.getAttribute("data-gate");
+          protoState.gates[gName] = !protoState.gates[gName];
+          syncPrototype();
+          return;
+        }
+      });
+
+      function syncMorphCellButtons() {
+        var cells = document.querySelectorAll("[data-mcell]");
+        for (var i = 0; i < cells.length; i++) {
+          var k = cells[i].getAttribute("data-mcell");
+          cells[i].classList.toggle("active", !!state.morphCells[k]);
+        }
+      }
+
+      function clearPresetActive() {
+        var pBtns = document.querySelectorAll("[data-morph-preset]");
+        for (var i = 0; i < pBtns.length; i++) {
+          pBtns[i].classList.toggle("active", activeMorphCount() === 0 && pBtns[i].getAttribute("data-morph-preset") === "all");
+        }
+      }
+
+      // Toolbar Buttons
+      document.getElementById("globalSearch").addEventListener("input", function (e) {
+        state.search = e.target.value.trim();
+        renderAll();
+      });
+
+      document.getElementById("btnClearPillar").addEventListener("click", function () {
+        state.pillar = null;
+        renderAll();
+      });
+
+      document.getElementById("btnStarredOnly").addEventListener("click", function () {
+        state.starredOnly = !state.starredOnly;
+        renderAll();
+      });
+
+      document.getElementById("btnResetAllFilters").addEventListener("click", function () {
+        state.search = "";
+        state.pillar = null;
+        state.starredOnly = false;
+        state.trizSub = "ALL";
+        state.morphCells = {};
+        state.crossLens = "ALL";
+        document.getElementById("globalSearch").value = "";
+        var tTabs = document.querySelectorAll("[data-triz]");
+        for (var i = 0; i < tTabs.length; i++) tTabs[i].classList.toggle("active", i === 0);
+        var lBtns = document.querySelectorAll("[data-lens]");
+        for (var j = 0; j < lBtns.length; j++) lBtns[j].classList.toggle("active", j === 0);
+        document.getElementById("lensBriefing").innerHTML = "<span>" + LENS_DESCRIPTIONS.ALL + "</span>";
+        syncMorphCellButtons();
+        clearPresetActive();
+        renderAll();
+      });
+
+      document.getElementById("btnClearMorph").addEventListener("click", function () {
+        state.morphCells = {};
+        syncMorphCellButtons();
+        clearPresetActive();
+        renderAll();
+      });
+
+      document.getElementById("btnSelectRecommended").addEventListener("click", function () {
+        state.starred = {};
+        for (var i = 0; i < IDEAS.length; i++) {
+          if (IDEAS[i].mvp) state.starred[IDEAS[i].id] = true;
+        }
+        saveStars();
+        renderAll();
+        showToast("Loaded 14 Recommended Core MVP Ideas!");
+      });
+
+      document.getElementById("btnSelectVisible").addEventListener("click", function () {
+        var added = 0;
+        for (var i = 0; i < IDEAS.length; i++) {
+          if (matchesGlobalFilters(IDEAS[i]) && matchesSectionFilter(IDEAS[i])) {
+            state.starred[IDEAS[i].id] = true;
+            added++;
+          }
+        }
+        saveStars();
+        renderAll();
+        showToast("Starred " + added + " visible ideas!");
+      });
+
+      document.getElementById("btnClearStars").addEventListener("click", function () {
+        state.starred = {};
+        saveStars();
+        renderAll();
+        showToast("Cleared starred selection");
+      });
+
+      // Keyboard shortcut: '/' focuses search, Escape closes modal
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          document.getElementById("globalSearch").focus();
+        } else if (e.key === "Escape") {
+          document.getElementById("specModal").classList.remove("open");
+        }
+      });
+
+      // Pipeline Inspector & Pulse Animation
+      function selectPipelineStage(idx) {
+        var stage = PIPELINE_STAGES[idx] || PIPELINE_STAGES[0];
+        var nodes = document.querySelectorAll("[data-node]");
+        for (var i = 0; i < nodes.length; i++) {
+          nodes[i].classList.toggle("active", i === idx);
+        }
+        document.getElementById("inspEyebrow").textContent = stage.eyebrow;
+        document.getElementById("inspTitle").textContent = stage.title;
+        document.getElementById("inspDesc").textContent = stage.desc;
+        document.getElementById("inspCode").textContent = stage.code;
+      }
+
+      document.getElementById("btnSimulatePulse").addEventListener("click", function () {
+        var nodes = document.querySelectorAll("[data-node]");
+        var step = 0;
+        var timer = setInterval(function () {
+          for (var i = 0; i < nodes.length; i++) {
+            nodes[i].classList.toggle("pulsing", i === step);
+          }
+          selectPipelineStage(step);
+          step++;
+          if (step >= nodes.length) {
+            clearInterval(timer);
+            setTimeout(function () {
+              for (var k = 0; k < nodes.length; k++) nodes[k].classList.remove("pulsing");
+            }, 650);
+          }
+        }, 520);
+      });
+
+      // Mini Live Prototype State & Logic
+      var protoState = {
+        acs: { "AC-1": true, "AC-2": true, "AC-3": false },
+        notes: {
+          "AC-1": "",
+          "AC-2": "",
+          "AC-3": "Verify img-src allows inline SVG data: URIs for completion rings."
+        },
+        blindRevealed: false,
+        gates: { Scope: true, Tests: true, Evidence: true, Security: false },
+        verdict: "CHANGES_REQUESTED"
+      };
+
+      function syncPrototype() {
+        var doneCount = (protoState.acs["AC-1"] ? 1 : 0) + (protoState.acs["AC-2"] ? 1 : 0) + (protoState.acs["AC-3"] ? 1 : 0);
+        var circumference = 106.8;
+        var offset = circumference - (doneCount / 3) * circumference;
+        var ring = document.getElementById("protoRingCircle");
+        ring.setAttribute("stroke-dashoffset", offset.toFixed(1));
+        ring.setAttribute("stroke", doneCount === 3 ? "var(--accent-emerald)" : "var(--accent-amber)");
+        document.getElementById("protoRingText").textContent = doneCount + "/3";
+
+        // Gate switches
+        var armedCount = 0;
+        var gBtns = document.querySelectorAll("[data-gate]");
+        for (var i = 0; i < gBtns.length; i++) {
+          var gKey = gBtns[i].getAttribute("data-gate");
+          var on = !!protoState.gates[gKey];
+          if (on) armedCount++;
+          gBtns[i].classList.toggle("armed", on);
+          gBtns[i].textContent = (on ? "[✓] " : "[ ] ") + gKey;
+        }
+
+        var allArmed = armedCount === 4;
+        var statusEl = document.getElementById("gateLockStatus");
+        statusEl.textContent = armedCount + " / 4 ARMED — " + (allArmed ? "UNLOCKED" : "LOCKED");
+        statusEl.style.color = allArmed ? "var(--accent-emerald)" : "var(--accent-amber)";
+
+        var approveBtn = document.getElementById("btnVerdictApprove");
+        var changesBtn = document.getElementById("btnVerdictChanges");
+        approveBtn.disabled = !allArmed;
+        if (!allArmed && protoState.verdict === "APPROVED") {
+          protoState.verdict = "CHANGES_REQUESTED";
+        }
+        approveBtn.textContent = allArmed ? "APPROVED (Gate Unlocked)" : "LOCKED: Toggle 4 Gate Switches to APPROVE";
+        approveBtn.classList.toggle("approve-active", protoState.verdict === "APPROVED" && allArmed);
+        changesBtn.classList.toggle("changes-active", protoState.verdict === "CHANGES_REQUESTED");
+
+        // Pin button counters
+        ["AC-1", "AC-2", "AC-3"].forEach(function (k) {
+          var btn = document.querySelector('[data-pin-btn="' + k + '"]');
+          var has = protoState.notes[k] && protoState.notes[k].trim().length > 0;
+          btn.classList.toggle("has-note", !!has);
+          btn.textContent = has ? "1 Note" : "+ Comment";
+        });
+
+        // Raw Markdown view
+        var rawLines = [
+          "---",
+          "id: STORY-101",
+          "status: " + (protoState.verdict === "APPROVED" ? "DONE" : "IN_REVIEW"),
+          "upstream: ARCH-04",
+          "---",
+          "## Acceptance Criteria",
+          "- [" + (protoState.acs["AC-1"] ? "x" : " ") + "] AC-1: Static .aidd/cockpit.html loads views/aidd-data.js over file:///",
+          "- [" + (protoState.acs["AC-2"] ? "x" : " ") + "] AC-2: .gitignore excludes .aidd/views/ (zero diff noise)",
+          "- [" + (protoState.acs["AC-3"] ? "x" : " ") + "] AC-3: Strict CSP meta header blocks external requests"
+        ];
+        document.getElementById("protoRawMd").textContent = rawLines.join("\n");
+
+        // Compiled @aidd-review-patch
+        var checked = [];
+        var unchecked = [];
+        ["AC-1", "AC-2", "AC-3"].forEach(function (k) {
+          if (protoState.acs[k]) checked.push(k);
+          else unchecked.push(k);
+        });
+
+        var patch = [
+          "@aidd-review-patch",
+          "target: .aidd/work/stories/STORY-101.md",
+          "sha256_seal: d9a4c17e...8f1c (verified)",
+          "verdict: " + protoState.verdict,
+          "aviation_gates: Scope=" + protoState.gates.Scope + ", Tests=" + protoState.gates.Tests + ", Evidence=" + protoState.gates.Evidence + ", Security=" + protoState.gates.Security,
+          "checked_acs: [" + checked.join(", ") + "]",
+          "unchecked_acs: [" + unchecked.join(", ") + "]"
+        ];
+
+        var noteLines = [];
+        ["AC-1", "AC-2", "AC-3"].forEach(function (k) {
+          var val = (protoState.notes[k] || "").trim();
+          if (val) noteLines.push("  - §" + k + ': "' + val + '"');
+        });
+        if (noteLines.length) {
+          patch.push("inline_clause_notes:");
+          patch = patch.concat(noteLines);
+        }
+        patch.push("next_command: /two-hat-review STORY-101 --verdict " + protoState.verdict);
+        document.getElementById("protoPatchOut").textContent = patch.join("\n");
+      }
+
+      var acBoxes = document.querySelectorAll(".proto-ac-cb");
+      for (var c = 0; c < acBoxes.length; c++) {
+        acBoxes[c].addEventListener("change", function (e) {
+          var k = e.target.getAttribute("data-ac");
+          protoState.acs[k] = e.target.checked;
+          if (k === "AC-3" && e.target.checked) {
+            protoState.gates.Security = true;
+          }
+          syncPrototype();
+        });
+      }
+
+      var pinInputs = document.querySelectorAll(".proto-pin-input");
+      for (var pi = 0; pi < pinInputs.length; pi++) {
+        pinInputs[pi].addEventListener("input", function (e) {
+          protoState.notes[e.target.getAttribute("data-pin-ac")] = e.target.value;
+          syncPrototype();
+        });
+      }
+
+      document.getElementById("btnToggleBlind").addEventListener("click", function () {
+        protoState.blindRevealed = !protoState.blindRevealed;
+        var txt = document.getElementById("blindOpinionText");
+        var btn = document.getElementById("btnToggleBlind");
+        if (protoState.blindRevealed) {
+          txt.innerHTML = '<span style="color:var(--accent-emerald);">@qa-reviewer: AC-1 &amp; AC-2 pass automated script check; verify data: URI allowance in §AC-3 CSP tag.</span>';
+          btn.textContent = "Hide @qa-reviewer Note";
+        } else {
+          txt.textContent = "Hidden until human gut-check (prevents rubber-stamping)";
+          btn.textContent = "Reveal @qa-reviewer Note";
+        }
+      });
+
+      document.getElementById("btnVerdictApprove").addEventListener("click", function () {
+        protoState.verdict = "APPROVED";
+        syncPrototype();
+      });
+
+      document.getElementById("btnVerdictChanges").addEventListener("click", function () {
+        protoState.verdict = "CHANGES_REQUESTED";
+        syncPrototype();
+      });
+
+      document.getElementById("btnCopyDemoPatch").addEventListener("click", function () {
+        copyText(document.getElementById("protoPatchOut").textContent, "Copied @aidd-review-patch to clipboard!");
+      });
+
+      // Spec Export Modal & Copy Buttons
+      function openSpecModal() {
+        document.getElementById("specModalTextarea").value = buildSpecMarkdown();
+        document.getElementById("specModal").classList.add("open");
+      }
+
+      document.getElementById("btnOpenSpecModal").addEventListener("click", openSpecModal);
+      document.getElementById("btnPreviewModalTop").addEventListener("click", openSpecModal);
+      document.getElementById("btnCloseSpecModal").addEventListener("click", function () {
+        document.getElementById("specModal").classList.remove("open");
+      });
+      document.getElementById("specModal").addEventListener("click", function (e) {
+        if (e.target.id === "specModal") document.getElementById("specModal").classList.remove("open");
+      });
+
+      document.getElementById("btnCopySelectedSpec").addEventListener("click", function () {
+        var md = buildSpecMarkdown();
+        copyText(md, "Copied " + getStarredIds().length + " selected ideas for AiDD Spec!");
+      });
+
+      document.getElementById("btnModalCopy").addEventListener("click", function () {
+        var md = buildSpecMarkdown();
+        copyText(md, "Copied " + getStarredIds().length + " selected ideas for AiDD Spec!");
+      });
+
+      // Boot
+      selectPipelineStage(0);
+      syncPrototype();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
