@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Dans <head> : verrouillage sécurité entreprise zéro réseau externe -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; frame-src 'none';" />
+  <title>AiDD v2.2 — Cockpit Dual-Layer de Revue Humaine</title>
+  <script src="views/aidd-data.js"></script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg: #0b1020;
+      --bg-elev: #121931;
+      --card: #161f3b;
+      --card-alt: #1c2748;
+      --border: #2a3966;
+      --text: #eef2ff;
+      --muted: #9aa8d1;
+      --accent: #6366f1;
+      --accent-soft: rgba(99, 102, 241, 0.18);
+      --ok: #10b981;
+      --ok-soft: rgba(16, 185, 129, 0.16);
+      --warn: #f59e0b;
+      --warn-soft: rgba(245, 158, 11, 0.16);
+      --danger: #ef4444;
+      --danger-soft: rgba(239, 68, 68, 0.16);
+      --info: #38bdf8;
+      --info-soft: rgba(56, 189, 248, 0.16);
+      --code-bg: #090d1a;
+      --shadow: 0 12px 32px rgba(0, 0, 0, 0.42);
+    }
+    [data-theme="light"] {
+      --bg: #f4f6fb;
+      --bg-elev: #ffffff;
+      --card: #ffffff;
+      --card-alt: #eef2f9;
+      --border: #d5deef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #4f46e5;
+      --accent-soft: rgba(79, 70, 229, 0.12);
+      --ok: #059669;
+      --ok-soft: rgba(5, 150, 105, 0.12);
+      --warn: #d97706;
+      --warn-soft: rgba(217, 119, 6, 0.13);
+      --danger: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.12);
+      --info: #0284c7;
+      --info-soft: rgba(2, 132, 199, 0.12);
+      --code-bg: #0f172a;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    [data-theme="hc"] {
+      --bg: #000000;
+      --bg-elev: #0a0a0a;
+      --card: #111111;
+      --card-alt: #1b1b1b;
+      --border: #ffffff;
+      --text: #ffffff;
+      --muted: #e5e5e5;
+      --accent: #fde047;
+      --accent-soft: rgba(253, 224, 71, 0.22);
+      --ok: #4ade80;
+      --ok-soft: rgba(74, 222, 128, 0.24);
+      --warn: #facc15;
+      --warn-soft: rgba(250, 204, 21, 0.24);
+      --danger: #ff6b6b;
+      --danger-soft: rgba(255, 107, 107, 0.24);
+      --info: #38bdf8;
+      --info-soft: rgba(56, 189, 248, 0.24);
+      --code-bg: #050505;
+      --shadow: none;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    code, pre, .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* Top Header */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-elev);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-badge {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+    [data-theme="hc"] .brand-badge { color: #000; }
+    .brand-title { font-weight: 700; font-size: 15px; }
+    .layer-pill {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--ok-soft);
+      color: var(--ok);
+      border: 1px solid var(--ok);
+      font-weight: 600;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button, select, input[type="text"] {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 11px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    input[type="text"] { cursor: text; }
+    button:hover { background: var(--card-alt); border-color: var(--accent); }
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+    [data-theme="hc"] button.primary { color: #000; }
+    button.ok {
+      background: var(--ok);
+      color: #fff;
+      border-color: var(--ok);
+      font-weight: 700;
+    }
+    button.danger {
+      background: var(--danger-soft);
+      color: var(--danger);
+      border-color: var(--danger);
+      font-weight: 600;
+    }
+    button:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    /* Navigation Tabs */
+    .navtabs {
+      display: flex;
+      gap: 6px;
+      padding: 10px 18px 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elev);
+      overflow-x: auto;
+    }
+    .navtab {
+      border: 1px solid transparent;
+      border-bottom: 2px solid transparent;
+      border-radius: 8px 8px 0 0;
+      background: transparent;
+      padding: 8px 14px;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .navtab.active {
+      color: var(--text);
+      background: var(--card);
+      border-color: var(--border);
+      border-bottom-color: var(--accent);
+    }
+    .count-badge {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .count-badge.warn { background: var(--warn-soft); color: var(--warn); }
+    .count-badge.danger { background: var(--danger-soft); color: var(--danger); }
+
+    /* Main Container */
+    .main {
+      padding: 18px;
+      max-width: 1600px;
+      margin: 0 auto 90px;
+    }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Dual-Layer Architecture Banner */
+    .arch-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .arch-step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .arch-step .kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--info);
+      font-weight: 700;
+    }
+    .arch-step .desc { font-size: 12px; color: var(--muted); }
+
+    /* Cards & Grids */
+    .grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; }
+    @media (max-width: 1024px) { .grid-2 { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+    }
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: var(--card-alt);
+    }
+    .pill.ok { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+    .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: var(--warn); }
+    .pill.danger { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
+    .pill.info { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+
+    .item-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .item-card.collision {
+      border-left: 4px solid var(--danger);
+      background: var(--danger-soft);
+    }
+    .item-card.holdshort {
+      border-left: 4px solid var(--warn);
+    }
+
+    /* Kanban */
+    .kanban-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .kanban-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(215px, 1fr));
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .kanban-col {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 360px;
+    }
+    .kanban-col-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      font-size: 12px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    .hold-short-bar {
+      background: repeating-linear-gradient(-45deg, rgba(245,158,11,0.22), rgba(245,158,11,0.22) 8px, rgba(0,0,0,0.2) 8px, rgba(0,0,0,0.2) 16px);
+      border: 1px dashed var(--warn);
+      color: var(--warn);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 7px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .kcard {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .kcard:hover { border-color: var(--accent); }
+    .kcard-title { font-weight: 600; font-size: 13px; margin: 5px 0; }
+    .kcard-meta { display: flex; gap: 5px; flex-wrap: wrap; font-size: 11px; color: var(--muted); }
+
+    /* Rich Reader + Dual Layer Split */
+    .lineage-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .lineage-node {
+      padding: 5px 11px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg-elev);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .lineage-node.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    [data-theme="hc"] .lineage-node.active { color: #000; }
+    .reader-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .track-btn.muted { opacity: 0.4; text-decoration: line-through; }
+    .reader-split {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .reader-split.split-mode {
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 1100px) { .reader-split.split-mode { grid-template-columns: 1fr; } }
+    .raw-md-box {
+      background: var(--code-bg);
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      overflow-x: auto;
+      max-height: 760px;
+      overflow-y: auto;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .ux-table, .xray-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .ux-table th, .ux-table td, .xray-table th, .xray-table td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .ux-table th, .xray-table th { background: var(--card-alt); }
+    .cell-missing {
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-weight: 700;
+    }
+    .scope-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      margin-bottom: 6px;
+      background: var(--bg-elev);
+    }
+    .scope-row.moved {
+      border-color: var(--warn);
+      background: var(--warn-soft);
+    }
+    .path-pill {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin: 3px 4px 3px 0;
+    }
+    .path-pill.allow { background: var(--ok-soft); color: var(--ok); border: 1px solid var(--ok); }
+    .path-pill.forbid { background: var(--danger-soft); color: var(--danger); border: 1px solid var(--danger); }
+
+    /* Two-Hat 3-Pane Judge */
+    .judge-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.15fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 1200px) { .judge-grid { grid-template-columns: 1fr; } }
+    .term-box {
+      background: var(--code-bg);
+      color: #d1fae5;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      border: 1px solid var(--border);
+      max-height: 430px;
+      overflow-y: auto;
+    }
+    .diff-line-add { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; display: block; }
+    .diff-line-del { background: rgba(239, 68, 68, 0.2); color: #fca5a5; display: block; }
+    .diff-line-hdr { color: #93c5fd; font-weight: 700; display: block; margin-top: 6px; }
+    .cockpit-switches {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .switch-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .switch-card.armed {
+      border-color: var(--ok);
+      background: var(--ok-soft);
+    }
+
+    /* Sticky Patch Bar */
+    .patch-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-elev);
+      border-top: 2px solid var(--accent);
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      z-index: 45;
+      box-shadow: var(--shadow);
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 820px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge">AiDD v2.2</span>
+      <span class="brand-title">Cockpit Dual-Layer de Revue Humaine</span>
+      <span class="layer-pill" id="bundle-status">Couche 1 (.md) → sync-state.sh → aidd-data.js chargé</span>
+    </div>
+    <div class="top-actions">
+      <button type="button" id="btn-cmdk" title="Raccourci Cmd/Ctrl+K">⌘K Aller à…</button>
+      <button type="button" id="btn-open-dir">📂 Ouvrir dossier .aidd</button>
+      <input type="file" id="dir-fallback" webkitdirectory directory multiple style="display:none" />
+      <button type="button" id="btn-snapshot">📸 Snapshot HTML autonome</button>
+      <select id="theme-select" aria-label="Thème visuel">
+        <option value="dark">Thème : Sombre</option>
+        <option value="light">Thème : Clair</option>
+        <option value="hc">Thème : Contraste Élevé</option>
+      </select>
+    </div>
+  </header>
+
+  <nav class="navtabs" role="tablist">
+    <button class="navtab active" data-tab="inbox" role="tab">
+      1. À Trancher &amp; Collisions <span class="count-badge warn" id="badge-inbox">0</span>
+    </button>
+    <button class="navtab" data-tab="kanban" role="tab">
+      2. Kanban 6 Colonnes <span class="count-badge" id="badge-kanban">0</span>
+    </button>
+    <button class="navtab" data-tab="reader" role="tab">
+      3. Lecteur Dual-Layer (.md ↔ HTML)
+    </button>
+    <button class="navtab" data-tab="judge" role="tab">
+      4. Juge Two-Hat <span class="count-badge danger" id="badge-judge">0</span>
+    </button>
+    <button class="navtab" data-tab="xray" role="tab">
+      5. Matrice Rayons X
+    </button>
+  </nav>
+
+  <main class="main">
+    <div class="arch-strip">
+      <div class="arch-step">
+        <span class="kicker">Couche 1 — Vérité Canonique LLM &amp; Git</span>
+        <strong>Fichiers <code>.aidd/work/**/*.md</code> purs</strong>
+        <span class="desc">Zéro HTML écrit par les agents. Diffs Git propres, faible coût tokens.</span>
+      </div>
+      <div class="arch-step">
+        <span class="kicker">Pont Déterministe Zéro-Serveur</span>
+        <strong><code>sync-state.sh</code> → <code>views/aidd-data.js</code></strong>
+        <span class="desc">Chargé via <code>&lt;script src&gt;</code> en <code>file:///</code> sans erreur CORS, ignoré par Git.</span>
+      </div>
+      <div class="arch-step">
+        <span class="kicker">Couche 2 — Cockpit Cognitif Humain</span>
+        <strong>Lecture visuelle, filtres &amp; verrous Two-Hat</strong>
+        <span class="desc">Compare le <code>.md</code> brut et la vue riche côte-à-côte en temps réel.</span>
+      </div>
+      <div class="arch-step">
+        <span class="kicker">Boucle de Retour Fermée</span>
+        <strong><code>@aidd-review-patch</code> → <code>/apply-review</code></strong>
+        <span class="desc">Vos décisions UI deviennent un patch structuré appliqué aux <code>.md</code> par l'agent.</span>
+      </div>
+    </div>
+
+    <!-- VIEW 1: INBOX & COLLISIONS -->
+    <section class="view active" id="view-inbox">
+      <div class="grid-2">
+        <div class="panel">
+          <h3>
+            <span>📥 Décisions Humaines Requises ("À Trancher par Moi")</span>
+            <span class="pill warn" id="inbox-summary-pill">Analyse…</span>
+          </h3>
+          <div id="inbox-list"></div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:16px;">
+            <h3>
+              <span>⚡ Radar de Collision Multi-Agents (Allowed Paths)</span>
+              <span class="pill danger" id="collision-pill">0 collision</span>
+            </h3>
+            <div id="collision-list"></div>
+          </div>
+          <div class="panel">
+            <h3>
+              <span>🧭 Contexte Projet &amp; Commandes Qualité</span>
+              <span class="pill info" id="synced-at-pill">--</span>
+            </h3>
+            <div id="conventions-box" style="font-size:12px;color:var(--muted);"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: KANBAN -->
+    <section class="view" id="view-kanban">
+      <div class="kanban-toolbar">
+        <label>Epic :
+          <select id="filter-epic"><option value="ALL">Tous</option></select>
+        </label>
+        <label>Lane :
+          <select id="filter-lane">
+            <option value="ALL">Toutes (standard + quick-fix)</option>
+            <option value="standard">standard</option>
+            <option value="quick-fix">quick-fix</option>
+          </select>
+        </label>
+        <span style="font-size:12px;color:var(--muted);">Cliquez sur une carte pour inspecter le Story Packet ou ouvrir le Juge Two-Hat.</span>
+      </div>
+      <div class="kanban-grid" id="kanban-grid"></div>
+    </section>
+
+    <!-- VIEW 3: RICH DUAL-LAYER READER -->
+    <section class="view" id="view-reader">
+      <div class="lineage-bar" id="lineage-bar"></div>
+      <div class="reader-controls">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <strong style="font-size:12px;">Mode Dual-Layer :</strong>
+          <button type="button" class="primary" id="btn-mode-split">Split 50/50 (.md Git ↔ Vue Riche HTML)</button>
+          <button type="button" id="btn-mode-rich">Vue Riche HTML seule</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:12px;color:var(--muted);">Pistes Personas (Solo/Mute) :</span>
+          <button type="button" class="track-btn" data-track="security">🛡 Sécurité</button>
+          <button type="button" class="track-btn" data-track="risk">⚠️ Risques</button>
+          <button type="button" class="track-btn" data-track="ux">🎨 UX 4-États</button>
+          <button type="button" class="track-btn" data-track="scope">🎯 Périmètre</button>
+        </div>
+      </div>
+
+      <div class="reader-split split-mode" id="reader-split">
+        <div class="panel" id="raw-layer-panel">
+          <h3>
+            <span>📄 Couche 1 — Fichier Markdown Pur sur Disque (Git / LLM)</span>
+            <span class="pill info" id="raw-path-pill">.aidd/work/…</span>
+          </h3>
+          <div class="raw-md-box mono" id="raw-md-content"></div>
+        </div>
+        <div class="panel">
+          <h3>
+            <span>✨ Couche 2 — Surface Interactive de Revue Humaine</span>
+            <span class="pill ok" id="rich-stage-pill">SPEC</span>
+          </h3>
+          <div id="rich-reader-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: TWO-HAT JUDGE -->
+    <section class="view" id="view-judge">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <label><strong>Story à juger :</strong>
+            <select id="judge-story-select"></select>
+          </label>
+          <span class="pill warn" id="judge-status-pill">IN_REVIEW</span>
+          <span class="pill ok" id="judge-firewall-pill">Pare-feu Chemins : OK</span>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="blind-mode-toggle" checked />
+          🕶 Mode Contre-Expertise à l'Aveugle (masquer les notes agent avant mon verdict)
+        </label>
+      </div>
+
+      <div class="judge-grid">
+        <div class="panel">
+          <h3><span>1️⃣ Critères d'Acceptation (AC-*)</span><span class="pill info">Cliquer pour attester</span></h3>
+          <div id="judge-ac-list"></div>
+        </div>
+        <div class="panel">
+          <h3><span>2️⃣ Execution Evidence (Sortie Tests)</span><span class="pill ok" id="judge-evid-pill">YES</span></h3>
+          <div class="term-box mono" id="judge-evidence-box"></div>
+        </div>
+        <div class="panel">
+          <h3><span>3️⃣ Inspection Diff &amp; Périmètre Fichiers</span><span class="pill info">git diff</span></h3>
+          <div id="judge-paths-box" style="margin-bottom:8px;"></div>
+          <div class="term-box mono" id="judge-diff-box"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>
+          <span>🛫 Verrou Challenge-Response Aviation (4 Interrupteurs Requis pour APPROVE)</span>
+          <span class="pill warn" id="lock-state-pill">VERROUILLÉ (0 / 4)</span>
+        </h3>
+        <div class="cockpit-switches" id="cockpit-switches">
+          <label class="switch-card"><input type="checkbox" class="gate-sw" data-sw="0" /> <span><strong>1. Preuves Réelles :</strong> La sortie brute des tests est présente sans <code>PENDING_EVIDENCE</code>.</span></label>
+          <label class="switch-card"><input type="checkbox" class="gate-sw" data-sw="1" /> <span><strong>2. Pare-feu Chemins :</strong> Aucun fichier hors <code>Allowed Paths</code> n'a été touché.</span></label>
+          <label class="switch-card"><input type="checkbox" class="gate-sw" data-sw="2" /> <span><strong>3. Couverture AC :</strong> Chaque <code>AC-*</code> possède une assertion de test vérifiée.</span></label>
+          <label class="switch-card"><input type="checkbox" class="gate-sw" data-sw="3" /> <span><strong>4. Sécurité &amp; Isolation :</strong> Aucun contournement multi-tenant ou fuite détecté dans le diff.</span></label>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+          <input type="text" id="judge-note-input" placeholder="Note de revue Two-Hat ou motif de rejet précis…" style="flex:1;min-width:260px;" />
+          <button type="button" class="danger" id="btn-verdict-reject">↩️ CHANGES_REQUESTED (Renvoyer au Dev)</button>
+          <button type="button" class="ok" id="btn-verdict-approve" disabled>✅ APPROVE → Débloquer DONE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: X-RAY TRACEABILITY -->
+    <section class="view" id="view-xray">
+      <div class="panel">
+        <h3>
+          <span>🔬 Matrice Rayons X — Traçabilité Bout-en-Bout (Brief → Spec → Arch → Story → Preuve)</span>
+          <span class="pill warn" id="xray-orphan-pill">Analyse…</span>
+        </h3>
+        <table class="xray-table">
+          <thead>
+            <tr>
+              <th>Amont (Brief / Spec)</th>
+              <th>Exigence / AC</th>
+              <th>Architecture</th>
+              <th>Story Packet Lié</th>
+              <th>Statut Story</th>
+              <th>Execution Evidence</th>
+              <th>Diagnostic Rayons X</th>
+            </tr>
+          </thead>
+          <tbody id="xray-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Sticky @aidd-review-patch Compiler Dock -->
+  <footer class="patch-dock">
+    <div>
+      <strong>📦 Compileur <code>@aidd-review-patch</code> :</strong>
+      <span id="patch-counter" style="color:var(--muted);margin-left:6px;">0 décision humaine enregistrée dans cette session</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="text" id="quick-park-input" placeholder="💡 Garer une idée hors-scope (IDEA-XX)…" style="width:240px;" />
+      <button type="button" id="btn-park-idea">+ Parking Lot</button>
+      <button type="button" class="primary" id="btn-open-patch">⚡ Générer &amp; Copier /apply-review (<span id="patch-count-num">0</span>)</button>
+    </div>
+  </footer>
+
+  <!-- Modal for @aidd-review-patch & Story Drawer / Cmd+K -->
+  <div class="modal-backdrop" id="patch-modal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="margin:0;">⚡ Bloc Déterministe pour GitHub Copilot / Agent (<code>/apply-review</code>)</h3>
+        <button type="button" id="btn-close-patch">Fermer ✕</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:0;">
+        Collez cette commande dans votre chat d'agent : <code>apply-review.prompt.md</code> mettra à jour les fichiers Markdown canoniques sous <code>.aidd/work/</code> puis relancera <code>sync-state.sh</code>.
+      </p>
+      <div class="raw-md-box mono" id="patch-output-box" style="max-height:360px;"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+        <button type="button" id="btn-clear-patch">Réinitialiser les décisions</button>
+        <button type="button" class="primary" id="btn-copy-patch">📋 Copier la commande /apply-review</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="cmdk-modal">
+    <div class="modal" style="max-width:540px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong>⌘K Navigation Rapide Artefacts &amp; Vues</strong>
+        <button type="button" id="btn-close-cmdk">Échap ✕</button>
+      </div>
+      <input type="text" id="cmdk-input" placeholder="Filtrer BRIEF-01, SPEC-01, STORY-101…" style="width:100%;margin-bottom:10px;" />
+      <div id="cmdk-results"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const FALLBACK_DATA = {
+        version: "2.2",
+        syncedAt: new Date().toISOString(),
+        conventions: "# Aucun bundle views/aidd-data.js détecté — cliquez sur 'Ouvrir dossier .aidd' ou lancez bash .aidd/guards/sync-state.sh",
+        context: "",
+        index: "",
+        state: "",
+        gitStatus: "",
+        gitDiff: "",
+        artifacts: []
+      };
+
+      let DATA = window.AIDD_DATA || FALLBACK_DATA;
+      let selectedArtifactId = "SPEC-01";
+      let selectedJudgeStoryId = "STORY-101";
+      let splitMode = true;
+      let mutedTracks = { security: false, risk: false, ux: false, scope: false };
+      let patchOps = [];
+      let scopeOverrides = {}; // key -> boolean movedOut
+      let acChecks = {}; // storyId:acId -> 'CHECK' | 'REJECT'
+      let currentVerdict = null;
+
+      function escHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function stripFrontmatter(md) {
+        return String(md || "").replace(/^---\n[\s\S]*?\n---\n*/, "");
+      }
+
+      function parseSections(md) {
+        const body = stripFrontmatter(md);
+        const lines = body.split("\n");
+        const sections = {};
+        let cur = "_intro";
+        sections[cur] = [];
+        for (const line of lines) {
+          const m = line.match(/^##\s+(.+?)\s*$/);
+          if (m) {
+            cur = m[1].trim();
+            sections[cur] = [];
+          } else {
+            sections[cur].push(line);
+          }
+        }
+        const out = {};
+        Object.keys(sections).forEach(k => { out[k] = sections[k].join("\n").trim(); });
+        return out;
+      }
+
+      function extractBullets(text) {
+        if (!text) return [];
+        return text.split("\n")
+          .map(l => l.trim())
+          .filter(l => /^-\s+/.test(l))
+          .map(l => l.replace(/^-\s+/, "").trim());
+      }
+
+      function extractPathList(md, heading) {
+        const secs = parseSections(md);
+        const raw = secs[heading] || "";
+        return extractBullets(raw).map(x => x.replace(/^`|`$/g, "").trim()).filter(Boolean);
+      }
+
+      function extractOpenQuestions(art) {
+        const lines = String(art.markdown || "").split("\n");
+        const qs = [];
+        lines.forEach(l => {
+          const m = l.match(/^-\s*\[\s\]\s*\*\*(Q\d+)\s*:\*\*\s*(.+)$/) || l.match(/^-\s*\[\s\]\s*(.+)$/);
+          if (m && (l.includes("?") || l.includes("**Q"))) {
+            const qid = m[2] ? m[1] : "Q";
+            const txt = m[2] ? m[2] : m[1];
+            if (!txt.startsWith("**AC-")) {
+              qs.push({ artifactId: art.id, path: art.path, qid, text: txt });
+            }
+          }
+        });
+        return qs;
+      }
+
+      function extractACs(art) {
+        const lines = String(art.markdown || "").split("\n");
+        const acs = [];
+        lines.forEach(l => {
+          const m = l.match(/^-\s*\[([ xX])\]\s*\*\*(AC-[A-Z0-9-]+)\s*:?\*\*\s*(.+)$/);
+          if (m) {
+            acs.push({ checked: m[1].toLowerCase() === "x", id: m[2], text: m[3] });
+          }
+        });
+        return acs;
+      }
+
+      function computeCollisions() {
+        const activeStories = DATA.artifacts.filter(a =>
+          a.stage === "stories" && ["IN_PROGRESS", "IN_REVIEW", "READY"].includes(a.status)
+        );
+        const pathMap = {};
+        activeStories.forEach(st => {
+          extractPathList(st.markdown, "Allowed Paths").forEach(p => {
+            if (!pathMap[p]) pathMap[p] = [];
+            pathMap[p].push(st);
+          });
+        });
+        return Object.entries(pathMap)
+          .filter(([, list]) => list.length > 1)
+          .map(([path, list]) => ({ path, stories: list }));
+      }
+
+      function recordOp(op) {
+        const existingIdx = patchOps.findIndex(x => x.key && x.key === op.key);
+        if (existingIdx >= 0) patchOps[existingIdx] = op;
+        else patchOps.push(op);
+        updatePatchBar();
+      }
+
+      function updatePatchBar() {
+        const n = patchOps.length + (currentVerdict ? 1 : 0);
+        document.getElementById("patch-count-num").textContent = String(n);
+        document.getElementById("patch-counter").textContent =
+          n === 0
+            ? "0 décision humaine enregistrée dans cette session"
+            : n + " décision(s) prête(s) à synchroniser vers les fichiers .md via /apply-review";
+      }
+
+      function buildPatchPayload() {
+        const target = DATA.artifacts.find(a => a.id === selectedArtifactId) || DATA.artifacts[0];
+        const judgeStory = DATA.artifacts.find(a => a.id === selectedJudgeStoryId);
+        const payload = {
+          schema: "aidd-review-patch/v1",
+          generatedAt: new Date().toISOString(),
+          reviewer: "human-lead",
+          primaryTarget: currentVerdict && judgeStory ? judgeStory.path : (target ? target.path : ".aidd/INDEX.md"),
+          verdict: currentVerdict ? currentVerdict.verdict : "PENDING",
+          verdictStory: currentVerdict ? currentVerdict.storyId : null,
+          verdictNote: currentVerdict ? currentVerdict.note : null,
+          operations: patchOps.map(({ key, ...rest }) => rest)
+        };
+        return "/apply-review\n```json\n// @aidd-review-patch\n" + JSON.stringify(payload, null, 2) + "\n```";
+      }
+
+      /* Render View 1: Inbox & Collisions */
+      function renderInbox() {
+        const inboxEl = document.getElementById("inbox-list");
+        const questions = [];
+        DATA.artifacts.forEach(a => questions.push(...extractOpenQuestions(a)));
+        const reviewStories = DATA.artifacts.filter(a => a.stage === "stories" && a.status === "IN_REVIEW");
+        const reviewSpecs = DATA.artifacts.filter(a => a.stage !== "stories" && a.status === "IN_REVIEW");
+        const blockedStories = DATA.artifacts.filter(a => a.stage === "stories" && a.status === "BLOCKED");
+        const collisions = computeCollisions();
+
+        const totalActionable = questions.length + reviewStories.length + reviewSpecs.length + blockedStories.length;
+        document.getElementById("badge-inbox").textContent = String(totalActionable + collisions.length);
+        document.getElementById("inbox-summary-pill").textContent = totalActionable + " point(s) à trancher";
+
+        let html = "";
+        reviewStories.forEach(st => {
+          html += `
+            <div class="item-card holdshort">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <span><span class="pill warn">TWO-HAT GATE</span> <strong>${escHtml(st.id)}</strong> — ${escHtml(st.title)}</span>
+                <button type="button" class="primary" data-goto-judge="${escHtml(st.id)}">Ouvrir Juge Two-Hat →</button>
+              </div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">
+                Preuves de tests journalisées : <strong>${escHtml(st.evidenceLogged)}</strong> · Fichier : <code>${escHtml(st.path)}</code>
+              </div>
+            </div>`;
+        });
+
+        reviewSpecs.forEach(sp => {
+          html += `
+            <div class="item-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <span><span class="pill info">SPEC IN_REVIEW</span> <strong>${escHtml(sp.id)}</strong> — ${escHtml(sp.title)}</span>
+                <button type="button" data-goto-reader="${escHtml(sp.id)}">Inspecter en Dual-Layer →</button>
+              </div>
+            </div>`;
+        });
+
+        questions.forEach((q, idx) => {
+          html += `
+            <div class="item-card">
+              <div style="font-size:12px;margin-bottom:6px;">
+                <span class="pill warn">QUESTION OUVERTE ${escHtml(q.qid)}</span>
+                dans <code>${escHtml(q.artifactId)}</code>
+              </div>
+              <div style="font-weight:600;margin-bottom:8px;">${escHtml(q.text)}</div>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="ans-input-${idx}" placeholder="Saisir votre décision (ex: Rétention 365j SOC2 Type II)…" style="flex:1;" />
+                <button type="button" class="primary" data-ans-idx="${idx}" data-ans-art="${escHtml(q.path)}" data-ans-qid="${escHtml(q.qid)}">Trancher</button>
+              </div>
+            </div>`;
+        });
+
+        blockedStories.forEach(bs => {
+          html += `
+            <div class="item-card" style="border-left:4px solid var(--danger);">
+              <span class="pill danger">BLOCKED</span> <strong>${escHtml(bs.id)}</strong> — ${escHtml(bs.title)}
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">Prochaine action : <code>${escHtml(bs.nextStep)}</code></div>
+            </div>`;
+        });
+
+        inboxEl.innerHTML = html || `<p style="color:var(--muted);">Aucune décision en attente.</p>`;
+
+        // Collisions
+        const colPill = document.getElementById("collision-pill");
+        colPill.textContent = collisions.length + " collision(s)";
+        colPill.className = "pill " + (collisions.length ? "danger" : "ok");
+        const colEl = document.getElementById("collision-list");
+        colEl.innerHTML = collisions.length
+          ? collisions.map(c => `
+              <div class="item-card collision">
+                <div style="font-weight:700;margin-bottom:4px;">⚠️ Chemin partagé : <code>${escHtml(c.path)}</code></div>
+                <div style="font-size:12px;">
+                  Modifié simultanément par :
+                  ${c.stories.map(s => `<strong>${escHtml(s.id)}</strong> (<code>${escHtml(s.status)}</code>)`).join(" &amp; ")}
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+                  Risque de conflit Git / écrasement d'agent : séquencer ${escHtml(c.stories[0].id)} avant de fusionner ${escHtml(c.stories[1].id)}.
+                </div>
+              </div>
+            `).join("")
+          : `<div class="item-card"><span class="pill ok">OK</span> Aucune collision de chemins actifs détectée.</div>`;
+
+        document.getElementById("synced-at-pill").textContent = "Sync : " + (DATA.syncedAt || "").replace("T", " ").slice(0, 19);
+        document.getElementById("conventions-box").innerHTML =
+          `<div style="margin-bottom:8px;">${escHtml(stripFrontmatter(DATA.context))}</div>` +
+          `<pre class="raw-md-box mono" style="max-height:190px;">${escHtml(DATA.conventions)}</pre>`;
+
+        inboxEl.querySelectorAll("[data-goto-judge]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            selectedJudgeStoryId = btn.getAttribute("data-goto-judge");
+            switchTab("judge");
+          });
+        });
+        inboxEl.querySelectorAll("[data-goto-reader]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            selectedArtifactId = btn.getAttribute("data-goto-reader");
+            switchTab("reader");
+          });
+        });
+        inboxEl.querySelectorAll("[data-ans-idx]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = btn.getAttribute("data-ans-idx");
+            const val = document.getElementById("ans-input-" + idx).value.trim();
+            if (!val) return;
+            const qid = btn.getAttribute("data-ans-qid");
+            const target = btn.getAttribute("data-ans-art");
+            recordOp({ key: "ans:" + target + ":" + qid, op: "ANSWER", target, id: qid, value: val });
+            btn.textContent = "✓ Enregistré";
+          });
+        });
+      }
+
+      /* Render View 2: Kanban */
+      function renderKanban() {
+        const stories = DATA.artifacts.filter(a => a.stage === "stories");
+        document.getElementById("badge-kanban").textContent = String(stories.length);
+
+        const epicSel = document.getElementById("filter-epic");
+        const epics = Array.from(new Set(stories.map(s => s.epic).filter(Boolean)));
+        const curEpic = epicSel.value || "ALL";
+        epicSel.innerHTML = `<option value="ALL">Tous (${stories.length})</option>` +
+          epics.map(e => `<option value="${escHtml(e)}" ${e === curEpic ? "selected" : ""}>${escHtml(e)}</option>`).join("");
+
+        const laneFilter = document.getElementById("filter-lane").value;
+        const cols = ["BACKLOG", "READY", "IN_PROGRESS", "BLOCKED", "IN_REVIEW", "DONE"];
+        const grid = document.getElementById("kanban-grid");
+
+        grid.innerHTML = cols.map(col => {
+          const items = stories.filter(s =>
+            s.status === col &&
+            (epicSel.value === "ALL" || s.epic === epicSel.value) &&
+            (laneFilter === "ALL" || s.lane === laneFilter)
+          );
+          const holdShort = col === "IN_REVIEW"
+            ? `<div class="hold-short-bar">🛑 HOLD SHORT — Verdict Two-Hat Requis avant DONE</div>`
+            : "";
+          return `
+            <div class="kanban-col">
+              <div class="kanban-col-head">
+                <span>${col}</span>
+                <span class="count-badge">${items.length}</span>
+              </div>
+              ${holdShort}
+              ${items.map(s => `
+                <div class="kcard" data-story-card="${escHtml(s.id)}">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <strong class="mono" style="font-size:11px;color:var(--accent);">${escHtml(s.id)}</strong>
+                    <span class="pill ${s.evidenceLogged === "YES" ? "ok" : "warn"}">Preuve: ${escHtml(s.evidenceLogged)}</span>
+                  </div>
+                  <div class="kcard-title">${escHtml(s.title)}</div>
+                  <div class="kcard-meta">
+                    <span>${escHtml(s.epic)}</span> · <span>${escHtml(s.lane)}</span>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `;
+        }).join("");
+
+        grid.querySelectorAll("[data-story-card]").forEach(el => {
+          el.addEventListener("click", () => {
+            selectedJudgeStoryId = el.getAttribute("data-story-card");
+            switchTab("judge");
+          });
+        });
+      }
+
+      /* Render View 3: Dual-Layer Reader */
+      function renderReader() {
+        const docs = DATA.artifacts;
+        if (!docs.length) return;
+        const art = docs.find(a => a.id === selectedArtifactId) || docs[0];
+        selectedArtifactId = art.id;
+
+        // Lineage bar
+        const lineageEl = document.getElementById("lineage-bar");
+        lineageEl.innerHTML = `<strong style="font-size:12px;margin-right:4px;">Chaîne de Traçabilité :</strong>` +
+          docs.map((d, idx) => `
+            ${idx > 0 ? '<span style="color:var(--muted);">→</span>' : ""}
+            <button type="button" class="lineage-node ${d.id === art.id ? "active" : ""}" data-sel-art="${escHtml(d.id)}">
+              ${escHtml(d.id)} <span style="opacity:0.75;font-weight:400;">(${escHtml(d.status)})</span>
+            </button>
+          `).join("");
+        lineageEl.querySelectorAll("[data-sel-art]").forEach(b => {
+          b.addEventListener("click", () => {
+            selectedArtifactId = b.getAttribute("data-sel-art");
+            renderReader();
+          });
+        });
+
+        const splitContainer = document.getElementById("reader-split");
+        const rawPanel = document.getElementById("raw-layer-panel");
+        splitContainer.className = splitMode ? "reader-split split-mode" : "reader-split";
+        rawPanel.style.display = splitMode ? "block" : "none";
+
+        document.getElementById("raw-path-pill").textContent = art.path + " (" + art.lines + " lignes .md)";
+        document.getElementById("raw-md-content").textContent = art.markdown;
+        document.getElementById("rich-stage-pill").textContent = art.stage.toUpperCase() + " · " + art.status;
+
+        const secs = parseSections(art.markdown);
+        let rich = `
+          <div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+            <div style="font-size:12px;color:var(--muted);">Amont : <code>${escHtml(art.upstream || "NONE")}</code> · Propriétaire : <code>@${escHtml(art.owner)}</code> · Prochaine étape : <code>${escHtml(art.nextStep)}</code></div>
+            <h2 style="margin:4px 0 0;font-size:18px;">${escHtml(art.id)} — ${escHtml(art.title)}</h2>
+          </div>
+        `;
+
+        // Overview / Problem / ADR
+        ["Problem Statement", "Functional Overview", "Architectural Decision (ADR)", "Context Slice"].forEach(h => {
+          if (secs[h]) {
+            rich += `<div class="item-card"><strong>${escHtml(h)}</strong><p style="margin:6px 0 0;">${escHtml(secs[h])}</p></div>`;
+          }
+        });
+
+        // Interactive Scope Sorter
+        if (!mutedTracks.scope && (secs["Scope & Boundaries"] || secs["Scope"])) {
+          const rawScope = secs["Scope & Boundaries"] || secs["Scope"];
+          const parts = rawScope.split(/###\s+Out of Scope/i);
+          const inItems = extractBullets((parts[0] || "").replace(/###\s+In Scope/i, ""));
+          const outItems = extractBullets(parts[1] || "");
+          rich += `<div class="item-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <strong>🎯 Tri Interactif du Périmètre (1 clic → @aidd-review-patch)</strong>
+              <span class="pill info">Piste Périmètre</span>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:var(--ok);margin-bottom:4px;">IN SCOPE</div>
+            ${inItems.map((it, i) => {
+              const k = art.id + ":in:" + i;
+              const moved = !!scopeOverrides[k];
+              return `<div class="scope-row ${moved ? "moved" : ""}">
+                <span>${moved ? "↪️ <em>Déplacé Hors-Périmètre :</em> " : "✅ "}${escHtml(it)}</span>
+                <button type="button" data-move-scope="${escHtml(k)}" data-item="${escHtml(it)}" data-path="${escHtml(art.path)}">
+                  ${moved ? "Annuler" : "Sortir Hors-Scope"}
+                </button>
+              </div>`;
+            }).join("")}
+            <div style="font-size:12px;font-weight:700;color:var(--muted);margin:8px 0 4px;">OUT OF SCOPE</div>
+            ${outItems.map(it => `<div class="scope-row"><span style="color:var(--muted);">⛔ ${escHtml(it)}</span></div>`).join("")}
+          </div>`;
+        }
+
+        // UX 4-State Matrix
+        if (!mutedTracks.ux && secs["UX States & Accessibility (WCAG AA)"]) {
+          const tableLines = secs["UX States & Accessibility (WCAG AA)"].split("\n").filter(l => l.trim().startsWith("|"));
+          if (tableLines.length >= 3) {
+            const headers = tableLines[0].split("|").slice(1, -1).map(s => s.trim());
+            const rows = tableLines.slice(2).map(r => r.split("|").slice(1, -1).map(s => s.trim()));
+            rich += `<div class="item-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <strong>🎨 Grille de Couverture UX 4-États &amp; WCAG AA</strong>
+                <span class="pill warn">Détection auto des états MISSING</span>
+              </div>
+              <table class="ux-table">
+                <thead><tr>${headers.map(h => `<th>${escHtml(h)}</th>`).join("")}</tr></thead>
+                <tbody>
+                  ${rows.map(r => `<tr>${r.map((cell, ci) => {
+                    const isMissing = cell.toUpperCase().includes("MISSING") || cell === "";
+                    return `<td class="${isMissing ? "cell-missing" : ""}">
+                      ${escHtml(cell || "MISSING")}
+                      ${isMissing ? `<div style="margin-top:4px;"><button type="button" class="danger" data-flag-ux="${escHtml(r[0] + " / " + headers[ci])}" data-path="${escHtml(art.path)}">+ Exiger cet état</button></div>` : ""}
+                    </td>`;
+                  }).join("")}</tr>`).join("")}
+                </tbody>
+              </table>
+            </div>`;
+          }
+        }
+
+        // Security & Risk Tracks
+        if ((!mutedTracks.security || !mutedTracks.risk) && secs["Security & Risk Notes"]) {
+          const notes = extractBullets(secs["Security & Risk Notes"]).filter(n => {
+            if (mutedTracks.security && n.includes("[SECURITY]")) return false;
+            if (mutedTracks.risk && n.includes("[RISK]")) return false;
+            return true;
+          });
+          if (notes.length) {
+            rich += `<div class="item-card">
+              <strong>🛡 Pistes Sécurité &amp; Risques</strong>
+              ${notes.map(n => `
+                <div style="margin-top:7px;padding:7px 9px;border-radius:6px;background:${n.includes("[SECURITY]") ? "var(--danger-soft)" : "var(--warn-soft)"};">
+                  ${escHtml(n)}
+                </div>
+              `).join("")}
+            </div>`;
+          }
+        }
+
+        // Allowed / Forbidden Path Firewall
+        const allowP = extractPathList(art.markdown, "Allowed Paths");
+        const forbidP = extractPathList(art.markdown, "Forbidden Paths");
+        if (allowP.length || forbidP.length) {
+          rich += `<div class="item-card">
+            <strong>🧱 Pare-Feu de Périmètre Module</strong>
+            <div style="margin-top:6px;">
+              <div style="font-size:11px;color:var(--muted);">Chemins Autorisés :</div>
+              ${allowP.map(p => `<span class="path-pill allow">✓ ${escHtml(p)}</span>`).join("") || "<em>Aucun</em>"}
+            </div>
+            <div style="margin-top:6px;">
+              <div style="font-size:11px;color:var(--muted);">Chemins Interdits :</div>
+              ${forbidP.map(p => `<span class="path-pill forbid">✕ ${escHtml(p)}</span>`).join("") || "<em>Aucun</em>"}
+            </div>
+          </div>`;
+        }
+
+        // Inline Comment Composer
+        rich += `
+          <div class="item-card">
+            <strong>💬 Ajouter une Annotation Humaine Ciblée sur <code>${escHtml(art.id)}</code></strong>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <input type="text" id="reader-comment-input" placeholder="Ex: Préciser le code HTTP exact si le JTI est malformé…" style="flex:1;" />
+              <button type="button" class="primary" id="btn-add-comment">Annoter</button>
+            </div>
+          </div>
+        `;
+
+        const container = document.getElementById("rich-reader-content");
+        container.innerHTML = rich;
+
+        container.querySelectorAll("[data-move-scope]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const k = btn.getAttribute("data-move-scope");
+            const item = btn.getAttribute("data-item");
+            const path = btn.getAttribute("data-path");
+            scopeOverrides[k] = !scopeOverrides[k];
+            recordOp({
+              key: "scope:" + k,
+              op: scopeOverrides[k] ? "MOVE_OUT" : "MOVE_IN",
+              target: path,
+              item
+            });
+            renderReader();
+          });
+        });
+
+        container.querySelectorAll("[data-flag-ux]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const cell = btn.getAttribute("data-flag-ux");
+            const path = btn.getAttribute("data-path");
+            recordOp({
+              key: "ux:" + path + ":" + cell,
+              op: "COMMENT",
+              target: path,
+              section: "UX States & Accessibility (WCAG AA)",
+              note: "Compléter obligatoirement l'état UX manquant : " + cell
+            });
+            btn.textContent = "✓ Exigé dans le patch";
+          });
+        });
+
+        const cBtn = document.getElementById("btn-add-comment");
+        if (cBtn) {
+          cBtn.addEventListener("click", () => {
+            const val = document.getElementById("reader-comment-input").value.trim();
+            if (!val) return;
+            recordOp({
+              key: "cmt:" + art.path + ":" + Date.now(),
+              op: "COMMENT",
+              target: art.path,
+              note: val
+            });
+            document.getElementById("reader-comment-input").value = "";
+            cBtn.textContent = "✓ Annoté";
+          });
+        }
+      }
+
+      /* Render View 4: Two-Hat Judge */
+      function renderJudge() {
+        const stories = DATA.artifacts.filter(a => a.stage === "stories");
+        const inRevCount = stories.filter(s => s.status === "IN_REVIEW").length;
+        document.getElementById("badge-judge").textContent = String(inRevCount);
+
+        const sel = document.getElementById("judge-story-select");
+        if (!stories.find(s => s.id === selectedJudgeStoryId) && stories.length) {
+          selectedJudgeStoryId = stories[0].id;
+        }
+        sel.innerHTML = stories.map(s =>
+          `<option value="${escHtml(s.id)}" ${s.id === selectedJudgeStoryId ? "selected" : ""}>${escHtml(s.id)} [${escHtml(s.status)}] — ${escHtml(s.title)}</option>`
+        ).join("");
+
+        const st = stories.find(s => s.id === selectedJudgeStoryId);
+        if (!st) return;
+
+        document.getElementById("judge-status-pill").textContent = st.status + " · lane: " + (st.lane || "standard");
+        document.getElementById("judge-evid-pill").textContent = "Evidence: " + st.evidenceLogged;
+        document.getElementById("judge-evid-pill").className = "pill " + (st.evidenceLogged === "YES" ? "ok" : "danger");
+
+        const acs = extractACs(st);
+        const acEl = document.getElementById("judge-ac-list");
+        acEl.innerHTML = acs.map(ac => {
+          const key = st.id + ":" + ac.id;
+          const state = acChecks[key] || (ac.checked ? "CHECK" : "PENDING");
+          return `
+            <div class="item-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px;">
+                <strong>${escHtml(ac.id)}</strong>
+                <div style="display:flex;gap:5px;">
+                  <button type="button" class="${state === "CHECK" ? "ok" : ""}" data-ac-act="CHECK" data-ac-id="${escHtml(ac.id)}">✓ Vérifié</button>
+                  <button type="button" class="${state === "REJECT" ? "danger" : ""}" data-ac-act="REJECT" data-ac-id="${escHtml(ac.id)}">✕ Contester</button>
+                </div>
+              </div>
+              <div style="font-size:12px;">${escHtml(ac.text)}</div>
+            </div>
+          `;
+        }).join("") || `<p style="color:var(--muted);">Aucun AC détecté.</p>`;
+
+        acEl.querySelectorAll("[data-ac-act]").forEach(b => {
+          b.addEventListener("click", () => {
+            const act = b.getAttribute("data-ac-act");
+            const id = b.getAttribute("data-ac-id");
+            acChecks[st.id + ":" + id] = act;
+            recordOp({ key: "ac:" + st.id + ":" + id, op: act, target: st.path, id });
+            renderJudge();
+          });
+        });
+
+        // Evidence & Diff extraction
+        const secs = parseSections(st.markdown);
+        const evidRaw = secs["Execution Evidence"] || "";
+        const diffMatch = st.markdown.match(/```diff\n([\s\S]*?)```/);
+        const textMatch = evidRaw.match(/```(?:text|bash|sh)?\n([\s\S]*?)```/);
+        const blind = document.getElementById("blind-mode-toggle").checked;
+        const verdictSection = secs["Review Verdict"] || "";
+
+        document.getElementById("judge-evidence-box").textContent =
+          (textMatch ? textMatch[1].trim() : evidRaw.trim()) +
+          (blind ? "\n\n[🕶 Mode Aveugle actif : Verdict/Notes pré-remplis masqués]" : "\n\n--- Review Verdict ---\n" + verdictSection);
+
+        const allowP = extractPathList(st.markdown, "Allowed Paths");
+        const forbidP = extractPathList(st.markdown, "Forbidden Paths");
+        document.getElementById("judge-paths-box").innerHTML =
+          allowP.map(p => `<span class="path-pill allow">✓ ${escHtml(p)}</span>`).join("") +
+          forbidP.map(p => `<span class="path-pill forbid">✕ ${escHtml(p)}</span>`).join("");
+
+        const rawDiff = (diffMatch ? diffMatch[1] : DATA.gitDiff) || "Aucun bloc diff attaché pour cette story.";
+        document.getElementById("judge-diff-box").innerHTML = rawDiff.split("\n").map(line => {
+          if (line.startsWith("diff --git") || line.startsWith("@@")) return `<span class="diff-line-hdr">${escHtml(line)}</span>`;
+          if (line.startsWith("+") && !line.startsWith("+++")) return `<span class="diff-line-add">${escHtml(line)}</span>`;
+          if (line.startsWith("-") && !line.startsWith("---")) return `<span class="diff-line-del">${escHtml(line)}</span>`;
+          return escHtml(line) + "\n";
+        }).join("");
+      }
+
+      /* Render View 5: X-Ray Traceability Matrix */
+      function renderXray() {
+        const spec = DATA.artifacts.find(a => a.stage === "specs");
+        const arch = DATA.artifacts.find(a => a.stage === "architecture");
+        const stories = DATA.artifacts.filter(a => a.stage === "stories");
+        const specACs = spec ? extractACs(spec) : [];
+        let gaps = 0;
+
+        const rowsHtml = specACs.map(ac => {
+          const linked = stories.filter(st => st.markdown.includes(ac.id));
+          if (!linked.length) {
+            gaps++;
+            return `<tr>
+              <td><code>${escHtml(spec.id)}</code> (← <code>${escHtml(spec.upstream)}</code>)</td>
+              <td><strong>${escHtml(ac.id)}</strong> — ${escHtml(ac.text)}</td>
+              <td><code>${escHtml(arch ? arch.id : "NONE")}</code></td>
+              <td class="cell-missing">ORPHELIN (Aucune Story)</td>
+              <td>—</td>
+              <td>—</td>
+              <td class="cell-missing">⚠️ AC non couvert</td>
+            </tr>`;
+          }
+          return linked.map(st => {
+            const proven = st.evidenceLogged === "YES";
+            if (!proven) gaps++;
+            return `<tr>
+              <td><code>${escHtml(spec.id)}</code> (← <code>${escHtml(spec.upstream)}</code>)</td>
+              <td><strong>${escHtml(ac.id)}</strong> — ${escHtml(ac.text)}</td>
+              <td><code>${escHtml(arch ? arch.id : st.upstream)}</code></td>
+              <td><code>${escHtml(st.id)}</code> — ${escHtml(st.title)}</td>
+              <td><span class="pill ${st.status === "DONE" ? "ok" : st.status === "BLOCKED" ? "danger" : "warn"}">${escHtml(st.status)}</span></td>
+              <td><span class="pill ${proven ? "ok" : "danger"}">${escHtml(st.evidenceLogged)}</span></td>
+              <td>${proven ? '<span class="pill ok">✓ Couvert &amp; Prouvé</span>' : '<span class="pill warn">⏳ Preuve manquante / Bloqué</span>'}</td>
+            </tr>`;
+          }).join("");
+        }).join("");
+
+        document.getElementById("xray-tbody").innerHTML = rowsHtml;
+        const pill = document.getElementById("xray-orphan-pill");
+        pill.textContent = gaps ? gaps + " écart(s) de couverture avant livraison complète" : "100% couvert & prouvé";
+        pill.className = "pill " + (gaps ? "warn" : "ok");
+      }
+
+      function switchTab(tabId) {
+        document.querySelectorAll(".navtab").forEach(t => t.classList.toggle("active", t.getAttribute("data-tab") === tabId));
+        document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + tabId));
+        renderAll();
+      }
+
+      function renderAll() {
+        renderInbox();
+        renderKanban();
+        renderReader();
+        renderJudge();
+        renderXray();
+      }
+
+      /* Switches & Verdict Controls */
+      function updateGateSwitches() {
+        const boxes = Array.from(document.querySelectorAll(".gate-sw"));
+        boxes.forEach(cb => cb.closest(".switch-card").classList.toggle("armed", cb.checked));
+        const armedCount = boxes.filter(cb => cb.checked).length;
+        const pill = document.getElementById("lock-state-pill");
+        const approveBtn = document.getElementById("btn-verdict-approve");
+        if (armedCount === 4) {
+          pill.textContent = "ARMÉ (4 / 4) — APPROVE Déverrouillé";
+          pill.className = "pill ok";
+          approveBtn.disabled = false;
+        } else {
+          pill.textContent = "VERROUILLÉ (" + armedCount + " / 4)";
+          pill.className = "pill warn";
+          approveBtn.disabled = true;
+        }
+      }
+
+      document.querySelectorAll(".gate-sw").forEach(cb => cb.addEventListener("change", updateGateSwitches));
+
+      document.getElementById("btn-verdict-approve").addEventListener("click", () => {
+        const note = document.getElementById("judge-note-input").value.trim() || "4/4 vérifications Two-Hat validées dans cockpit.html.";
+        currentVerdict = { storyId: selectedJudgeStoryId, verdict: "APPROVED", note };
+        updatePatchBar();
+        openPatchModal();
+      });
+
+      document.getElementById("btn-verdict-reject").addEventListener("click", () => {
+        const note = document.getElementById("judge-note-input").value.trim() || "Corrections requises suite à revue Two-Hat.";
+        currentVerdict = { storyId: selectedJudgeStoryId, verdict: "CHANGES_REQUESTED", note };
+        updatePatchBar();
+        openPatchModal();
+      });
+
+      /* Theme, Split, Tracks, Modals */
+      document.getElementById("theme-select").addEventListener("change", e => {
+        document.documentElement.setAttribute("data-theme", e.target.value);
+      });
+
+      document.querySelectorAll(".navtab").forEach(t => {
+        t.addEventListener("click", () => switchTab(t.getAttribute("data-tab")));
+      });
+
+      document.getElementById("filter-epic").addEventListener("change", renderKanban);
+      document.getElementById("filter-lane").addEventListener("change", renderKanban);
+      document.getElementById("judge-story-select").addEventListener("change", e => {
+        selectedJudgeStoryId = e.target.value;
+        renderJudge();
+      });
+      document.getElementById("blind-mode-toggle").addEventListener("change", renderJudge);
+
+      document.getElementById("btn-mode-split").addEventListener("click", () => {
+        splitMode = true;
+        document.getElementById("btn-mode-split").className = "primary";
+        document.getElementById("btn-mode-rich").className = "";
+        renderReader();
+      });
+      document.getElementById("btn-mode-rich").addEventListener("click", () => {
+        splitMode = false;
+        document.getElementById("btn-mode-rich").className = "primary";
+        document.getElementById("btn-mode-split").className = "";
+        renderReader();
+      });
+
+      document.querySelectorAll(".track-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const tr = btn.getAttribute("data-track");
+          mutedTracks[tr] = !mutedTracks[tr];
+          btn.classList.toggle("muted", mutedTracks[tr]);
+          renderReader();
+        });
+      });
+
+      document.getElementById("btn-park-idea").addEventListener("click", () => {
+        const inp = document.getElementById("quick-park-input");
+        const val = inp.value.trim();
+        if (!val) return;
+        recordOp({ key: "park:" + Date.now(), op: "PARK", target: ".aidd/INDEX.md", idea: val });
+        inp.value = "";
+      });
+
+      function openPatchModal() {
+        document.getElementById("patch-output-box").textContent = buildPatchPayload();
+        document.getElementById("patch-modal").classList.add("open");
+      }
+
+      document.getElementById("btn-open-patch").addEventListener("click", openPatchModal);
+      document.getElementById("btn-close-patch").addEventListener("click", () => {
+        document.getElementById("patch-modal").classList.remove("open");
+      });
+      document.getElementById("btn-clear-patch").addEventListener("click", () => {
+        patchOps = [];
+        scopeOverrides = {};
+        acChecks = {};
+        currentVerdict = null;
+        updatePatchBar();
+        document.getElementById("patch-output-box").textContent = buildPatchPayload();
+        renderAll();
+      });
+      document.getElementById("btn-copy-patch").addEventListener("click", () => {
+        navigator.clipboard.writeText(buildPatchPayload());
+        document.getElementById("btn-copy-patch").textContent = "✓ Copié dans le presse-papiers !";
+        setTimeout(() => {
+          document.getElementById("btn-copy-patch").textContent = "📋 Copier la commande /apply-review";
+        }, 1800);
+      });
+
+      /* Cmd+K Palette */
+      function openCmdK() {
+        const modal = document.getElementById("cmdk-modal");
+        modal.classList.add("open");
+        const inp = document.getElementById("cmdk-input");
+        inp.value = "";
+        renderCmdK("");
+        inp.focus();
+      }
+      function renderCmdK(q) {
+        const needle = q.toLowerCase();
+        const items = DATA.artifacts.filter(a =>
+          (a.id + " " + a.title + " " + a.status).toLowerCase().includes(needle)
+        );
+        const box = document.getElementById("cmdk-results");
+        box.innerHTML = items.map(a => `
+          <div class="scope-row" style="cursor:pointer;" data-cmdk-id="${escHtml(a.id)}" data-cmdk-stage="${escHtml(a.stage)}">
+            <span><strong>${escHtml(a.id)}</strong> — ${escHtml(a.title)}</span>
+            <span class="pill info">${escHtml(a.status)}</span>
+          </div>
+        `).join("");
+        box.querySelectorAll("[data-cmdk-id]").forEach(el => {
+          el.addEventListener("click", () => {
+            const id = el.getAttribute("data-cmdk-id");
+            const stg = el.getAttribute("data-cmdk-stage");
+            document.getElementById("cmdk-modal").classList.remove("open");
+            if (stg === "stories") {
+              selectedJudgeStoryId = id;
+              switchTab("judge");
+            } else {
+              selectedArtifactId = id;
+              switchTab("reader");
+            }
+          });
+        });
+      }
+      document.getElementById("btn-cmdk").addEventListener("click", openCmdK);
+      document.getElementById("btn-close-cmdk").addEventListener("click", () => {
+        document.getElementById("cmdk-modal").classList.remove("open");
+      });
+      document.getElementById("cmdk-input").addEventListener("input", e => renderCmdK(e.target.value));
+      document.addEventListener("keydown", e => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          openCmdK();
+        } else if (e.key === "Escape") {
+          document.getElementById("patch-modal").classList.remove("open");
+          document.getElementById("cmdk-modal").classList.remove("open");
+        }
+      });
+
+      /* Directory Fallback Loader + Snapshot HTML Export */
+      document.getElementById("btn-open-dir").addEventListener("click", () => {
+        document.getElementById("dir-fallback").click();
+      });
+      document.getElementById("dir-fallback").addEventListener("change", async e => {
+        const files = Array.from(e.target.files || []);
+        const mdFiles = files.filter(f => f.name.endsWith(".md") && (f.webkitRelativePath || "").includes("work/"));
+        if (!mdFiles.length) return;
+        const loaded = [];
+        for (const f of mdFiles) {
+          const text = await f.text();
+          const rel = f.webkitRelativePath;
+          const stage = rel.includes("/briefs/") ? "briefs" : rel.includes("/specs/") ? "specs" : rel.includes("/architecture/") ? "architecture" : "stories";
+          const idMatch = text.match(/^id:\s*(.+)$/m);
+          const titleMatch = text.match(/^title:\s*["']?(.+?)["']?$/m);
+          const statusMatch = text.match(/^status:\s*(.+)$/m);
+          loaded.push({
+            id: idMatch ? idMatch[1].trim() : f.name.replace(/\.md$/, ""),
+            stage,
+            path: rel,
+            title: titleMatch ? titleMatch[1].trim() : f.name,
+            status: statusMatch ? statusMatch[1].trim().toUpperCase() : "READY",
+            owner: "agent",
+            upstream: "",
+            nextStep: "",
+            epic: "EPIC",
+            sprint: "SPRINT",
+            lane: "standard",
+            lines: text.split("\n").length,
+            evidenceLogged: text.includes("## Execution Evidence") && !text.includes("PENDING_EVIDENCE") ? "YES" : "NO",
+            markdown: text
+          });
+        }
+        DATA = { ...DATA, syncedAt: new Date().toISOString(), artifacts: loaded };
+        document.getElementById("bundle-status").textContent = "Dossier local chargé (" + loaded.length + " artefacts .md)";
+        renderAll();
+      });
+
+      document.getElementById("btn-snapshot").addEventListener("click", () => {
+        const inlineScript = "<script>window.AIDD_DATA = " + JSON.stringify(DATA).replace(/<\//g, "<\\/") + ";<\/script>";
+        const htmlSnap = document.documentElement.outerHTML.replace(
+          /<script src="views\/aidd-data\.js"><\/script>/,
+          inlineScript
+        );
+        const blob = new Blob(["<!DOCTYPE html>\n" + htmlSnap], { type: "text/html;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "aidd-cockpit-snapshot.html";
+        a.click();
+      });
+
+      renderAll();
+      updatePatchBar();
+    })();
+  </script>
+</body>
+</html>
